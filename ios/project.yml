@@ -1,0 +1,50 @@
+# Generate DiamondBid.xcodeproj with XcodeGen:  brew install xcodegen && xcodegen
+name: DiamondBid
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "16.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    SWIFT_STRICT_CONCURRENCY: minimal
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # Put your Apple Developer Team ID here, or pick the team in Xcode > Signing & Capabilities.
+    DEVELOPMENT_TEAM: ""
+targets:
+  DiamondBid:
+    type: application
+    platform: iOS
+    sources: [DiamondBid]
+    entitlements:
+      path: DiamondBid/DiamondBid.entitlements
+      properties:
+        com.apple.developer.game-center: true
+    info:
+      path: DiamondBid/Info.plist
+      properties:
+        CFBundleDisplayName: Diamond Bid
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIRequiresFullScreen: true
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        # Change to your own reverse-domain ID; it must match the App ID with Game Center enabled.
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.diamondbid
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_STYLE: Automatic
+    scheme:
+      testTargets: [DiamondBidTests]
+  DiamondBidTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [DiamondBidTests]
+    dependencies:
+      - target: DiamondBid
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
