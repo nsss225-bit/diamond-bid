@@ -3,6 +3,7 @@ const fs = require("fs"), vm = require("vm"), path = require("path");
 const dir = path.join(__dirname, "..");
 const engineSrc = fs.readFileSync(path.join(dir, "engine.js"), "utf8");
 const appSrc = fs.readFileSync(path.join(dir, "app.js"), "utf8");
+const i18nSrc = fs.readFileSync(path.join(dir, "i18n.js"), "utf8");
 let failures = 0;
 const ok = (c, m) => { if (!c) { failures++; console.log("FAIL:", m); } else console.log("ok  ", m); };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -56,7 +57,7 @@ function browser(label, bus) {
   ctx.scrollTo = () => {};
   if (bus) ctx.claude = { use: async name => name === "room" ? bus.capability() : null };
   vm.createContext(ctx);
-  vm.runInContext(engineSrc + "\n" + appSrc, ctx, { filename: label });
+  vm.runInContext(engineSrc + "\n" + i18nSrc + "\n" + appSrc, ctx, { filename: label });
   ctx.click = (act, data = {}) => {
     const target = { dataset: Object.assign({ act }, data), disabled: false, closest: () => target };
     listeners.click({ target });
@@ -233,6 +234,26 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   ok(c.get("stats.coins") >= 20 && c.html().includes("coins"), "a game vs a Hard bot pays coins: " + c.get("stats.coins"));
   c.get(`stats.lastGift = "2000-01-01"; checkDailyGift()`);
   ok(c.get("stats.giftStreak") === 1, "a missed day resets the gift streak");
+
+  // 10) Languages: picker, RTL Arabic, translated game, back to English
+  const L = browser("lang");
+  await sleep(20); L.click("close");
+  ok(L.html().includes('data-act="lang"'), "home shows the language button");
+  L.click("lang");
+  ok(["English", "العربية", "Español", "Français", "中文"].every(n => L.html().includes(n)), "the picker lists all 5 languages");
+  L.click("set-lang", { id: "ar" });
+  ok(L.get("document.documentElement.dir") === "rtl" && L.get("prefs.lang") === "ar", "Arabic switches the page to right-to-left");
+  ok(L.html().includes(L.get('t("Play vs bots")')) && L.get('t("Play vs bots")') !== "Play vs bots", "home text is translated: " + L.get('t("Play vs bots")'));
+  for (const id of ["es", "fr", "zh", "ar"]) {
+    L.click("set-lang", { id });
+    L.get(`Object.assign(prefs.config, { seatCount: 2, botLevel: "easy", gamesToWin: 1 })`);
+    L.click("open-setup", { kind: "bots" }); L.click("start");
+    const endL = await playOut(L);
+    ok(endL === "matchOver" && !/undefined|\{\w+\}/.test(L.html()), `a full game in ${id} renders with no missing text`);
+    L.click("home");
+  }
+  L.click("set-lang", { id: "en" });
+  ok(L.get("document.documentElement.dir") === "ltr" && L.html().includes("Play"), "back to English, left-to-right");
 
   console.log(failures ? `\n${failures} FAILURES` : "\nALL UI TESTS PASSED");
   process.exit(failures ? 1 : 0);

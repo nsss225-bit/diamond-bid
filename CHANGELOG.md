@@ -1,6 +1,7 @@
 # Diamond Bid changelog
 
 ## 1.1
+- **Languages:** English, العربية (Arabic, right-to-left), Español, Français and 中文. The app picks the phone's language on first visit; change it anytime from the globe button on the home screen.
 
 **Play together**
 - Online play with friends: start a table, share the 4-letter code, and play on your own phones. Empty seats get bots. If a player leaves, a bot takes over.

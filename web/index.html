@@ -506,6 +506,16 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 .coin.big { width: 64px; height: 64px; box-shadow: inset 0 0 0 4px rgba(122,74,0,.45), 0 10px 30px rgba(240,199,90,.35); }
 .coinbtn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; background: var(--panel); font-weight: 800; font-variant-numeric: tabular-nums; color: #ffe7a3; border: 1px solid rgba(240,199,90,.35); }
 .coinbtn:hover { background: var(--panel-strong); }
+.langbtn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 999px; background: var(--panel); font-weight: 800; font-size: 13px; letter-spacing: .04em; border: 1px solid rgba(255,255,255,.14); }
+.langbtn:hover { background: var(--panel-strong); }
+.langbtn svg { width: 16px; height: 16px; }
+.langs { display: grid; gap: 8px; }
+.langopt { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: 14px; background: var(--panel); border: 2px solid transparent; text-align: start; font-size: 17px; }
+.langopt small { opacity: .65; font-size: 13px; }
+.langopt[aria-pressed="true"] { border-color: #f0c75a; background: var(--panel-strong); }
+:root[dir="rtl"] body { font-family: system-ui, -apple-system, "Segoe UI", Tahoma, "Noto Sans Arabic", sans-serif; }
+:root[dir="rtl"] .card, :root[dir="rtl"] .num, :root[dir="rtl"] .coinbtn { direction: ltr; }
+.earn span { text-align: end; }
 .coins-earned { background: rgba(240,199,90,.18) !important; color: #ffe7a3 !important; display: inline-flex; align-items: center; gap: 6px; }
 .lock b { display: inline-flex; align-items: center; gap: 5px; color: #ffe7a3; }
 .swatch-lock { position: absolute; right: -4px; bottom: -4px; font-size: 16px; }
@@ -553,4 +563,5 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <script src="engine.js"></script>
+<script src="i18n.js"></script>
 <script src="app.js"></script>

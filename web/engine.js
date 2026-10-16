@@ -325,9 +325,8 @@ function finishTiebreak(s) {
     s.tie = { sides: r.winners, spin: null, spinTo: 0, spinAt: 0, result: null, round: t.round + 1 };
     return;
   }
-  s.tieNote = r.id === "shared"
-    ? `Tied on ${fmt(sideScore(s, t.sides[0]))} points. The wheel picked a shared win.`
-    : `Tied on ${fmt(sideScore(s, t.sides[0]))} points. The wheel picked ${opt.name}.`;
+  // "<tie-breaker id>|<points in twelfths>": the app turns this into a sentence in the player's language.
+  s.tieNote = `${r.id}|${sideScore(s, t.sides[0])}`;
   s.tieWonBy = r.id === "shared" ? [] : r.winners.slice();
   s.tie = null;
   awardGame(s, r.winners);
