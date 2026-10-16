@@ -12,8 +12,8 @@ const CHARACTERS = [
   { id: "panda", name: "Bao", title: "The Gentle Giant", line: "Slow, steady and hard to read.", ring: "#e9e6dc" },
   { id: "penguin", name: "Tux", title: "The Gentleman", line: "Bows politely, then takes your gem.", ring: "#6f8fb3" },
   { id: "robot", name: "Unit 13", title: "The Machine", line: "Thirteen cards. Zero emotions.", ring: "#5ef0ff" },
-  { id: "raccoon", name: "Rosa", title: "The Pickpocket", line: "Your points look better in her pocket.", ring: "#8f8b86", unlock: { kind: "ach", n: 3, text: "Earn 3 achievements" } },
-  { id: "dragon", name: "Ember", title: "The Hoarder", line: "Guards every gem she takes.", ring: "#e0583f", unlock: { kind: "expert", text: "Beat an Expert bot" } },
+  { id: "raccoon", name: "Rosa", title: "The Pickpocket", line: "Your points look better in her pocket.", ring: "#8f8b86" },
+  { id: "dragon", name: "Ember", title: "The Hoarder", line: "Guards every gem she takes.", ring: "#e0583f" },
 ];
 const CHAR = Object.fromEntries(CHARACTERS.map(c => [c.id, c]));
 const CHAR_IDS = CHARACTERS.map(c => c.id);
@@ -38,8 +38,8 @@ const DECKS = [
   { id: "noir", name: "Noir", note: "Black and gold ink" },
   { id: "retro", name: "Retro", note: "Seventies stripes" },
   { id: "arcade", name: "Arcade", note: "Neon grid" },
-  { id: "gold", name: "Gold Leaf", note: "Gilded backs", unlock: { kind: "wins", n: 5, text: "Win 5 matches" } },
-  { id: "galaxy", name: "Galaxy", note: "Stars and nebula", unlock: { kind: "daily", n: 3, text: "Play 3 daily challenges" } },
+  { id: "gold", name: "Gold Leaf", note: "Gilded backs" },
+  { id: "galaxy", name: "Galaxy", note: "Stars and nebula" },
 ];
 const TABLES = [
   { id: "green", name: "Baize", a: "#1d5a4b", b: "#0b2620" },
@@ -47,8 +47,20 @@ const TABLES = [
   { id: "wine", name: "Wine", a: "#6a2236", b: "#2a0b15" },
   { id: "slate", name: "Slate", a: "#3e464e", b: "#15181c" },
   { id: "plum", name: "Plum", a: "#53306f", b: "#1d0f2b" },
-  { id: "midnight", name: "Midnight", a: "#2a3170", b: "#0b0e24", unlock: { kind: "ach", n: 8, text: "Earn 8 achievements" } },
+  { id: "midnight", name: "Midnight", a: "#2a3170", b: "#0b0e24" },
 ];
+
+/* Coins. Starters are free; everything else is bought with coins earned by playing. */
+const PRICES = {
+  fox: 0, owl: 0, bear: 0, cat: 400, frog: 400, panda: 500, penguin: 500, robot: 600, raccoon: 900, dragon: 1200,
+  classic: 0, royal: 0, sakura: 300, noir: 400, retro: 400, arcade: 500, gold: 800, galaxy: 1000,
+  green: 0, ocean: 150, wine: 150, slate: 200, plum: 200, midnight: 500,
+};
+const GIFT_LADDER = [100, 120, 140, 160, 180, 200, 250]; // daily gift by streak day, day 7 and on pays the most
+const BOT_REWARD = { easy: 10, normal: 15, hard: 20, expert: 30 };
+const ACH_REWARD = 50;
+const COIN = `<span class="coin" aria-hidden="true"></span>`;
+const fmtCoins = n => Number(n).toLocaleString();
 
 const ACHIEVEMENTS = [
   { id: "first_gem", icon: "◆", name: "First sparkle", desc: "Win your first gem." },
@@ -88,19 +100,27 @@ const store = {
 const DEFAULT_PREFS = { character: "fox", name: "", deck: "classic", table: "green", fourColor: false, sound: true, config: Object.assign({}, DEFAULT_CONFIG), localPlayers: 2, passChars: {} };
 let prefs = Object.assign({}, DEFAULT_PREFS, store.get("diamondbid.prefs", {}));
 prefs.config = Object.assign({}, DEFAULT_CONFIG, prefs.config);
-let stats = Object.assign({ played: 0, won: 0, ach: {}, dailyDays: [], dailyBest: {}, seenUnlocks: [] }, store.get("diamondbid.stats", {}));
+let stats = Object.assign({ played: 0, won: 0, ach: {}, dailyDays: [], dailyBest: {}, coins: 0, owned: [], lastGift: "", giftStreak: 0, walletV: 0, tutorialPaid: false }, store.get("diamondbid.stats", {}));
 const savePrefs = () => store.set("diamondbid.prefs", prefs);
 const saveStats = () => store.set("diamondbid.stats", stats);
 const achCount = () => Object.keys(stats.ach).length;
 
-function isUnlocked(item) {
-  const u = item && item.unlock;
-  if (!u) return true;
-  if (u.kind === "ach") return achCount() >= u.n;
-  if (u.kind === "expert") return !!stats.ach.expert_win;
-  if (u.kind === "wins") return stats.won >= u.n;
-  if (u.kind === "daily") return stats.dailyDays.length >= u.n;
-  return false;
+const priceOf = item => PRICES[item.id] || 0;
+function isUnlocked(item) { return !!item && (priceOf(item) === 0 || stats.owned.includes(item.id)); }
+const itemById = id => CHAR[id] || DECKS.find(d => d.id === id) || TABLES.find(t => t.id === id);
+const kindOf = id => CHAR[id] ? "character" : DECKS.some(d => d.id === id) ? "card design" : "table";
+/* First run of the coin system: keep everything a player already uses or earned in 1.1, and give a welcome gift. */
+if (stats.walletV < 1) {
+  const keep = [prefs.character, prefs.deck, prefs.table];
+  if (achCount() >= 3) keep.push("raccoon");
+  if (stats.ach.expert_win) keep.push("dragon");
+  if (stats.won >= 5) keep.push("gold");
+  if (stats.dailyDays.length >= 3) keep.push("galaxy");
+  if (achCount() >= 8) keep.push("midnight");
+  stats.owned = [...new Set(stats.owned.concat(keep.filter(id => PRICES[id] > 0)))];
+  stats.coins += 200;
+  stats.walletV = 1;
+  saveStats();
 }
 if (!CHAR[prefs.character] || !isUnlocked(CHAR[prefs.character])) prefs.character = "fox";
 if (!DECKS.some(d => d.id === prefs.deck && isUnlocked(d))) prefs.deck = "classic";
@@ -115,7 +135,7 @@ function applyLook() {
 const esc = v => String(v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const cleanName = v => String(v || "").replace(/[\u0000-\u001f\u007f​-‏‪-‮⁠-⁤﻿]/g, "").trim().slice(0, 16);
 const myName = () => cleanName(prefs.name) || CHAR[prefs.character].name;
-const todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+const todayKey = (d = new Date()) => { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 
 /* ================= Sound and vibration ================= */
 const Sound = (() => {
@@ -194,27 +214,39 @@ function grant(id) {
   if (stats.ach[id]) return;
   const a = ACHIEVEMENTS.find(x => x.id === id);
   if (!a) return;
-  const before = unlockedNow();
   stats.ach[id] = Date.now();
   saveStats();
   if (G) G.newAch.push(a.name);
   toast(a.icon, a.name, "Achievement unlocked");
   Sound.chime();
-  announceUnlocks(before);
+  addCoins(ACH_REWARD, a.name);
 }
-function unlockedNow() {
-  return [...CHARACTERS, ...DECKS, ...TABLES].filter(x => x.unlock && isUnlocked(x)).map(x => x.id);
-}
-function announceUnlocks(before) {
-  unlockedNow().filter(id => !before.includes(id) && !stats.seenUnlocks.includes(id)).forEach(id => {
-    stats.seenUnlocks.push(id);
-    const ch = CHAR[id], deck = DECKS.find(d => d.id === id), tbl = TABLES.find(t => t.id === id);
-    const what = ch ? `New character: ${ch.name}` : deck ? `New card design: ${deck.name}` : `New table: ${tbl.name}`;
-    setTimeout(() => toast("✦", what, "Unlocked"), 600);
-  });
+function addCoins(n, why) {
+  if (!n) return;
+  stats.coins += n;
   saveStats();
+  if (G) G.coinsEarned = (G.coinsEarned || 0) + n;
+  setTimeout(() => toast("\u25C9", `+${n} coins`, why), 350);
+  const badge = document.getElementById("coin-count");
+  if (badge) badge.textContent = fmtCoins(stats.coins);
 }
-
+/** Coins for finishing a game. */
+function gameReward(iWon) {
+  const s = G.s;
+  if (G.kind === "pass") return [10, "Pass and play game"];
+  if (G.kind === "tutorial") { if (stats.tutorialPaid) return [0, ""]; stats.tutorialPaid = true; return [100, "Tutorial finished"]; }
+  if (G.kind === "online") return [20 + (iWon ? 40 : 0), iWon ? "Online win" : "Online game"];
+  if (G.kind === "daily") {
+    const first = !stats.dailyPaid || stats.dailyPaid !== G.dailyDate;
+    if (!first) return [10, "Daily challenge replay"];
+    stats.dailyPaid = G.dailyDate;
+    return [50 + Math.max(0, Math.round(s.scores[0] / 12)), "Daily challenge"];
+  }
+  const mySide = sideOf(s.config, me());
+  const levels = s.seats.filter((x, k) => x.bot && sideOf(s.config, k) !== mySide).map(x => x.level);
+  const base = Math.max(10, ...levels.map(l => BOT_REWARD[l] || 10));
+  return [base + (iWon ? base * 2 : 0), iWon ? "Win vs bots" : "Game vs bots"];
+}
 /* ================= App state ================= */
 let app = { screen: "home", setup: null, modal: null, botOffset: Math.floor(Math.random() * 10), introDone: false };
 let G = null; // the current game
@@ -248,7 +280,7 @@ const feltPip = suit => {
   const color = { h: "#ef5a6c", d: four ? "#6f9bff" : "#ef5a6c", c: four ? "#5fd38a" : "var(--ink)", s: "var(--ink)" }[suit];
   return `<span style="color:${color}">${PIP[suit]}</span>`;
 };
-const lockOverlay = item => `<span class="lock"><b>Locked</b><span>${esc(item.unlock.text)}</span></span>`;
+const lockOverlay = item => `<span class="lock"><b>${COIN} ${fmtCoins(priceOf(item))}</b><span>Tap to buy</span></span>`;
 const awardText = a => `${a > 0 ? "+" : ""}${fmt(a)}`;
 
 /** The gems a seat has taken this game, as small chips. */
@@ -282,7 +314,10 @@ function renderHome() {
       <nav class="topnav" aria-label="Sections">
         <a href="#daily">Daily</a><a href="#characters">Characters</a><a href="#designs">Designs</a><a href="#achievements">Achievements</a><a href="#how">How to play</a>
       </nav>
-      <button class="icon-btn" data-act="sound" aria-label="${prefs.sound ? "Turn sound off" : "Turn sound on"}" aria-pressed="${prefs.sound}">${SPEAKER_SVG(prefs.sound)}</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="coinbtn" data-act="coins" aria-label="${fmtCoins(stats.coins)} coins. How to earn more">${COIN}<b id="coin-count">${fmtCoins(stats.coins)}</b></button>
+        <button class="icon-btn" data-act="sound" aria-label="${prefs.sound ? "Turn sound off" : "Turn sound on"}" aria-pressed="${prefs.sound}">${SPEAKER_SVG(prefs.sound)}</button>
+      </div>
     </header>
 
     <section class="hero">
@@ -326,7 +361,7 @@ function renderHome() {
 
     <section class="block" id="characters">
       <div class="block-head">
-        <div><h2>Choose your character</h2><p>Each one has a power you can use once per game when "Character powers" is on. Bots take the characters you don't pick.</p></div>
+        <div><h2>Choose your character</h2><p>Fennec, Prof. Hoot and Bruno are free; buy the others with coins. Each has a power you can use once per game when "Character powers" is on.</p></div>
         <label class="name-field" for="name">Your name (optional)
           <input id="name" maxlength="16" placeholder="${esc(c.name)}" value="${esc(prefs.name)}" autocomplete="nickname">
         </label>
@@ -334,7 +369,7 @@ function renderHome() {
       <div class="char-grid">
         ${CHARACTERS.map(ch => {
           const open = isUnlocked(ch), p = POWERS[ch.id];
-          return `<button class="char ${open ? "" : "locked"}" data-act="pick-char" data-id="${ch.id}" aria-pressed="${ch.id === prefs.character}" ${open ? "" : "disabled"}>
+          return `<button class="char ${open ? "" : "locked"}" data-act="${open ? "pick-char" : "buy"}" data-id="${ch.id}" aria-pressed="${ch.id === prefs.character}" aria-label="${esc(ch.name)}${open ? "" : `, costs ${priceOf(ch)} coins`}">
             ${avatar(ch.id, "lg")}
             <b>${esc(ch.name)}</b>
             <span class="title">${esc(ch.title)}</span>
@@ -347,11 +382,11 @@ function renderHome() {
     </section>
 
     <section class="block" id="designs">
-      <div class="block-head"><div><h2>Card design</h2><p>Changes the faces and backs of every card. Win matches and play daily challenges to unlock more.</p></div></div>
+      <div class="block-head"><div><h2>Card design</h2><p>Changes the faces and backs of every card. Classic and Royal are free; buy the rest with coins.</p></div></div>
       <div class="deck-grid">
         ${DECKS.map(d => {
           const open = isUnlocked(d);
-          return `<button class="deck ${open ? "" : "locked"}" data-act="pick-deck" data-id="${d.id}" data-deck="${d.id}" aria-pressed="${d.id === prefs.deck}" ${open ? "" : "disabled"}>
+          return `<button class="deck ${open ? "" : "locked"}" data-act="${open ? "pick-deck" : "buy"}" data-id="${d.id}" data-deck="${d.id}" aria-pressed="${d.id === prefs.deck}" aria-label="${d.name}${open ? "" : `, costs ${priceOf(d)} coins`}">
             <div class="mini">${cardBack("md")}${cardFace("h", 13, "md")}${cardFace("c", 12, "md")}</div>
             <b>${d.name}</b><small>${d.note}</small>${open ? "" : lockOverlay(d)}
           </button>`;
@@ -363,7 +398,7 @@ function renderHome() {
           <div class="swatches">
             ${TABLES.map(t => {
               const open = isUnlocked(t);
-              return `<div><button class="swatch" data-act="pick-table" data-id="${t.id}" aria-pressed="${t.id === prefs.table}" aria-label="${t.name} table${open ? "" : " (locked: " + t.unlock.text + ")"}" title="${open ? t.name : "Locked: " + t.unlock.text}" ${open ? "" : "disabled"} style="background:radial-gradient(circle at 35% 30%, ${t.a}, ${t.b});${open ? "" : "opacity:.35"}"></button><div class="swatch-label">${open ? t.name : "Locked"}</div></div>`;
+              return `<div><button class="swatch" data-act="${open ? "pick-table" : "buy"}" data-id="${t.id}" aria-pressed="${t.id === prefs.table}" aria-label="${t.name} table${open ? "" : `, costs ${priceOf(t)} coins`}" style="background:radial-gradient(circle at 35% 30%, ${t.a}, ${t.b})">${open ? "" : `<span class="swatch-lock">${COIN}</span>`}</button><div class="swatch-label">${open ? t.name : `${COIN}${fmtCoins(priceOf(t))}`}</div></div>`;
             }).join("")}
           </div>
         </div>
@@ -377,7 +412,7 @@ function renderHome() {
 
     <section class="block" id="achievements">
       <div class="block-head">
-        <div><h2>Achievements</h2><p>${got} of ${ACHIEVEMENTS.length} earned. Achievements also unlock new characters, card designs and a table.</p></div>
+        <div><h2>Achievements</h2><p>${got} of ${ACHIEVEMENTS.length} earned. Each one gives you ${ACH_REWARD} coins.</p></div>
         <div class="progress" aria-hidden="true"><span style="width:${Math.round(100 * got / ACHIEVEMENTS.length)}%"></span></div>
       </div>
       <div class="ach-grid">
@@ -569,7 +604,7 @@ function observe() {
   const spinKey = s.tie && s.tie.spin !== null ? `${s.tie.round}.${s.tie.spinTo}` : "";
   if (spinKey && spinKey !== p.spinKey) { G.localSpinAt = Date.now(); Sound.wheel(SPIN_MS); }
   if (s.phase === "gameOver" && p.phase === "gameOver" && p.gn !== s.gameNumber) G.newAch = [];
-  if (s.phase === "bidding" && p.gn != null && p.gn !== s.gameNumber) { G.newAch = []; G.recorded = false; G.streak = 0; }
+  if (s.phase === "bidding" && p.gn != null && p.gn !== s.gameNumber) { G.newAch = []; G.coinsEarned = 0; G.recorded = false; G.streak = 0; }
   G.prev = { phase: s.phase, hist: histLen, gn: s.gameNumber, round: s.round, spinKey };
 }
 
@@ -619,15 +654,14 @@ function onGameEnd() {
   }
   if (G.kind === "daily") {
     const score = s.scores[0], date = G.dailyDate;
-    const before = unlockedNow();
     if (stats.dailyBest[date] == null || score > stats.dailyBest[date]) stats.dailyBest[date] = score;
     if (!stats.dailyDays.includes(date)) stats.dailyDays.push(date);
     saveStats();
     grant("daily");
-    announceUnlocks(before);
     postDaily(score, date);
   }
   if (G.kind === "tutorial") grant("learner");
+  if (i >= 0 || G.kind === "pass") { const [n, why] = gameReward(iWon); addCoins(n, why); }
 }
 
 function onMatchEnd() {
@@ -635,7 +669,6 @@ function onMatchEnd() {
   if (G.recorded || i < 0 || G.kind === "pass" || G.kind === "tutorial") return;
   G.recorded = true;
   const mySide = sideOf(s.config, i), won = matchWinners(s).includes(mySide);
-  const before = unlockedNow();
   stats.played++;
   if (won) stats.won++;
   saveStats();
@@ -648,7 +681,6 @@ function onMatchEnd() {
     if (s.config.seatCount === 4 && !usesTeams(s.config)) grant("full_table");
     if (usesTeams(s.config)) grant("teamwork");
   }
-  announceUnlocks(before);
 }
 
 function scheduleBots() {
@@ -741,7 +773,7 @@ function tieContinue() {
 function doRematch() {
   if (!isAuthority()) return;
   rematch(G.s);
-  G.seen = []; G.recorded = false; G.newAch = []; G.streak = 0;
+  G.seen = []; G.recorded = false; G.newAch = []; G.coinsEarned = 0; G.streak = 0;
   progress();
 }
 function stopTimers() {
@@ -1032,7 +1064,7 @@ function renderResults() {
     </div>`).join("");
   const recapSeat = G.kind === "pass" ? -1 : me();
   const recap = recapSeat >= 0 ? `<div><div class="opt-label">Your game</div><div class="recap">${recapFor(s, recapSeat).map(([k, v]) => `<div><small>${k}</small><b>${esc(v)}</b></div>`).join("")}</div></div>` : "";
-  const newAch = G.newAch.length ? `<div class="newach">${G.newAch.map(a => `<span>★ ${esc(a)}</span>`).join("")}</div>` : "";
+  const newAch = G.newAch.length || G.coinsEarned ? `<div class="newach">${G.coinsEarned ? `<span class="coins-earned">${COIN} +${fmtCoins(G.coinsEarned)} coins</span>` : ""}${G.newAch.map(a => `<span>★ ${esc(a)}</span>`).join("")}</div>` : "";
   const guest = G.kind === "online" && G.role === "guest";
   let buttons;
   if (G.kind === "tutorial") buttons = `<button class="btn ghost" data-act="home">Home</button><button class="btn primary" data-act="tutorial-done">Play vs bots</button>`;
@@ -1366,6 +1398,69 @@ function renderOnlineSheet() {
   </div></div>`;
 }
 
+/* ================= Coins: daily gift, shop, wallet ================= */
+function checkDailyGift() {
+  const today = todayKey();
+  if (stats.lastGift === today) return;
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  stats.giftStreak = stats.lastGift === todayKey(y) ? stats.giftStreak + 1 : 1;
+  const amount = GIFT_LADDER[Math.min(stats.giftStreak, GIFT_LADDER.length) - 1];
+  stats.lastGift = today;
+  stats.coins += amount;
+  saveStats();
+  app.gift = amount;
+  if (!G) app.modal = "gift";
+}
+function renderHomeModal() {
+  const m = app.modal;
+  if (!m) return "";
+  const wrap = (title, body, foot) => `<div class="overlay" data-act="close-bg"><div class="sheet" role="dialog" aria-modal="true" style="max-width:460px">
+    <div class="sheet-head"><h2>${title}</h2><button class="icon-btn" data-act="close" aria-label="Close">✕</button></div>${body}<div class="sheet-foot" style="justify-content:flex-end">${foot}</div></div></div>`;
+  const ladder = () => `<div class="ladder">${GIFT_LADDER.map((v, k) => `<div class="${k < Math.min(stats.giftStreak, 7) ? "got" : ""} ${k === Math.min(stats.giftStreak, 7) - 1 ? "today" : ""}"><small>Day ${k + 1}${k === 6 ? "+" : ""}</small><b>${v}</b></div>`).join("")}</div>`;
+  if (m === "gift") {
+    return wrap("Daily gift", `<div class="gift">${COIN.replace('class="coin"', 'class="coin big"')}<b>+${fmtCoins(app.gift || 0)} coins</b>
+        <p class="muted" style="margin:0">Day ${stats.giftStreak} in a row. Come back tomorrow for more: the gift grows each day up to day 7.</p></div>${ladder()}`,
+      `<button class="btn primary" data-act="close">Collect</button>`);
+  }
+  if (m === "coins") {
+    return wrap(`${COIN} ${fmtCoins(stats.coins)} coins`, `<div class="earn">
+        <div><b>Daily gift</b><span>${GIFT_LADDER[0]}–${GIFT_LADDER[6]} a day, more for each day in a row</span></div>
+        <div><b>Games vs bots</b><span>10–30 per game, triple for a win (more for harder bots)</span></div>
+        <div><b>Online games</b><span>20 per game, 60 for a win</span></div>
+        <div><b>Daily challenge</b><span>50 plus your score, once a day</span></div>
+        <div><b>Achievements</b><span>${ACH_REWARD} each</span></div>
+        <div><b>Tutorial</b><span>100 the first time</span></div>
+        <div><b>Pass and play</b><span>10 per game</span></div>
+      </div>${ladder()}`, `<button class="btn primary" data-act="close">OK</button>`);
+  }
+  if (m === "buy") {
+    const item = itemById(app.buyId);
+    if (!item) return "";
+    const price = priceOf(item), short = price - stats.coins;
+    let preview = "";
+    if (CHAR[item.id]) preview = `<div class="buy-prev">${avatar(item.id, "xl")}<div><b>${esc(item.title)}</b><p class="muted" style="margin:4px 0 0">${esc(item.line)}</p><p style="margin:8px 0 0"><b style="color:var(--brass)">${esc(POWERS[item.id].name)}:</b> ${esc(POWERS[item.id].text)}</p></div></div>`;
+    else if (DECKS.some(d => d.id === item.id)) preview = `<div class="buy-prev" data-deck="${item.id}"><div class="mini" style="position:relative;width:150px;height:96px;flex:none">${cardBack("lg").replace('class="card', 'style="position:absolute;left:0;top:0;transform:rotate(-8deg)" class="card')}${cardFace("h", 13, "lg").replace('class="card', 'style="position:absolute;left:56px;top:0;transform:rotate(6deg)" class="card')}</div><div><b>${esc(item.note)}</b></div></div>`;
+    else preview = `<div class="buy-prev"><span class="swatch" style="width:88px;height:88px;background:radial-gradient(circle at 35% 30%, ${item.a}, ${item.b})"></span><div><b>${esc(item.name)} table</b><p class="muted" style="margin:4px 0 0">Changes the felt behind every game.</p></div></div>`;
+    return wrap(`${esc(item.name)}`, `${preview}
+      <p style="margin:0">Price: ${COIN} <b>${fmtCoins(price)}</b> · You have ${COIN} <b>${fmtCoins(stats.coins)}</b></p>
+      ${short > 0 ? `<p class="muted" style="margin:0">You need ${fmtCoins(short)} more coins. Play games, finish the daily challenge and collect your daily gift to earn them.</p>` : ""}`,
+      `<button class="btn ghost" data-act="close">Not now</button><button class="btn primary" data-act="confirm-buy" ${short > 0 ? "disabled" : ""}>Buy for ${fmtCoins(price)}</button>`);
+  }
+  return "";
+}
+function buy(id) {
+  const item = itemById(id);
+  if (!item || isUnlocked(item) || stats.coins < priceOf(item)) return;
+  stats.coins -= priceOf(item);
+  stats.owned.push(id);
+  if (CHAR[id]) prefs.character = id; else if (DECKS.some(d => d.id === id)) prefs.deck = id; else prefs.table = id;
+  saveStats(); savePrefs();
+  app.modal = null;
+  Sound.fanfare(); confetti(80);
+  toast("\u2726", `${item.name} is yours`, `New ${kindOf(id)}`);
+  render();
+}
+
 /* ================= Render + events ================= */
 function render() {
   applyLook();
@@ -1376,7 +1471,7 @@ function render() {
       + (G.notice ? `<div class="overlay"><div class="sheet" role="alertdialog" style="max-width:420px"><p style="margin:0">${esc(G.notice)}</p><div class="sheet-foot" style="justify-content:flex-end"><button class="btn primary" data-act="notice-ok">OK</button></div></div></div>` : "");
   } else {
     const typing = document.activeElement && document.activeElement.id === "join-code" ? document.activeElement.value : null;
-    root.innerHTML = renderHome() + (app.setup ? renderSetup() : "");
+    root.innerHTML = renderHome() + (app.setup ? renderSetup() : "") + renderHomeModal();
     if (typing !== null) { const el = document.getElementById("join-code"); if (el) { el.value = typing; el.focus(); } }
   }
 }
@@ -1438,6 +1533,9 @@ document.addEventListener("click", e => {
     case "home": leaveGame(); break;
     case "modal": app.modal = el.dataset.m; render(); break;
     case "notice-ok": G.notice = null; render(); break;
+    case "coins": app.modal = "coins"; render(); break;
+    case "buy": app.buyId = el.dataset.id; app.modal = "buy"; Sound.select(); render(); break;
+    case "confirm-buy": buy(app.buyId); break;
   }
 });
 document.addEventListener("input", e => {
@@ -1460,6 +1558,7 @@ const boot = data => {
     G = data.G || null;
     if (!G) app.screen = "home";
   }
+  checkDailyGift();
   render();
   if (G) { scheduleBots(); scheduleReveal(); scheduleSpin(); }
   initOnline();

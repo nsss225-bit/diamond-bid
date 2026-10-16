@@ -101,7 +101,7 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   await sleep(20);
   const home = b.html();
   ok(["Daily challenge", "Choose your character", "Achievements", "Card design", "Rosa", "Ember", "Gold Leaf", "Galaxy", "Version 1.1", "tutorial"].every(t => home.includes(t)), "home shows daily, characters, achievements, unlockables, version");
-  ok(home.includes("Locked"), "locked items shown");
+  ok(home.includes("Tap to buy"), "items for sale shown with prices");
 
   // 2) Every extra on, vs Expert bots, 4 players
   b.get(`Object.assign(prefs.config, { seatCount: 4, teams: false, botLevel: "expert", powers: true, showNext: true, mystery: true, jackpot: true, cursed: true, double: true, gamesToWin: 2 })`);
@@ -215,6 +215,24 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   h.click("online-start");
   await sleep(60);
   ok(gst.get("G && G.kind === 'online'") && h.get("G.s.seats.filter(x => !x.bot).length") === 2, "the new host starts the game for both");
+
+  // 9) Coins: welcome + daily gift, starters free, buy flow, game rewards
+  const c = browser("coins");
+  await sleep(20);
+  ok(c.get("stats.coins") === 300 && c.get("app.modal") === "gift", "first visit: 200 welcome + 100 daily gift, gift shown");
+  ok(["fox", "owl", "bear"].every(id => c.get(`isUnlocked(CHAR.${id})`)) && !c.get("isUnlocked(CHAR.cat)"), "3 starter characters are free");
+  ok(c.get(`["classic","royal"].every(id => isUnlocked(DECKS.find(d => d.id === id))) && !isUnlocked(DECKS.find(d => d.id === "noir"))`), "2 starter card designs are free");
+  c.click("close");
+  c.click("buy", { id: "dragon" });
+  ok(c.html().includes("You need") && /data-act="confirm-buy"[^>]*disabled/.test(c.html()), "can't buy what you can't afford");
+  c.click("close"); c.click("buy", { id: "sakura" }); c.click("confirm-buy");
+  ok(c.get("stats.coins") === 0 && c.get(`isUnlocked(DECKS.find(d => d.id === "sakura"))`) && c.get("prefs.deck") === "sakura", "buying Sakura cards for 300 coins works and switches to them");
+  c.get(`Object.assign(prefs.config, { seatCount: 2, botLevel: "hard", powers: false, mystery: false, jackpot: false, cursed: false, double: false, gamesToWin: 1 })`);
+  c.click("open-setup", { kind: "bots" }); c.click("start");
+  end = await playOut(c);
+  ok(c.get("stats.coins") >= 20 && c.html().includes("coins"), "a game vs a Hard bot pays coins: " + c.get("stats.coins"));
+  c.get(`stats.lastGift = "2000-01-01"; checkDailyGift()`);
+  ok(c.get("stats.giftStreak") === 1, "a missed day resets the gift streak");
 
   console.log(failures ? `\n${failures} FAILURES` : "\nALL UI TESTS PASSED");
   process.exit(failures ? 1 : 0);
