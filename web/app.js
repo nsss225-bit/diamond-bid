@@ -292,7 +292,7 @@ function renderHome() {
         <p class="lede">Thirteen gems, thirteen cards each. Everyone bids one card face down, all cards flip at once, and the highest card takes the gem.</p>
         <div class="cta">
           <button class="btn primary" data-act="open-setup" data-kind="bots">Play vs bots</button>
-          <button class="btn ghost" data-act="open-online" ${onlineReady ? "" : "disabled"} title="${onlineReady ? "" : Online.checked ? "Online play isn't available in this view" : "Connecting…"}">Play online</button>
+          <button class="btn ghost" data-act="open-online" ${onlineReady ? "" : `style="opacity:.6"`}>Play online</button>
           <button class="btn ghost" data-act="open-setup" data-kind="pass">Pass and play</button>
         </div>
         <div class="cta2">
@@ -1216,8 +1216,8 @@ async function joinTable(code, host) {
     Online.error = e && e.code === "not_permitted" ? "You can't join tables from this view." : "Couldn't open that table. Check your connection and try again.";
     render(); return;
   }
-  Online.code = code; Online.role = host ? "host" : "guest"; Online.error = ""; Online.lastG = null;
-  try { await Online.named.presence({ app: "diamondbid", v: 11, name: myName(), char: prefs.character, host: !!host, t: Date.now() }); } catch (e) {}
+  Online.code = code; Online.role = host ? "host" : "guest"; Online.error = ""; Online.lastG = null; Online.hostSince = host ? Date.now() : 0;
+  try { await Online.named.presence({ app: "diamondbid", v: 11, name: myName(), char: prefs.character, host: !!host, t: Online.hostSince || Date.now() }); } catch (e) {}
   Online.unsub = Online.named.onPeers(onPeersChange, () => { Online.error = "The connection to the table was lost."; render(); });
   app.setup = "online-lobby";
   render();
@@ -1233,6 +1233,11 @@ function onPeersChange(ch) {
   Online.peers = ch.peers;
   const mine = ch.peers.find(p => p.sameTab);
   if (mine) Online.myPeer = mine.peer;
+  // Two hosts at one table (both tapped "Host this table"): the earlier one keeps it.
+  if (Online.role === "host" && !G) {
+    const rival = tablePeople().find(p => !p.sameTab && p.presence.host && ((p.presence.t || 0) < Online.hostSince || ((p.presence.t || 0) === Online.hostSince && p.peer < Online.myPeer)));
+    if (rival) { Online.role = "guest"; Online.named.presence({ host: false }).catch(() => {}); }
+  }
   if (Online.role === "host") hostReadPeers(ch);
   else guestReadPeers(ch);
 }
@@ -1312,6 +1317,20 @@ function hostStart() {
 function renderOnlineSheet() {
   const head = (title) => `<div class="sheet-head"><h2>${title}</h2><button class="icon-btn" data-act="online-close" aria-label="Close">✕</button></div>`;
   const err = Online.error ? `<p style="margin:0;color:${Online.error === "Connecting…" ? "var(--muted)" : "#ff9a9a"}">${esc(Online.error)}</p>` : "";
+  if (app.setup === "online-menu" && !Online.room) {
+    return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true">
+      ${head("Play online")}
+      ${Online.checked ? `<p style="margin:0">Online play isn't available in this view.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;color:var(--muted)">
+        <p style="margin:0">Online tables only admit people who are <b style="color:var(--ink)">signed in to Claude</b> and <b style="color:var(--ink)">invited to this page</b>. A public link, or a link opened inside another app such as WhatsApp, can't join a table.</p>
+        <p style="margin:0"><b style="color:var(--ink)">To fix it:</b></p>
+        <p style="margin:0">1. The page's owner invites each friend by email from the page's Share menu.</p>
+        <p style="margin:0">2. Open the link in Safari, Chrome or the Claude app, and sign in to Claude with the invited email.</p>
+        <p style="margin:0">Everything else (bots, pass and play, the daily challenge) works without that.</p>
+      </div>` : `<p class="muted" style="margin:0">Connecting…</p>`}
+      <div class="sheet-foot" style="justify-content:flex-end"><button class="btn primary" data-act="online-close">OK</button></div>
+    </div></div>`;
+  }
   if (app.setup === "online-menu") {
     return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true">
       ${head("Play online")}
@@ -1336,7 +1355,11 @@ function renderOnlineSheet() {
     <div><div class="opt-label" style="text-align:center">Table code</div><div class="code">${esc(Online.code.toUpperCase())}</div>
       <p class="muted" style="margin:4px 0 0;text-align:center">Friends open this page, tap Play online, and enter this code.</p></div>
     <div><div class="opt-label">At the table (${people.length})</div><div class="peers">${list || `<p class="muted">Connecting…</p>`}</div></div>
-    ${host ? rulesFields("online", people.length < seats) : `<p class="muted" style="margin:0">Waiting for the host to start the game…</p>`}
+    ${host ? rulesFields("online", people.length < seats)
+      : people.some(p => p.presence.host)
+        ? `<p class="muted" style="margin:0">Waiting for the host to start the game…</p>`
+        : `<div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start"><p style="margin:0">Nobody is hosting this table yet. One person needs to host: they pick the rules and start the game.</p><button class="btn primary" data-act="online-host">Host this table</button></div>`}
+    ${people.length > 1 && new Set(people.map(p => p.presence.char)).size < people.length ? `<p class="muted" style="margin:0;font-size:13px">Two of you picked the same character. One will be swapped when the game starts, or pick a different one on the home page first.</p>` : ""}
     ${err}
     <div class="sheet-foot"><button class="btn ghost" data-act="online-close">Leave table</button>
       ${host ? `<button class="btn primary" data-act="online-start" ${people.length < 2 ? "disabled" : ""}>${people.length < 2 ? "Waiting for friends…" : "Start game"}</button>` : ""}</div>
@@ -1376,6 +1399,10 @@ document.addEventListener("click", e => {
     case "online-join": joinTable((document.getElementById("join-code") || {}).value, false); break;
     case "online-close": leaveOnline(); app.setup = null; render(); break;
     case "online-start": hostStart(); break;
+    case "online-host":
+      Online.role = "host"; Online.hostSince = Date.now();
+      if (Online.named) Online.named.presence({ host: true, t: Online.hostSince }).catch(() => {});
+      render(); break;
     case "close": case "close-bg": if (app.setup && app.setup.startsWith("online")) break; app.setup = null; app.modal = null; render(); break;
     case "cfg": {
       const key = el.dataset.key, val = JSON.parse(el.dataset.val);

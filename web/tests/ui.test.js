@@ -200,6 +200,22 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   await sleep(40);
   ok(!guest.get("G") && guest.get("Online.error").includes("host left"), "guest is told when the host leaves");
 
+  // 8) Both join by code (nobody hosting) → one taps "Host this table"
+  const bus2 = makeBus();
+  const a = browser("a", bus2), b2b = browser("b", bus2);
+  await sleep(30);
+  a.click("open-online"); a.__joinCode = "oman"; a.click("online-join");
+  b2b.click("open-online"); b2b.__joinCode = "oman"; b2b.click("online-join");
+  await sleep(50);
+  ok(a.html().includes("Nobody is hosting") && b2b.html().includes("Nobody is hosting"), "a table without a host offers Host this table");
+  a.click("online-host"); b2b.click("online-host");
+  await sleep(50);
+  ok([a.get("Online.role"), b2b.get("Online.role")].sort().join() === "guest,host", "if both tap Host, exactly one keeps it");
+  const h = a.get("Online.role") === "host" ? a : b2b, gst = h === a ? b2b : a;
+  h.click("online-start");
+  await sleep(60);
+  ok(gst.get("G && G.kind === 'online'") && h.get("G.s.seats.filter(x => !x.bot).length") === 2, "the new host starts the game for both");
+
   console.log(failures ? `\n${failures} FAILURES` : "\nALL UI TESTS PASSED");
   process.exit(failures ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });
