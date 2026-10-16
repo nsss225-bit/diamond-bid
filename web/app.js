@@ -1,0 +1,1441 @@
+/* Diamond Bid app (version 1.1): screens, sound, effects, progress, daily challenge, tutorial and online play.
+ * The rules live in engine.js. */
+const APP_VERSION = "1.1";
+
+/* ================= Content ================= */
+const CHARACTERS = [
+  { id: "fox", name: "Fennec", title: "The Sly Fox", line: "Saves big cards for the moments that matter.", ring: "#e8732f" },
+  { id: "owl", name: "Prof. Hoot", title: "The Card Counter", line: "Knows exactly what you have left.", ring: "#c79a6b" },
+  { id: "bear", name: "Bruno", title: "The Big Bettor", line: "Never met a King he would not play.", ring: "#a8693a" },
+  { id: "cat", name: "Duchess", title: "The Cool Cat", line: "Unbothered. Unpredictable.", ring: "#b9a3d6" },
+  { id: "frog", name: "Lily", title: "The Lucky Frog", line: "Swears that ties bring good luck.", ring: "#5fae4e" },
+  { id: "panda", name: "Bao", title: "The Gentle Giant", line: "Slow, steady and hard to read.", ring: "#e9e6dc" },
+  { id: "penguin", name: "Tux", title: "The Gentleman", line: "Bows politely, then takes your gem.", ring: "#6f8fb3" },
+  { id: "robot", name: "Unit 13", title: "The Machine", line: "Thirteen cards. Zero emotions.", ring: "#5ef0ff" },
+  { id: "raccoon", name: "Rosa", title: "The Pickpocket", line: "Your points look better in her pocket.", ring: "#8f8b86", unlock: { kind: "ach", n: 3, text: "Earn 3 achievements" } },
+  { id: "dragon", name: "Ember", title: "The Hoarder", line: "Guards every gem she takes.", ring: "#e0583f", unlock: { kind: "expert", text: "Beat an Expert bot" } },
+];
+const CHAR = Object.fromEntries(CHARACTERS.map(c => [c.id, c]));
+const CHAR_IDS = CHARACTERS.map(c => c.id);
+
+const AVATAR_SVG = {
+  fox: `<rect width="100" height="100" fill="#f4dcbc"/><path d="M18 16 L42 44 L24 54Z" fill="#d9622b"/><path d="M82 16 L58 44 L76 54Z" fill="#d9622b"/><path d="M24 26 L37 42 L27 47Z" fill="#5a2a14"/><path d="M76 26 L63 42 L73 47Z" fill="#5a2a14"/><path d="M16 46 Q50 18 84 46 Q80 72 50 90 Q20 72 16 46Z" fill="#e8732f"/><path d="M24 58 Q40 60 50 90 Q28 78 24 58Z" fill="#fff6ea"/><path d="M76 58 Q60 60 50 90 Q72 78 76 58Z" fill="#fff6ea"/><ellipse cx="37" cy="54" rx="4.2" ry="5.4" fill="#2b1a10"/><ellipse cx="63" cy="54" rx="4.2" ry="5.4" fill="#2b1a10"/><circle cx="38.6" cy="52.2" r="1.4" fill="#fff"/><circle cx="64.6" cy="52.2" r="1.4" fill="#fff"/><ellipse cx="50" cy="80" rx="5.5" ry="3.8" fill="#2b1a10"/>`,
+  owl: `<rect width="100" height="100" fill="#d6e2ef"/><path d="M16 26 L34 40 L20 50Z" fill="#6e4429"/><path d="M84 26 L66 40 L80 50Z" fill="#6e4429"/><ellipse cx="50" cy="62" rx="36" ry="40" fill="#8a5a3b"/><ellipse cx="50" cy="58" rx="29" ry="24" fill="#c79a6b"/><circle cx="37" cy="54" r="11" fill="#fff"/><circle cx="63" cy="54" r="11" fill="#fff"/><circle cx="38" cy="55" r="5" fill="#1f1a17"/><circle cx="62" cy="55" r="5" fill="#1f1a17"/><circle cx="39.5" cy="53.5" r="1.5" fill="#fff"/><circle cx="63.5" cy="53.5" r="1.5" fill="#fff"/><circle cx="37" cy="54" r="13" fill="none" stroke="#2a2420" stroke-width="3"/><circle cx="63" cy="54" r="13" fill="none" stroke="#2a2420" stroke-width="3"/><path d="M48 54 Q50 51 52 54" fill="none" stroke="#2a2420" stroke-width="3"/><path d="M45 66 L55 66 L50 75Z" fill="#f0a830"/><path d="M30 86 Q36 82 42 86 M44 88 Q50 84 56 88 M58 86 Q64 82 70 86" fill="none" stroke="#6e4429" stroke-width="2.5"/>`,
+  bear: `<rect width="100" height="100" fill="#f1e2c8"/><circle cx="24" cy="28" r="13" fill="#7a4a2a"/><circle cx="76" cy="28" r="13" fill="#7a4a2a"/><circle cx="24" cy="28" r="6.5" fill="#c68b5e"/><circle cx="76" cy="28" r="6.5" fill="#c68b5e"/><circle cx="50" cy="57" r="36" fill="#8b5a34"/><ellipse cx="50" cy="69" rx="17" ry="13" fill="#d9b48a"/><ellipse cx="50" cy="62" rx="6.5" ry="4.8" fill="#2b1a10"/><circle cx="36" cy="49" r="4.2" fill="#2b1a10"/><circle cx="64" cy="49" r="4.2" fill="#2b1a10"/><circle cx="37.3" cy="47.6" r="1.3" fill="#fff"/><circle cx="65.3" cy="47.6" r="1.3" fill="#fff"/><path d="M50 66 Q50 74 43 74 M50 66 Q50 74 57 74" fill="none" stroke="#2b1a10" stroke-width="2.4" stroke-linecap="round"/>`,
+  cat: `<rect width="100" height="100" fill="#e6dcf2"/><path d="M18 44 L24 12 L46 30Z" fill="#6d6f7d"/><path d="M82 44 L76 12 L54 30Z" fill="#6d6f7d"/><path d="M24 36 L27 20 L38 30Z" fill="#f2a7bd"/><path d="M76 36 L73 20 L62 30Z" fill="#f2a7bd"/><ellipse cx="50" cy="60" rx="34" ry="30" fill="#7b7e8d"/><path d="M36 28 L40 14 L46 22 L50 9 L54 22 L60 14 L64 28Z" fill="#e8c050" stroke="#b8902a" stroke-width="1.5" stroke-linejoin="round"/><ellipse cx="37" cy="56" rx="6.5" ry="7.5" fill="#9be07a"/><ellipse cx="63" cy="56" rx="6.5" ry="7.5" fill="#9be07a"/><ellipse cx="37" cy="56" rx="1.8" ry="6" fill="#1d1f24"/><ellipse cx="63" cy="56" rx="1.8" ry="6" fill="#1d1f24"/><path d="M46.5 66 L53.5 66 L50 70.5Z" fill="#f2a7bd"/><path d="M50 70.5 Q46 76 42 73 M50 70.5 Q54 76 58 73" fill="none" stroke="#3a3c46" stroke-width="2" stroke-linecap="round"/><path d="M42 68 L20 64 M42 71 L21 73 M58 68 L80 64 M58 71 L79 73" stroke="#dcdde4" stroke-width="1.5" stroke-linecap="round"/>`,
+  frog: `<rect width="100" height="100" fill="#d6efe1"/><circle cx="31" cy="40" r="15" fill="#5fae4e"/><circle cx="69" cy="40" r="15" fill="#5fae4e"/><ellipse cx="50" cy="64" rx="40" ry="28" fill="#5fae4e"/><circle cx="31" cy="39" r="10" fill="#fff"/><circle cx="69" cy="39" r="10" fill="#fff"/><circle cx="32" cy="40" r="5" fill="#1d2a18"/><circle cx="68" cy="40" r="5" fill="#1d2a18"/><circle cx="33.5" cy="38.5" r="1.6" fill="#fff"/><circle cx="69.5" cy="38.5" r="1.6" fill="#fff"/><path d="M26 66 Q50 84 74 66" fill="none" stroke="#2d5a24" stroke-width="3.2" stroke-linecap="round"/><ellipse cx="22" cy="68" rx="6.5" ry="4" fill="#f29a9a" opacity=".85"/><ellipse cx="78" cy="68" rx="6.5" ry="4" fill="#f29a9a" opacity=".85"/><circle cx="44" cy="58" r="1.5" fill="#2d5a24"/><circle cx="56" cy="58" r="1.5" fill="#2d5a24"/>`,
+  panda: `<rect width="100" height="100" fill="#f4e6dc"/><circle cx="24" cy="28" r="13" fill="#1f1f24"/><circle cx="76" cy="28" r="13" fill="#1f1f24"/><circle cx="50" cy="57" r="36" fill="#fbfaf6"/><ellipse cx="36" cy="53" rx="9" ry="12" transform="rotate(28 36 53)" fill="#1f1f24"/><ellipse cx="64" cy="53" rx="9" ry="12" transform="rotate(-28 64 53)" fill="#1f1f24"/><circle cx="37" cy="52" r="3.6" fill="#fff"/><circle cx="63" cy="52" r="3.6" fill="#fff"/><circle cx="37.6" cy="52.4" r="1.8" fill="#1f1f24"/><circle cx="62.4" cy="52.4" r="1.8" fill="#1f1f24"/><ellipse cx="50" cy="66" rx="5.5" ry="3.8" fill="#1f1f24"/><path d="M50 69 Q50 75 44 75 M50 69 Q50 75 56 75" fill="none" stroke="#1f1f24" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="27" cy="68" rx="5" ry="3" fill="#f5b5b5" opacity=".7"/><ellipse cx="73" cy="68" rx="5" ry="3" fill="#f5b5b5" opacity=".7"/>`,
+  penguin: `<rect width="100" height="100" fill="#d9e6f4"/><circle cx="50" cy="54" r="40" fill="#23262e"/><path d="M50 40 C38 24 14 36 24 60 C29 74 42 82 50 84 C58 82 71 74 76 60 C86 36 62 24 50 40Z" fill="#f7f5ef"/><circle cx="40" cy="53" r="4.2" fill="#23262e"/><circle cx="60" cy="53" r="4.2" fill="#23262e"/><circle cx="41.4" cy="51.6" r="1.3" fill="#fff"/><circle cx="61.4" cy="51.6" r="1.3" fill="#fff"/><circle cx="60" cy="53" r="8.5" fill="none" stroke="#d9ab4f" stroke-width="2"/><path d="M68 57 Q74 66 70 76" fill="none" stroke="#d9ab4f" stroke-width="1.4"/><path d="M43 61 L57 61 L50 70Z" fill="#f0a030"/><path d="M36 88 L47 92.5 L36 97Z M64 88 L53 92.5 L64 97Z" fill="#c42a3c"/><rect x="46" y="89.5" width="8" height="6" rx="2" fill="#a51f30"/>`,
+  robot: `<rect width="100" height="100" fill="#dfe6ea"/><line x1="50" y1="10" x2="50" y2="24" stroke="#5b6770" stroke-width="3"/><circle cx="50" cy="10" r="4.5" fill="#ff4f5e"/><circle cx="16" cy="54" r="6" fill="#5b6770"/><circle cx="84" cy="54" r="6" fill="#5b6770"/><rect x="18" y="24" width="64" height="58" rx="15" fill="#9aa7b0"/><rect x="26" y="34" width="48" height="32" rx="9" fill="#1d2a33"/><rect x="33" y="42" width="11" height="9" rx="2.5" fill="#5ef0ff"/><rect x="56" y="42" width="11" height="9" rx="2.5" fill="#5ef0ff"/><rect x="37" y="57" width="4" height="3" fill="#5ef0ff"/><rect x="44" y="57" width="4" height="3" fill="#5ef0ff"/><rect x="51" y="57" width="4" height="3" fill="#5ef0ff"/><rect x="58" y="57" width="4" height="3" fill="#5ef0ff"/><text x="50" y="77" text-anchor="middle" font-family="Figtree, sans-serif" font-size="9" font-weight="700" fill="#4a565e">13</text>`,
+  raccoon: `<rect width="100" height="100" fill="#e3dfd7"/><path d="M16 34 L26 8 L42 28Z" fill="#6f6c69"/><path d="M84 34 L74 8 L58 28Z" fill="#6f6c69"/><path d="M23 28 L28 15 L35 26Z" fill="#f0e9e0"/><path d="M77 28 L72 15 L65 26Z" fill="#f0e9e0"/><ellipse cx="50" cy="58" rx="36" ry="32" fill="#8f8b86"/><path d="M15 54 Q50 34 85 54 Q78 67 63 62 Q50 57 37 62 Q22 67 15 54Z" fill="#26231f"/><circle cx="37" cy="54" r="5.2" fill="#fff"/><circle cx="63" cy="54" r="5.2" fill="#fff"/><circle cx="37.6" cy="54.6" r="2.7" fill="#1a1714"/><circle cx="62.4" cy="54.6" r="2.7" fill="#1a1714"/><path d="M33 70 Q50 94 67 70 Q50 63 33 70Z" fill="#f4efe8"/><ellipse cx="50" cy="70" rx="5.2" ry="3.7" fill="#1a1714"/><path d="M50 74 Q50 80 45 80 M50 74 Q50 80 55 80" fill="none" stroke="#1a1714" stroke-width="2" stroke-linecap="round"/>`,
+  dragon: `<rect width="100" height="100" fill="#f6dccf"/><path d="M28 32 L18 6 L42 24Z" fill="#e8c050"/><path d="M72 32 L82 6 L58 24Z" fill="#e8c050"/><ellipse cx="50" cy="57" rx="35" ry="33" fill="#c8402c"/><path d="M30 26 Q50 16 70 26 L64 34 Q50 28 36 34Z" fill="#a83220"/><ellipse cx="50" cy="73" rx="21" ry="14" fill="#e8735b"/><circle cx="43" cy="71" r="2.2" fill="#5a1a10"/><circle cx="57" cy="71" r="2.2" fill="#5a1a10"/><ellipse cx="35" cy="51" rx="7.5" ry="6.5" fill="#ffe27a"/><ellipse cx="65" cy="51" rx="7.5" ry="6.5" fill="#ffe27a"/><ellipse cx="35" cy="51" rx="2.2" ry="5.5" fill="#2a120c"/><ellipse cx="65" cy="51" rx="2.2" ry="5.5" fill="#2a120c"/><path d="M27 41 L42 45 M73 41 L58 45" stroke="#7a2014" stroke-width="3" stroke-linecap="round"/><path d="M40 84 L43 90 L46 84 M54 84 L57 90 L60 84" fill="#fff"/>`,
+};
+
+const DECKS = [
+  { id: "classic", name: "Classic", note: "Ivory and oxblood" },
+  { id: "royal", name: "Royal", note: "Navy with gold" },
+  { id: "sakura", name: "Sakura", note: "Blossom pink" },
+  { id: "noir", name: "Noir", note: "Black and gold ink" },
+  { id: "retro", name: "Retro", note: "Seventies stripes" },
+  { id: "arcade", name: "Arcade", note: "Neon grid" },
+  { id: "gold", name: "Gold Leaf", note: "Gilded backs", unlock: { kind: "wins", n: 5, text: "Win 5 matches" } },
+  { id: "galaxy", name: "Galaxy", note: "Stars and nebula", unlock: { kind: "daily", n: 3, text: "Play 3 daily challenges" } },
+];
+const TABLES = [
+  { id: "green", name: "Baize", a: "#1d5a4b", b: "#0b2620" },
+  { id: "ocean", name: "Ocean", a: "#1c4a78", b: "#0a1d33" },
+  { id: "wine", name: "Wine", a: "#6a2236", b: "#2a0b15" },
+  { id: "slate", name: "Slate", a: "#3e464e", b: "#15181c" },
+  { id: "plum", name: "Plum", a: "#53306f", b: "#1d0f2b" },
+  { id: "midnight", name: "Midnight", a: "#2a3170", b: "#0b0e24", unlock: { kind: "ach", n: 8, text: "Earn 8 achievements" } },
+];
+
+const ACHIEVEMENTS = [
+  { id: "first_gem", icon: "◆", name: "First sparkle", desc: "Win your first gem." },
+  { id: "first_win", icon: "★", name: "Winner", desc: "Win a match." },
+  { id: "steal", icon: "↯", name: "Steal!", desc: "Win a round by exactly one." },
+  { id: "giant_slayer", icon: "⚔", name: "Giant slayer", desc: "Take the 13 gem or the jackpot with a 7 or lower." },
+  { id: "hat_trick", icon: "∴", name: "Hat trick", desc: "Win three rounds in a row." },
+  { id: "double_trouble", icon: "×", name: "Double trouble", desc: "Score 20 or more points in one round." },
+  { id: "jackpot", icon: "☀", name: "Jackpot!", desc: "Take the 20 jackpot gem." },
+  { id: "curse_dodger", icon: "☂", name: "Curse dodger", desc: "Finish a game with cursed gems and take no curse." },
+  { id: "power_play", icon: "⚡", name: "Power play", desc: "Win a round with your character's power." },
+  { id: "wheel", icon: "☸", name: "Wheel of fortune", desc: "Win a game on the tie-breaker wheel." },
+  { id: "hard_win", icon: "♜", name: "Tough cookie", desc: "Beat a Hard bot in a match." },
+  { id: "expert_win", icon: "♛", name: "Mind reader", desc: "Beat an Expert bot in a match." },
+  { id: "full_table", icon: "♣", name: "Last one standing", desc: "Win a 4-player free-for-all." },
+  { id: "teamwork", icon: "♡", name: "Teamwork", desc: "Win a 2 vs 2 match." },
+  { id: "daily", icon: "☼", name: "Daily player", desc: "Finish a daily challenge." },
+  { id: "online", icon: "☁", name: "Good game", desc: "Finish an online game with friends." },
+  { id: "learner", icon: "✑", name: "Quick learner", desc: "Finish the tutorial." },
+];
+
+const GEM_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 L36 20 L20 37 L4 20Z" style="fill:var(--gem)"/><path d="M20 3 L36 20 L20 20Z" style="fill:var(--gem-hi)"/><path d="M20 20 L4 20 L20 37Z" style="fill:var(--gem-lo)"/><path d="M20 3 L36 20 L20 37 L4 20Z" style="fill:none;stroke:var(--brass)" stroke-width="2" stroke-linejoin="round"/></svg>`;
+const JACKPOT_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2 L37 20 L20 38 L3 20Z" fill="#fff8dc"/><path d="M20 2 L37 20 L20 20Z" fill="#ffe9a0"/><path d="M20 20 L3 20 L20 38Z" fill="#c8942c"/><path d="M20 2 L37 20 L20 38 L3 20Z" fill="none" stroke="#7a4a00" stroke-width="2" stroke-linejoin="round"/></svg>`;
+const CURSE_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 C24 11 33 15 31 26 C30 33 25 37 20 37 C14 37 9 33 9 26 C9 20 13 17 14 12 C17 16 17 19 19 20 C20 14 18 9 20 3Z" fill="currentColor"/></svg>`;
+const SPEAKER_SVG = on => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>${on ? `<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>` : `<path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`}</svg>`;
+const TEAM_COLOR = ["#e0485a", "#e9e3d3"];
+const REVEAL_MS = 3000;
+const SPIN_MS = 4200;
+const TUTORIAL_PRIZES = [5, 13, 2, 9, 1, 11, 7, 3, 12, 6, 10, 4, 8];
+const DAILY_CONFIG = { seatCount: 2, tieRule: "split", cursed: true, double: true, gamesToWin: 1, botLevel: "hard", showNext: true, mystery: true, jackpot: true, powers: false };
+
+/* ================= Preferences and progress ================= */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+const DEFAULT_PREFS = { character: "fox", name: "", deck: "classic", table: "green", fourColor: false, sound: true, config: Object.assign({}, DEFAULT_CONFIG), localPlayers: 2, passChars: {} };
+let prefs = Object.assign({}, DEFAULT_PREFS, store.get("diamondbid.prefs", {}));
+prefs.config = Object.assign({}, DEFAULT_CONFIG, prefs.config);
+let stats = Object.assign({ played: 0, won: 0, ach: {}, dailyDays: [], dailyBest: {}, seenUnlocks: [] }, store.get("diamondbid.stats", {}));
+const savePrefs = () => store.set("diamondbid.prefs", prefs);
+const saveStats = () => store.set("diamondbid.stats", stats);
+const achCount = () => Object.keys(stats.ach).length;
+
+function isUnlocked(item) {
+  const u = item && item.unlock;
+  if (!u) return true;
+  if (u.kind === "ach") return achCount() >= u.n;
+  if (u.kind === "expert") return !!stats.ach.expert_win;
+  if (u.kind === "wins") return stats.won >= u.n;
+  if (u.kind === "daily") return stats.dailyDays.length >= u.n;
+  return false;
+}
+if (!CHAR[prefs.character] || !isUnlocked(CHAR[prefs.character])) prefs.character = "fox";
+if (!DECKS.some(d => d.id === prefs.deck && isUnlocked(d))) prefs.deck = "classic";
+if (!TABLES.some(t => t.id === prefs.table && isUnlocked(t))) prefs.table = "green";
+
+function applyLook() {
+  const root = document.documentElement;
+  root.dataset.deck = prefs.deck;
+  root.dataset.table = prefs.table;
+  root.dataset.four = prefs.fourColor ? "1" : "0";
+}
+const esc = v => String(v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const cleanName = v => String(v || "").replace(/[\u0000-\u001f\u007f​-‏‪-‮⁠-⁤﻿]/g, "").trim().slice(0, 16);
+const myName = () => cleanName(prefs.name) || CHAR[prefs.character].name;
+const todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+
+/* ================= Sound and vibration ================= */
+const Sound = (() => {
+  let ctx = null;
+  const on = () => prefs.sound !== false;
+  function ac() {
+    if (!on()) return null;
+    try {
+      if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ctx = new C(); }
+      if (ctx.state === "suspended") ctx.resume();
+      return ctx;
+    } catch (e) { return null; }
+  }
+  function tone(freq, dur, { type = "sine", vol = .14, at = 0, glide = null } = {}) {
+    const c = ac(); if (!c) return;
+    const t = c.currentTime + at, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (glide) o.frequency.exponentialRampToValueAtTime(glide, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t + dur + .02);
+  }
+  function noise(dur, { freq = 2200, q = .9, vol = .3, at = 0 } = {}) {
+    const c = ac(); if (!c) return;
+    const t = c.currentTime + at, len = Math.max(1, Math.floor(c.sampleRate * dur));
+    const buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+    const src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    src.buffer = buf; f.type = "bandpass"; f.frequency.value = freq; f.Q.value = q; g.gain.value = vol;
+    src.connect(f).connect(g).connect(c.destination); src.start(t);
+  }
+  return {
+    unlock() { ac(); },
+    select() { tone(1500, .035, { type: "triangle", vol: .05 }); },
+    snap() { noise(.07, { freq: 2600, vol: .38 }); tone(170, .07, { vol: .07 }); },
+    flip() { noise(.05, { freq: 3200, vol: .25 }); noise(.05, { freq: 2300, vol: .22, at: .1 }); },
+    win() { [880, 1109, 1319].forEach((f, i) => tone(f, .28, { type: "triangle", vol: .11, at: .12 + i * .08 })); },
+    big() { [784, 988, 1175, 1568].forEach((f, i) => tone(f, .35, { type: "triangle", vol: .12, at: .12 + i * .09 })); },
+    lose() { tone(190, .32, { glide: 70, vol: .16, at: .1 }); },
+    tick() { tone(1050, .035, { type: "square", vol: .035 }); },
+    wheel(ms) { let t = 0, gap = .04; while (t < ms / 1000 - .2) { tone(1800, .02, { type: "square", vol: .03, at: t }); t += gap; gap *= 1.09; } },
+    fanfare() { [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tone(f, i > 3 ? .5 : .2, { type: "triangle", vol: .13, at: i * .12 })); },
+    chime() { [1319, 1760, 2093].forEach((f, i) => tone(f, .3, { vol: .08, at: i * .07 })); },
+  };
+})();
+function buzz(pattern) { try { if (prefs.sound !== false && navigator.vibrate) navigator.vibrate(pattern); } catch (e) {} }
+
+/* ================= Effects ================= */
+function toast(icon, title, sub) {
+  const box = document.getElementById("toasts");
+  if (!box) return;
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.innerHTML = `<span class="ti">${esc(icon)}</span><div><small>${esc(sub)}</small><b>${esc(title)}</b></div>`;
+  box.appendChild(el);
+  setTimeout(() => el.remove(), 4200);
+}
+function confetti(amount = 140) {
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cv = document.createElement("canvas");
+  cv.id = "confetti";
+  document.body.appendChild(cv);
+  const ctx = cv.getContext("2d"), W = cv.width = innerWidth, H = cv.height = innerHeight;
+  const colors = ["#d9ab4f", "#ec7a4f", "#ef5a6c", "#f3ede0", "#8fe3ff", "#5fd38a"];
+  const parts = Array.from({ length: amount }, () => ({ x: W / 2 + (Math.random() - .5) * W * .3, y: H * .35, vx: (Math.random() - .5) * 12, vy: -Math.random() * 13 - 4, r: Math.random() * Math.PI, vr: (Math.random() - .5) * .3, w: 6 + Math.random() * 6, h: 4 + Math.random() * 6, c: colors[Math.floor(Math.random() * colors.length)] }));
+  const start = performance.now();
+  (function frame(now) {
+    const t = now - start;
+    ctx.clearRect(0, 0, W, H);
+    parts.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += .32; p.vx *= .99; p.r += p.vr; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.globalAlpha = Math.max(0, 1 - t / 2800); ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore(); });
+    if (t < 2800) requestAnimationFrame(frame); else cv.remove();
+  })(start);
+}
+
+/* ================= Achievements ================= */
+function grant(id) {
+  if (stats.ach[id]) return;
+  const a = ACHIEVEMENTS.find(x => x.id === id);
+  if (!a) return;
+  const before = unlockedNow();
+  stats.ach[id] = Date.now();
+  saveStats();
+  if (G) G.newAch.push(a.name);
+  toast(a.icon, a.name, "Achievement unlocked");
+  Sound.chime();
+  announceUnlocks(before);
+}
+function unlockedNow() {
+  return [...CHARACTERS, ...DECKS, ...TABLES].filter(x => x.unlock && isUnlocked(x)).map(x => x.id);
+}
+function announceUnlocks(before) {
+  unlockedNow().filter(id => !before.includes(id) && !stats.seenUnlocks.includes(id)).forEach(id => {
+    stats.seenUnlocks.push(id);
+    const ch = CHAR[id], deck = DECKS.find(d => d.id === id), tbl = TABLES.find(t => t.id === id);
+    const what = ch ? `New character: ${ch.name}` : deck ? `New card design: ${deck.name}` : `New table: ${tbl.name}`;
+    setTimeout(() => toast("✦", what, "Unlocked"), 600);
+  });
+  saveStats();
+}
+
+/* ================= App state ================= */
+let app = { screen: "home", setup: null, modal: null, botOffset: Math.floor(Math.random() * 10), introDone: false };
+let G = null; // the current game
+let botTimer = null, revealTimer = null, tickTimer = null, spinTimer = null;
+
+function newG(kind, s, mySeats, extra = {}) {
+  return Object.assign({
+    kind, role: null, s, mySeats, unlocked: mySeats.length === 1 ? mySeats[0] : null,
+    selected: null, useDouble: false, usePower: false, revealAnim: false, seen: [], prizeKey: null,
+    recorded: false, revealAt: 0, localSpinAt: 0, track: kind !== "pass", streak: 0, newAch: [], banner: null, prev: {},
+  }, extra);
+}
+const isAuthority = () => G && (G.kind !== "online" || G.role === "host");
+const me = () => G && G.mySeats.length ? G.mySeats[0] : -1;
+const roundKey = s => `${s.gameNumber}.${s.round}`;
+
+/* ================= Markup helpers ================= */
+const avatar = (id, cls = "") => `<span class="avatar ${cls}" style="--ring:${CHAR[id].ring}" role="img" aria-label="${esc(CHAR[id].name)}"><svg viewBox="0 0 100 100">${AVATAR_SVG[id]}</svg></span>`;
+function cardFace(suit, v, cls = "", tag = "div", attrs = "") {
+  return `<${tag} class="card suit-${suit} ${cls}" ${attrs} aria-label="${RANK(v)} of ${SUIT_NAME[suit]}"><span class="ix"><b>${RANK(v)}</b><i>${PIP[suit]}</i></span><span class="pip">${PIP[suit]}</span><span class="ix b"><b>${RANK(v)}</b><i>${PIP[suit]}</i></span></${tag}>`;
+}
+const cardBack = (cls = "") => `<div class="card back ${cls}" aria-label="Face-down card"></div>`;
+function prizeCard(v, cls = "", hidden = false) {
+  if (hidden) return `<div class="card prize mystery ${cls}" aria-label="Mystery gem"><b>?</b></div>`;
+  if (v === JACKPOT) return `<div class="card prize jackpot ${cls}" aria-label="20 jackpot gem">${JACKPOT_SVG}<b>20</b></div>`;
+  return `<div class="card prize ${v < 0 ? "curse" : ""} ${cls}" aria-label="${prizeName(v)}">${v < 0 ? CURSE_SVG : GEM_SVG}<b>${prizeLabel(v)}</b></div>`;
+}
+const thinking = `<span class="thinking" aria-label="choosing"><span></span><span></span><span></span></span>`;
+const feltPip = suit => {
+  const four = prefs.fourColor;
+  const color = { h: "#ef5a6c", d: four ? "#6f9bff" : "#ef5a6c", c: four ? "#5fd38a" : "var(--ink)", s: "var(--ink)" }[suit];
+  return `<span style="color:${color}">${PIP[suit]}</span>`;
+};
+const lockOverlay = item => `<span class="lock"><b>Locked</b><span>${esc(item.unlock.text)}</span></span>`;
+const awardText = a => `${a > 0 ? "+" : ""}${fmt(a)}`;
+
+/** The gems a seat has taken this game, as small chips. */
+function gemPile(s, seat) {
+  const got = s.history.filter(h => h.awards[seat] !== 0);
+  if (!got.length) return `<div class="pile"></div>`;
+  const chips = got.slice(-7).map(h => {
+    const cls = h.prize === JACKPOT ? "j" : h.prize < 0 || h.awards[seat] < 0 ? "c" : "";
+    const split = h.winners.length > 1 ? " s" : "";
+    return `<span class="chip-gem ${cls}${split}" title="${prizeName(h.prize)}: ${awardText(h.awards[seat])}">${prizeLabel(h.prize)}</span>`;
+  }).join("");
+  return `<div class="pile" aria-label="Gems taken">${got.length > 7 ? `<span class="chip-more">+${got.length - 7}</span>` : ""}${chips}</div>`;
+}
+
+/* ================= Home ================= */
+function renderHome() {
+  const c = CHAR[prefs.character];
+  const intro = app.introDone ? "" : "intro";
+  app.introDone = true;
+  const fanCards = [
+    [cardFace("h", 13, "xl"), -26, 18, 0], [cardFace("c", 12, "xl"), -13, 4, 1], [prizeCard(13, "xl"), 0, 0, 2],
+    [cardFace("d", 11, "xl"), 13, 4, 3], [cardFace("s", 1, "xl"), 26, 18, 4],
+  ].map(([html, r, y, i]) => html.replace('class="card', `style="--r:${r}deg;--y:${y}px;--d:${i * 90}ms;z-index:${i === 2 ? 5 : i}" class="card`)).join("");
+  const onlineReady = Online.checked && Online.room;
+  const got = achCount();
+
+  return `
+  <div class="wrap">
+    <header class="topbar">
+      <div class="brand">${GEM_SVG}Diamond Bid</div>
+      <nav class="topnav" aria-label="Sections">
+        <a href="#daily">Daily</a><a href="#characters">Characters</a><a href="#designs">Designs</a><a href="#achievements">Achievements</a><a href="#how">How to play</a>
+      </nav>
+      <button class="icon-btn" data-act="sound" aria-label="${prefs.sound ? "Turn sound off" : "Turn sound on"}" aria-pressed="${prefs.sound}">${SPEAKER_SVG(prefs.sound)}</button>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">A card game of secret bids · 2 or 4 players</p>
+        <h1>Diamond <em>Bid</em></h1>
+        <p class="lede">Thirteen gems, thirteen cards each. Everyone bids one card face down, all cards flip at once, and the highest card takes the gem.</p>
+        <div class="cta">
+          <button class="btn primary" data-act="open-setup" data-kind="bots">Play vs bots</button>
+          <button class="btn ghost" data-act="open-online" ${onlineReady ? "" : "disabled"} title="${onlineReady ? "" : Online.checked ? "Online play isn't available in this view" : "Connecting…"}">Play online</button>
+          <button class="btn ghost" data-act="open-setup" data-kind="pass">Pass and play</button>
+        </div>
+        <div class="cta2">
+          <button class="link" data-act="daily">Today's daily challenge →</button>
+          <button class="link" data-act="tutorial">New here? Play the 2-minute tutorial →</button>
+        </div>
+        <div class="playing-as">
+          ${avatar(c.id)}
+          <div><small>Playing as</small><b id="playing-name">${esc(myName())}</b></div>
+          <a href="#characters">Change</a>
+        </div>
+      </div>
+      <div class="hero-art"><div class="fan ${intro}">${fanCards}</div></div>
+    </section>
+
+    <section class="block" id="daily">
+      <div class="block-head"><div><h2>Daily challenge</h2><p>Everyone gets the same gems today, against the same Hard bot. Beat your friends' scores.</p></div></div>
+      <div class="daily">
+        <div class="panel">
+          <h3>${new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</h3>
+          <div class="rules"><span>vs ${esc(CHAR[dailyOpponent()].name)} (Hard)</span><span>Next gem shown</span><span>Mystery gem</span><span>Jackpot</span><span>Cursed gems</span><span>Double token</span></div>
+          <p class="muted" style="margin:0">${stats.dailyBest[todayKey()] != null ? `Your best today: <b style="color:var(--ink)">${fmt(stats.dailyBest[todayKey()])}</b> points. Play again to beat it.` : "You haven't played today's challenge yet."}</p>
+          <div><button class="btn primary" data-act="daily">Play today's challenge</button></div>
+        </div>
+        <div class="panel">
+          <h3>Today's leaderboard</h3>
+          <div id="daily-lb">${renderLeaderboard()}</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="characters">
+      <div class="block-head">
+        <div><h2>Choose your character</h2><p>Each one has a power you can use once per game when "Character powers" is on. Bots take the characters you don't pick.</p></div>
+        <label class="name-field" for="name">Your name (optional)
+          <input id="name" maxlength="16" placeholder="${esc(c.name)}" value="${esc(prefs.name)}" autocomplete="nickname">
+        </label>
+      </div>
+      <div class="char-grid">
+        ${CHARACTERS.map(ch => {
+          const open = isUnlocked(ch), p = POWERS[ch.id];
+          return `<button class="char ${open ? "" : "locked"}" data-act="pick-char" data-id="${ch.id}" aria-pressed="${ch.id === prefs.character}" ${open ? "" : "disabled"}>
+            ${avatar(ch.id, "lg")}
+            <b>${esc(ch.name)}</b>
+            <span class="title">${esc(ch.title)}</span>
+            <span class="line">${esc(ch.line)}</span>
+            <span class="power"><b>${esc(p.name)}:</b> ${esc(p.text)}</span>
+            ${open ? "" : lockOverlay(ch)}
+          </button>`;
+        }).join("")}
+      </div>
+    </section>
+
+    <section class="block" id="designs">
+      <div class="block-head"><div><h2>Card design</h2><p>Changes the faces and backs of every card. Win matches and play daily challenges to unlock more.</p></div></div>
+      <div class="deck-grid">
+        ${DECKS.map(d => {
+          const open = isUnlocked(d);
+          return `<button class="deck ${open ? "" : "locked"}" data-act="pick-deck" data-id="${d.id}" data-deck="${d.id}" aria-pressed="${d.id === prefs.deck}" ${open ? "" : "disabled"}>
+            <div class="mini">${cardBack("md")}${cardFace("h", 13, "md")}${cardFace("c", 12, "md")}</div>
+            <b>${d.name}</b><small>${d.note}</small>${open ? "" : lockOverlay(d)}
+          </button>`;
+        }).join("")}
+      </div>
+      <div class="options-row">
+        <div>
+          <div class="opt-label">Table</div>
+          <div class="swatches">
+            ${TABLES.map(t => {
+              const open = isUnlocked(t);
+              return `<div><button class="swatch" data-act="pick-table" data-id="${t.id}" aria-pressed="${t.id === prefs.table}" aria-label="${t.name} table${open ? "" : " (locked: " + t.unlock.text + ")"}" title="${open ? t.name : "Locked: " + t.unlock.text}" ${open ? "" : "disabled"} style="background:radial-gradient(circle at 35% 30%, ${t.a}, ${t.b});${open ? "" : "opacity:.35"}"></button><div class="swatch-label">${open ? t.name : "Locked"}</div></div>`;
+            }).join("")}
+          </div>
+        </div>
+        <div>
+          <div class="opt-label">Suit colors</div>
+          <button class="switch" data-act="four" aria-pressed="${prefs.fourColor}"><span class="track"></span>Four-color suits</button>
+          <div class="swatch-label" style="text-align:left;margin-top:8px">Gives Clubs and Diamonds their own colors. Handy with 4 players.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="achievements">
+      <div class="block-head">
+        <div><h2>Achievements</h2><p>${got} of ${ACHIEVEMENTS.length} earned. Achievements also unlock new characters, card designs and a table.</p></div>
+        <div class="progress" aria-hidden="true"><span style="width:${Math.round(100 * got / ACHIEVEMENTS.length)}%"></span></div>
+      </div>
+      <div class="ach-grid">
+        ${ACHIEVEMENTS.map(a => `<div class="ach ${stats.ach[a.id] ? "got" : ""}"><span class="ai">${a.icon}</span><div><b>${a.name}</b><small>${a.desc}</small></div></div>`).join("")}
+      </div>
+    </section>
+
+    <section class="block" id="how">
+      <div class="block-head"><div><h2>How to play</h2><p>One round per gem. A game is 13 rounds.</p></div></div>
+      <div class="steps">
+        <div class="step"><span class="n">1</span><div class="art">${prizeCard(9, "sm")}</div><h3>A gem is turned up</h3><p>It's worth its number in points: 1 to 13.</p></div>
+        <div class="step"><span class="n">2</span><div class="art">${cardBack("sm")}${cardBack("sm")}</div><h3>Everyone bids</h3><p>Each player picks one card from their suit, A to K, and lays it face down.</p></div>
+        <div class="step"><span class="n">3</span><div class="art">${cardFace("h", 12, "sm")}${cardFace("s", 8, "sm")}</div><h3>Reveal</h3><p>All bids flip together. The highest card takes the gem. Used cards are gone.</p></div>
+        <div class="step"><span class="n">4</span><div class="art">${prizeCard(13, "sm")}${prizeCard(7, "sm")}</div><h3>Most points wins</h3><p>After 13 gems, add up your gems. Spend your Kings wisely.</p></div>
+      </div>
+      <div class="variants">
+        <div class="variant"><h3>Tied bids</h3><p>Split: everyone tied shares the gem. Cancel out: matching cards knock each other out.</p></div>
+        <div class="variant"><h3>Tied at the end?</h3><p>Spin the wheel: most gems, biggest gem, last gem, high card or a shared win.</p></div>
+        <div class="variant"><h3>Character powers</h3><p>Each character has a one-time power, from Feint (+2) to Upside down (lowest card wins).</p></div>
+        <div class="variant"><h3>Next gem and mystery gem</h3><p>See the gem that comes next, or play one round for a gem nobody can see until the reveal.</p></div>
+        <div class="variant"><h3>Jackpot</h3><p>A golden 20-point gem replaces the 1 and turns up in the last four rounds.</p></div>
+        <div class="variant"><h3>Cursed gems and Double</h3><p>Curses (−1 to −3) go to the lowest bid. The Double token doubles one round, curses too.</p></div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <span>Matches won: ${stats.won} of ${stats.played}</span>
+      <span>Diamond Bid · Version ${APP_VERSION}</span>
+    </footer>
+  </div>`;
+}
+
+/* ================= Setup (bots and pass and play) ================= */
+function seatPlan(kind) {
+  const c = prefs.config, n = c.seatCount;
+  const people = kind === "bots" ? 1 : Math.min(prefs.localPlayers, n);
+  const used = new Set([prefs.character]);
+  const chars = [prefs.character];
+  for (let i = 1; i < people; i++) {
+    let id = prefs.passChars[i];
+    if (!id || used.has(id) || !isUnlocked(CHAR[id])) id = CHAR_IDS.find(x => !used.has(x) && isUnlocked(CHAR[x]));
+    chars[i] = id; used.add(id);
+  }
+  const rotated = CHAR_IDS.map((_, k) => CHAR_IDS[(k + app.botOffset) % CHAR_IDS.length]);
+  for (let i = people; i < n; i++) { const id = rotated.find(x => !used.has(x)); chars[i] = id; used.add(id); }
+  return range(n).map(i => ({ char: chars[i], name: i === 0 ? myName() : CHAR[chars[i]].name, bot: i >= people, level: c.botLevel }));
+}
+
+function rulesFields(kind, hasBots) {
+  const c = prefs.config;
+  const seg = (key, options, value = c[key]) => `<div class="seg" role="group">${options.map(([val, label]) =>
+    `<button type="button" data-act="cfg" data-key="${key}" data-val='${JSON.stringify(val)}' aria-pressed="${value === val}">${label}</button>`).join("")}</div>`;
+  const toggle = (key, label) => `<button type="button" class="switch" data-act="cfg" data-key="${key}" data-val='${JSON.stringify(!c[key])}' aria-pressed="${!!c[key]}"><span class="track"></span>${label}</button>`;
+  return `
+    <div class="field"><span>Players</span>${seg("seatCount", [[2, "2 players"], [4, "4 players"]])}</div>
+    ${c.seatCount === 4 ? `<div class="field"><span>Mode</span>${seg("teams", [[false, "Free-for-all"], [true, "2 vs 2 teams"]])}</div>` : ""}
+    ${kind === "pass" ? `<div class="field"><span>People here</span>${seg("localPlayers", range(c.seatCount - 1).map(k => [k + 2, String(k + 2)]), Math.min(prefs.localPlayers, c.seatCount))}</div>` : ""}
+    ${hasBots ? `<div class="field"><span>Bots</span>${seg("botLevel", [["easy", "Easy"], ["normal", "Normal"], ["hard", "Hard"], ["expert", "Expert"]])}
+      ${c.botLevel === "expert" ? `<div class="hint">Expert bots watch how you bid and learn your habits during the game.</div>` : ""}</div>` : ""}
+    <div class="field"><span>Ties</span>${seg("tieRule", [["split", "Split the gem"], ["cancel", "Cancel out"]])}</div>
+    <div class="field"><span>Match</span>${seg("gamesToWin", [[1, "Single game"], [2, "Best of 3"]])}</div>
+    <div>
+      <div class="opt-label">Extras</div>
+      <div class="extras">
+        ${toggle("powers", "Character powers")}${toggle("showNext", "Show next gem")}
+        ${toggle("mystery", "Mystery gem")}${toggle("jackpot", "Jackpot gem")}
+        ${toggle("cursed", "Cursed gems")}${toggle("double", "Double token")}
+      </div>
+    </div>`;
+}
+
+function renderSetup() {
+  const kind = app.setup, c = prefs.config;
+  if (kind === "online-menu" || kind === "online-lobby") return renderOnlineSheet();
+  const plan = seatPlan(kind);
+  const people = plan.filter(p => !p.bot).length;
+  const hasBots = plan.some(p => p.bot);
+  const seats = plan.map((p, i) => {
+    const suit = suitFor(i, c.seatCount);
+    const role = p.bot ? `Bot · ${c.botLevel}` : (kind === "bots" ? "You" : `Player ${i + 1}`);
+    const team = usesTeams(c) ? `<span class="team-dot" style="background:${TEAM_COLOR[sideOf(c, i)]}"></span>` : "";
+    return `<div class="seat-row">
+      <button class="avatar-btn" data-act="cycle-char" data-seat="${i}" ${p.bot ? "disabled" : ""} aria-label="Change character for seat ${i + 1}">${avatar(p.char)}</button>
+      <div><b>${esc(p.name)}</b><small>${team}${feltPip(suit)} ${SUIT_NAME[suit]} · ${role}</small></div>
+    </div>`;
+  }).join("");
+  return `<div class="overlay" data-act="close-bg">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setup-title">
+      <div class="sheet-head"><h2 id="setup-title">${kind === "bots" ? "Play vs bots" : "Pass and play"}</h2><button class="icon-btn" data-act="close" aria-label="Close">✕</button></div>
+      ${rulesFields(kind, hasBots)}
+      <div>
+        <div class="opt-label">At the table${people > 1 ? " · tap an avatar to change character" : ""}</div>
+        <div class="seats">${seats}</div>
+      </div>
+      <div class="sheet-foot">
+        ${hasBots ? `<button class="link" data-act="reroll">Seat different bots</button>` : "<span></span>"}
+        <button class="btn primary" data-act="start">Deal the cards</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ================= Starting games ================= */
+function beginGame(g) {
+  stopTimers();
+  G = g;
+  app.setup = null;
+  app.modal = null;
+  app.screen = "game";
+  window.scrollTo(0, 0);
+  Sound.unlock();
+}
+function startLocal(kind) {
+  const seats = seatPlan(kind);
+  const mySeats = range(seats.length).filter(i => !seats[i].bot);
+  beginGame(newG(kind, newMatch(prefs.config, seats), mySeats));
+  progress();
+}
+function dailyOpponent() {
+  const pool = CHAR_IDS.filter(id => id !== prefs.character);
+  return pool[seedFrom("opp-" + todayKey()) % pool.length];
+}
+function startDaily() {
+  const date = todayKey();
+  const seats = [
+    { char: prefs.character, name: myName(), bot: false },
+    { char: dailyOpponent(), name: CHAR[dailyOpponent()].name, bot: true, level: "hard" },
+  ];
+  beginGame(newG("daily", newMatch(DAILY_CONFIG, seats, { seed: seedFrom("diamondbid-" + date) }), [0], { dailyDate: date }));
+  progress();
+}
+function startTutorial() {
+  const seats = [
+    { char: prefs.character === "frog" ? "fox" : prefs.character, name: myName(), bot: false },
+    { char: "frog", name: "Lily", bot: true, level: "easy" },
+  ];
+  const cfg = Object.assign({}, DEFAULT_CONFIG, { seatCount: 2, showNext: true });
+  beginGame(newG("tutorial", newMatch(cfg, seats, { prizes: TUTORIAL_PRIZES }), [0]));
+  progress();
+}
+
+/* ================= Game flow ================= */
+const activeSeat = () => G.s.phase === "bidding" ? G.mySeats.find(i => !G.s.submitted[i] && !(G.myBid && G.myBid.key === roundKey(G.s) && G.myBid.seat === i)) : undefined;
+const needsHandoff = () => { const a = activeSeat(); return a !== undefined && G.mySeats.length > 1 && G.unlocked !== a; };
+const homeSeat = () => G.mySeats.length === 1 ? G.mySeats[0] : undefined;
+function handSeat() {
+  const a = activeSeat();
+  if (a !== undefined) return needsHandoff() ? undefined : a;
+  return homeSeat();
+}
+/** For an online guest, a bid sent but not yet confirmed by the host counts as placed. */
+function shownBid(seat) {
+  const s = G.s;
+  if (s.bids[seat]) return s.bids[seat];
+  if (G.myBid && G.myBid.seat === seat && G.myBid.key === roundKey(s) && s.phase === "bidding") return G.myBid.bid;
+  return null;
+}
+const shownSubmitted = seat => G.s.submitted[seat] || !!(G.myBid && G.myBid.seat === seat && G.myBid.key === roundKey(G.s) && G.s.phase === "bidding");
+
+/** Run the table: resolve rounds, advance, run bots. Only the authority (this device, or the online host) calls it. */
+function progress() {
+  const s = G.s;
+  if (s.phase === "bidding") s.seats.forEach((x, i) => { if (x.bot) botInstant(s, i); });
+  if (s.phase === "bidding" && s.submitted.every(Boolean)) {
+    resolve(s);
+    s.revealAt = Date.now();
+  } else if ((s.phase === "reveal" || s.phase === "gameOver") && s.ready.every(Boolean)) {
+    advance(s);
+    G.seen = [];
+  }
+  if (G.mySeats.length > 1 && s.phase !== "bidding") G.unlocked = null;
+  observe();
+  scheduleBots();
+  publish();
+  render();
+  scheduleReveal();
+  scheduleSpin();
+}
+
+/** React to what just changed: sounds, effects, achievements, stats. Runs on every device. */
+function observe() {
+  const s = G.s, p = G.prev || {};
+  const histLen = s.history.length;
+  if (s.phase === "reveal" && (p.phase !== "reveal" || p.hist !== histLen || p.gn !== s.gameNumber)) onReveal(s.history[histLen - 1]);
+  if (s.phase === "bidding" && (p.phase !== "bidding" || p.round !== s.round)) { G.banner = null; G.myBid = G.myBid && G.myBid.key === roundKey(s) ? G.myBid : null; }
+  const ended = ph => ph === "gameOver" || ph === "matchOver";
+  if (ended(s.phase) && !ended(p.phase)) onGameEnd();
+  if (s.phase === "matchOver" && p.phase !== "matchOver") onMatchEnd();
+  const spinKey = s.tie && s.tie.spin !== null ? `${s.tie.round}.${s.tie.spinTo}` : "";
+  if (spinKey && spinKey !== p.spinKey) { G.localSpinAt = Date.now(); Sound.wheel(SPIN_MS); }
+  if (s.phase === "gameOver" && p.phase === "gameOver" && p.gn !== s.gameNumber) G.newAch = [];
+  if (s.phase === "bidding" && p.gn != null && p.gn !== s.gameNumber) { G.newAch = []; G.recorded = false; G.streak = 0; }
+  G.prev = { phase: s.phase, hist: histLen, gn: s.gameNumber, round: s.round, spinKey };
+}
+
+function onReveal(r) {
+  const s = G.s, i = me();
+  G.revealAnim = true;
+  G.revealAt = Date.now();
+  // The banner for the big moments
+  const w = r.winners;
+  let banner = null;
+  if (r.prize === JACKPOT && w.length) banner = { text: "Jackpot!", kind: "" };
+  else if (r.powers.some(k => w.includes(k) && POWERS[s.seats[k].char].timing === "bid")) banner = { text: POWERS[s.seats[r.powers.find(k => w.includes(k))].char].name + "!", kind: "power" };
+  else if (w.length === 1 && r.margin === 1) banner = { text: "Steal!", kind: "" };
+  else if (r.prize < 0 && w.length) banner = { text: "Cursed!", kind: "curse" };
+  else if (w.length === 1 && r.prize >= 11) banner = { text: "Big win!", kind: "" };
+  else if (w.length > 1) banner = { text: "Split!", kind: "" };
+  G.banner = banner;
+  Sound.flip();
+  const mine = i >= 0 ? r.awards[i] : 0;
+  setTimeout(() => {
+    if (mine > 0) { (r.prize >= 11 ? Sound.big : Sound.win)(); buzz([20, 40, 30]); }
+    else if (mine < 0) { Sound.lose(); buzz(80); }
+    else if (i >= 0 && w.length && !w.includes(i)) Sound.lose();
+  }, 0);
+  if (!G.track || i < 0) return;
+  if (mine > 0) grant("first_gem");
+  if (w.length === 1 && w[0] === i) {
+    if ((r.prize === 13 || r.prize === JACKPOT) && r.bids[i].card <= 7) grant("giant_slayer");
+    if (r.margin === 1) grant("steal");
+    if (r.prize === JACKPOT) grant("jackpot");
+  }
+  if (mine >= 240) grant("double_trouble");
+  if (r.powers.includes(i) && w.includes(i) && mine > 0) grant("power_play");
+  G.streak = w.includes(i) && mine > 0 ? G.streak + 1 : 0;
+  if (G.streak >= 3) grant("hat_trick");
+}
+
+function onGameEnd() {
+  const s = G.s, i = me();
+  const mySide = i >= 0 ? sideOf(s.config, i) : -1;
+  const iWon = mySide >= 0 && s.lastGameWinners.includes(mySide);
+  if (iWon) { Sound.fanfare(); confetti(s.phase === "matchOver" ? 180 : 90); }
+  if (G.kind === "pass") { Sound.fanfare(); confetti(120); }
+  if (G.track && i >= 0) {
+    if (s.config.cursed && !s.history.some(h => h.awards[i] < 0) && s.history.some(h => h.prize < 0)) grant("curse_dodger");
+    if (s.tieWonBy && s.tieWonBy.includes(mySide)) grant("wheel");
+  }
+  if (G.kind === "daily") {
+    const score = s.scores[0], date = G.dailyDate;
+    const before = unlockedNow();
+    if (stats.dailyBest[date] == null || score > stats.dailyBest[date]) stats.dailyBest[date] = score;
+    if (!stats.dailyDays.includes(date)) stats.dailyDays.push(date);
+    saveStats();
+    grant("daily");
+    announceUnlocks(before);
+    postDaily(score, date);
+  }
+  if (G.kind === "tutorial") grant("learner");
+}
+
+function onMatchEnd() {
+  const s = G.s, i = me();
+  if (G.recorded || i < 0 || G.kind === "pass" || G.kind === "tutorial") return;
+  G.recorded = true;
+  const mySide = sideOf(s.config, i), won = matchWinners(s).includes(mySide);
+  const before = unlockedNow();
+  stats.played++;
+  if (won) stats.won++;
+  saveStats();
+  if (G.kind === "online") grant("online");
+  if (won) {
+    grant("first_win");
+    const levels = s.seats.filter((x, k) => x.bot && sideOf(s.config, k) !== mySide).map(x => x.level);
+    if (levels.includes("hard")) grant("hard_win");
+    if (levels.includes("expert")) grant("expert_win");
+    if (s.config.seatCount === 4 && !usesTeams(s.config)) grant("full_table");
+    if (usesTeams(s.config)) grant("teamwork");
+  }
+  announceUnlocks(before);
+}
+
+function scheduleBots() {
+  clearTimeout(botTimer);
+  if (!isAuthority()) return;
+  const s = G.s;
+  if (s.phase !== "bidding" || !s.seats.some((x, i) => x.bot && !s.submitted[i])) return;
+  botTimer = setTimeout(() => {
+    if (!G || G.s.phase !== "bidding") return;
+    G.s.seats.forEach((x, i) => { if (x.bot && !G.s.submitted[i]) submit(G.s, i, botChoose(G.s, i, x.level)); });
+    progress();
+  }, 650 + Math.random() * 650);
+}
+
+/** After a reveal the next gem is dealt automatically (not in the tutorial, where you read the tips first). */
+function scheduleReveal() {
+  clearTimeout(revealTimer);
+  clearInterval(tickTimer);
+  if (!G || G.s.phase !== "reveal") return;
+  const auto = G.kind !== "tutorial";
+  const left = () => REVEAL_MS - (Date.now() - G.revealAt);
+  if (auto && isAuthority()) revealTimer = setTimeout(() => { if (G && G.s.phase === "reveal") { G.s.ready = G.s.ready.map(() => true); progress(); } }, Math.max(0, left()));
+  if (!auto) return;
+  let lastSecs = null;
+  tickTimer = setInterval(() => {
+    if (!G || !G.revealAt) return;
+    const secs = String(Math.max(1, Math.ceil(left() / 1000)));
+    if (secs !== lastSecs && lastSecs !== null) Sound.tick();
+    lastSecs = secs;
+    ["countdown", "countdown-big"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.textContent !== secs) { el.textContent = secs; el.classList.remove("tick"); void el.offsetWidth; el.classList.add("tick"); }
+    });
+  }, 150);
+}
+
+function placeBid() {
+  const seat = activeSeat();
+  if (seat === undefined || G.selected == null) return;
+  const bid = { card: G.selected, double: G.useDouble, power: G.usePower };
+  if (G.kind === "online" && G.role === "guest") {
+    G.myBid = { seat, key: roundKey(G.s), bid };
+    Online.named && Online.named.presence({ b: { k: roundKey(G.s), c: bid.card, d: bid.double ? 1 : 0, p: bid.power ? 1 : 0 } }).catch(() => {});
+    afterBidPlaced();
+    render();
+    return;
+  }
+  if (submit(G.s, seat, bid)) { afterBidPlaced(); progress(); }
+}
+function afterBidPlaced() {
+  G.selected = null; G.useDouble = false; G.usePower = false;
+  Sound.snap(); buzz(12);
+}
+function useInstantPower() {
+  const seat = activeSeat();
+  if (seat === undefined) return;
+  if (G.kind === "online" && G.role === "guest") {
+    Online.named && Online.named.presence({ f: roundKey(G.s) }).catch(() => {});
+    G.s.powerAvail[seat] = false; G.s.foresight[seat] = true;
+  } else if (!usePowerNow(G.s, seat)) return;
+  Sound.chime();
+  if (isAuthority()) progress(); else render();
+}
+function nextStep() {
+  if (!isAuthority()) return;
+  G.mySeats.forEach(i => { G.s.ready[i] = true; });
+  if (G.kind === "online") G.s.ready = G.s.ready.map(() => true); // the host moves the table on
+  progress();
+}
+function spinWheel() {
+  if (!isAuthority() || G.s.phase !== "tiebreak" || G.s.tie.spin !== null) return;
+  spinTie(G.s);
+  progress();
+}
+function scheduleSpin() {
+  clearTimeout(spinTimer);
+  const t = G && G.s.tie;
+  if (!t || t.spin === null || t.result || !isAuthority()) return;
+  spinTimer = setTimeout(() => {
+    if (!G || !G.s.tie || G.s.tie.result) return;
+    applyTiebreak(G.s);
+    progress();
+  }, Math.max(0, SPIN_MS - (Date.now() - G.localSpinAt)));
+}
+function tieContinue() {
+  if (!isAuthority() || !G.s.tie || !G.s.tie.result) return;
+  finishTiebreak(G.s);
+  progress();
+}
+function doRematch() {
+  if (!isAuthority()) return;
+  rematch(G.s);
+  G.seen = []; G.recorded = false; G.newAch = []; G.streak = 0;
+  progress();
+}
+function stopTimers() {
+  clearTimeout(botTimer); clearTimeout(revealTimer); clearInterval(tickTimer); clearTimeout(spinTimer);
+}
+function leaveGame() {
+  stopTimers();
+  if (G && G.kind === "online") leaveOnline();
+  G = null;
+  app.screen = "home";
+  app.modal = null;
+  render();
+}
+
+/* ================= Table ================= */
+function coachTip() {
+  const s = G.s, last = s.history[s.history.length - 1];
+  if (s.phase === "bidding") {
+    return [
+      "Welcome! The 5 gem is up for grabs. Tap any card in your hand, then press Place bid. Lily bids at the same time, face down.",
+      "This is the 13, the biggest gem. A King is worth spending here.",
+      "Only a 2. Save your big cards and throw away a low one.",
+      "Look under the gem: Next shows what's coming. Plan which cards you'll need.",
+      "A 1 gem. A good moment to get rid of your weakest card.",
+      "11 is big. Tap ▤ at the top to see which cards Lily has left before you bid.",
+    ][s.round] || "You've got it. Win the most points by the end of the 13 gems.";
+  }
+  if (s.phase === "reveal" && last) {
+    if (last.winners.length === 1 && last.winners[0] === 0) return "You won that one! The gem's points go to your score. Press Next gem when you're ready.";
+    if (last.winners.length > 1) return "A tie: you split the gem, so each of you gets half.";
+    return "Lily won this one. Cards you play are gone for good, so think about which ones you still need.";
+  }
+  return "";
+}
+
+function renderGame() {
+  const s = G.s, c = s.config, n = s.seats.length;
+  const home = homeSeat();
+  const tileSeats = range(n).filter(i => i !== home);
+  const cols = tileSeats.length === 4 ? 2 : Math.max(tileSeats.length, 1);
+  const result = s.phase === "reveal" ? s.history[s.history.length - 1] : null;
+  const anim = G.revealAnim;
+  G.revealAnim = false;
+  const prize = prizeNow(s);
+  const hidden = s.phase === "bidding" && isMystery(s);
+  const roundId = `${s.gameNumber}-${s.round}`;
+  const prizeAnim = G.prizeKey !== roundId ? " drop" : "";
+  G.prizeKey = roundId;
+  const guest = G.kind === "online" && G.role === "guest";
+
+  const dropClass = i => {
+    if (s.phase === "bidding" && shownSubmitted(i) && !G.seen[i]) { G.seen[i] = true; return " drop"; }
+    return "";
+  };
+  const drops = range(n).map(dropClass);
+  const awardSpan = (i, suffix = "") => result && result.awards[i] ? `<span class="award ${result.awards[i] < 0 ? "neg" : ""}">${awardText(result.awards[i])}${suffix}</span>` : "";
+  const bidCard = (i, size) => {
+    const suit = suitFor(i, n);
+    if (result) {
+      const cx = result.cancelled.includes(i), burned = result.burned === i;
+      let html = cardFace(suit, result.bids[i].card, size + (anim ? " flip" : "") + (cx || burned ? " cancelled" : "")) + (cx || burned ? `<span class="cancel-x">${burned ? "0" : "✕"}</span>` : "");
+      if (result.bids[i].double) html += `<span class="x2">×2</span>`;
+      if (result.powers.includes(i)) html += `<span class="x2" style="top:auto;bottom:-7px;background:#8fe3ff;color:#062430">★</span>`;
+      return html;
+    }
+    if (s.phase === "bidding" && shownSubmitted(i)) return cardBack(size + drops[i]);
+    return `<div class="slot ${size}">${s.phase === "bidding" ? thinking : ""}</div>`;
+  };
+  const tokensFor = i => {
+    let t = "";
+    if (c.double) t += `<span class="tok ${s.doubleAvail[i] ? "" : "used"}" title="Double token ${s.doubleAvail[i] ? "ready" : "used"}"><i>×2</i></span>`;
+    if (c.powers && POWERS[s.seats[i].char]) t += `<span class="tok pw ${s.powerAvail[i] ? "" : "used"}" title="${esc(POWERS[s.seats[i].char].name)} ${s.powerAvail[i] ? "ready" : "used"}"><i>★</i>${esc(POWERS[s.seats[i].char].name)}</span>`;
+    return t;
+  };
+
+  // Pass and play tiles
+  const tile = i => {
+    const p = s.seats[i], suit = suitFor(i, n);
+    const win = result && result.winners.includes(i);
+    const stripe = usesTeams(c) ? `<span class="stripe" style="background:${TEAM_COLOR[sideOf(c, i)]}"></span>` : "";
+    return `<div class="tile ${win ? "win" : ""}">${stripe}
+      <div class="who">${avatar(p.char)}<div><b>${esc(p.name)}</b><small>${feltPip(suit)} ${p.bot ? "Bot" : SUIT_NAME[suit]}</small></div></div>
+      <div class="row"><div class="bidwrap">${bidCard(i, "sm")}</div><div><div class="score">${fmt(s.scores[i])}</div>${awardSpan(i)}</div></div>
+      ${gemPile(s, i)}
+      <div class="tokens"><span>${s.hands[i].length} cards</span>${tokensFor(i)}</div>
+    </div>`;
+  };
+
+  // Score bars (single-human games)
+  const playerBar = (i, you) => {
+    const p = s.seats[i], suit = suitFor(i, n);
+    const sorted = range(n).map(k => s.scores[k]).sort((a, b) => b - a);
+    const place = sorted.indexOf(s.scores[i]) + 1;
+    const tied = sorted.filter(v => v === s.scores[i]).length > 1;
+    const standing = s.scores.every(v => v === 0) ? "" : `${tied ? "Tied " : ""}${["", "1st", "2nd", "3rd", "4th"][place]} of ${n}`;
+    const team = usesTeams(c) ? `<span class="team-dot" style="background:${TEAM_COLOR[sideOf(c, i)]}"></span>` : "";
+    const win = result && result.winners.includes(i);
+    const tag = you ? "(you)" : p.bot ? (p.left ? "(left, bot playing)" : "(bot)") : "";
+    return `<div class="mebar ${you ? "you" : ""} ${win ? "win" : ""}">
+      ${avatar(p.char)}
+      <div class="me-who"><b>${esc(p.name)} <small>${tag}</small></b><small>${team}${feltPip(suit)} ${SUIT_NAME[suit]} · ${s.hands[i].length} cards${standing ? " · " + standing : ""}</small>${gemPile(s, i)}</div>
+      <div class="me-score"><span class="lbl">${you ? "Your score" : "Score"}</span><b>${fmt(s.scores[i])}</b>${awardSpan(i, " this round")}</div>
+      ${tokensFor(i) ? `<div class="tokens">${tokensFor(i)}</div>` : ""}
+    </div>`;
+  };
+
+  // Middle of the table
+  let theirs = "", mine = "";
+  if (home !== undefined) {
+    const size = tileSeats.length === 1 ? "lg" : "md";
+    const label = tileSeats.length === 1 ? `${esc(s.seats[tileSeats[0]].name)}'s bid` : "Their bids";
+    theirs = `<div class="spot"><span class="lbl">${label}</span><div class="opps">${tileSeats.map(i => `<div class="opp ${result && result.winners.includes(i) ? "win" : ""}">
+        ${tileSeats.length > 1 ? avatar(s.seats[i].char, "sm") : ""}
+        <div class="bidwrap" style="position:relative">${bidCard(i, size)}</div>
+        <span class="sub">${awardSpan(i)}</span></div>`).join("")}</div></div>`;
+    const myAward = result ? result.awards[home] : 0;
+    mine = `<div class="spot ${result && result.winners.includes(home) ? "win" : ""}">
+      <span class="lbl">Your bid</span>
+      <div class="bidwrap" style="position:relative">${result || shownSubmitted(home) ? bidCard(home, "lg") : `<div class="slot lg">${G.selected != null ? "" : "Pick a card"}</div>`}
+        ${anim && myAward ? `<span class="floatpts ${myAward < 0 ? "neg" : ""}">${awardText(myAward)}</span>` : ""}</div>
+      <span class="sub">${awardSpan(home)}</span>
+    </div>`;
+  }
+  const next = prizeNext(s);
+  const seesFuture = G.mySeats.some(i => s.foresight[i]);
+  let below = "";
+  if (s.phase === "reveal" && G.kind !== "tutorial") {
+    const gone = G.revealAt ? Math.min(REVEAL_MS, Date.now() - G.revealAt) : 0;
+    below = `<div class="bigcount" role="timer" aria-label="Next gem soon"><svg viewBox="0 0 36 36" aria-hidden="true"><circle class="track" cx="18" cy="18" r="15.915"/><circle class="ring" cx="18" cy="18" r="15.915" style="animation-delay:-${gone}ms"/></svg><b id="countdown-big">${Math.max(1, Math.ceil((REVEAL_MS - gone) / 1000))}</b></div>`;
+  } else {
+    const rule = hidden ? "Value revealed with the bids" : prize < 0 ? "Lowest bid takes it" : "Highest bid wins";
+    below = `<span class="sub">${rule}</span>`;
+  }
+  let preview = "";
+  if (seesFuture) {
+    const upcoming = s.prizes.slice(s.round + 1, s.round + 4);
+    preview = upcoming.length ? `<div class="foresight">★ Coming up: ${upcoming.map(v => prizeCard(v, "xs")).join("")}</div>` : "";
+  } else if (c.showNext && next != null && s.phase !== "gameOver") {
+    preview = `<div class="nextgem">Next: ${prizeCard(next, "xs", isMystery(s, s.round + 1))}</div>`;
+  }
+  const lbl = hidden ? "Mystery gem" : prize === JACKPOT ? "Jackpot" : prize < 0 ? "Cursed" : "Up for grabs";
+  const center = `<div class="center ${anim && result && result.prize < 0 && result.winners.includes(home) ? "shake" : ""}">
+      ${theirs}
+      <div class="spot">
+        <span class="lbl ${prize < 0 && !hidden ? "cursed" : "gold"}">${lbl}</span>
+        ${prizeCard(prize, "lg" + prizeAnim + (result && result.mystery && anim ? " flip" : ""), hidden)}
+        ${below}
+        ${preview}
+      </div>
+      ${mine}
+      ${anim && G.banner ? `<div class="banner ${G.banner.kind}">${esc(G.banner.text)}</div>` : ""}
+    </div>`;
+
+  // Status line
+  let status = "", acts = "";
+  if (s.phase === "bidding") {
+    const a = activeSeat();
+    if (a !== undefined && !needsHandoff()) {
+      const pname = hidden ? "mystery gem" : prizeName(prize);
+      status = G.selected != null ? `Bid <b>${RANK(G.selected)}</b> on the ${pname}?`
+        : prize < 0 && !hidden ? `Pick a card. Don't be the lowest, or you take the ${pname}.` : `Pick a card to bid on the ${pname}.`;
+    } else {
+      const waiting = range(n).filter(i => !shownSubmitted(i)).map(i => esc(s.seats[i].name));
+      status = waiting.length ? `Waiting for ${waiting.join(", ")}…` : "Revealing…";
+    }
+  } else if (s.phase === "reveal") {
+    status = summary(s, result, esc);
+    if (G.kind === "tutorial") acts = `<button class="btn primary" data-act="next">${isLast(s) ? "See results" : "Next gem"}</button>`;
+    else {
+      const gone = Math.min(REVEAL_MS, Date.now() - (G.revealAt || Date.now()));
+      acts = `<span class="countdown">${isLast(s) ? "Results" : "Next gem"} in <b id="countdown">${Math.max(1, Math.ceil((REVEAL_MS - gone) / 1000))}</b></span>${guest ? "" : `<button class="btn ghost" data-act="next">Skip</button>`}`;
+      status += `<span class="timebar" aria-hidden="true"><span style="animation-delay:-${gone}ms"></span></span>`;
+    }
+  }
+
+  // Hand
+  let handHTML = "";
+  const hs = handSeat();
+  if (hs !== undefined) {
+    const suit = suitFor(hs, n);
+    const canBid = activeSeat() === hs && !needsHandoff();
+    const pb = shownBid(hs);
+    const pendingCard = s.phase === "bidding" && pb ? pb.card : null;
+    handHTML = `<div class="hand" role="group" aria-label="Your cards">${s.hands[hs].map(v =>
+      cardFace(suit, v, `md ${G.selected === v ? "sel" : ""} ${pendingCard === v ? "pending" : ""}`, "button",
+        `data-act="select" data-v="${v}" ${canBid ? "" : "disabled"} aria-pressed="${G.selected === v}"`)).join("")}</div>`;
+    if (canBid) {
+      const pw = c.powers && s.powerAvail[hs] && POWERS[s.seats[hs].char];
+      let pwBtn = "";
+      if (pw && pw.timing === "now") pwBtn = `<button class="pwr" data-act="power-now" title="${esc(pw.text)}">★ Use ${esc(pw.name)}</button>`;
+      else if (pw) {
+        const blocked = s.seats[hs].char === "cat" && isLast(s);
+        pwBtn = `<button class="pwr" data-act="power" aria-pressed="${G.usePower}" ${blocked ? "disabled" : ""} title="${esc(pw.text)}">★ ${esc(pw.name)}${G.usePower ? " on" : ""}</button>`;
+      }
+      handHTML += `<div class="bidbar">
+        ${c.double && s.doubleAvail[hs] ? `<button class="dbl" data-act="double" aria-pressed="${G.useDouble}">×2 Double${G.useDouble ? " on" : ""}</button>` : ""}
+        ${pwBtn}
+        <button class="btn primary" data-act="bid" ${G.selected == null ? "disabled" : ""}>Place bid face down</button>
+      </div>
+      ${pw && G.usePower ? `<p class="muted" style="margin:0;text-align:center;font-size:13px">${esc(pw.name)}: ${esc(pw.text)}</p>` : ""}`;
+    }
+  } else if (G.kind === "online" && !G.mySeats.length) {
+    handHTML = `<p class="muted" style="text-align:center">The table is full, so you're watching this game.</p>`;
+  }
+
+  const teamBar = usesTeams(c) ? `<div class="teambar">
+      ${[0, 1].map(side => `<span class="t"><span class="team-dot" style="background:${TEAM_COLOR[side]}"></span>${TEAM_NAME[side]} <b>${fmt(sideScore(s, side))}</b>${c.gamesToWin > 1 ? `<small style="color:var(--muted)">· ${s.gameWins[side]} won</small>` : ""}</span>`).join(`<span style="color:var(--muted)">vs</span>`)}
+    </div>` : "";
+
+  let overlay = "";
+  if (needsHandoff()) {
+    const a = activeSeat(), p = s.seats[a];
+    overlay = `<div class="cover"><div class="box">${avatar(p.char, "xl")}<h2>${esc(p.name)}, your bid</h2>
+      <p>Pass the device to ${esc(p.name)}. Everyone else, look away.<br>The ${hidden ? "mystery gem" : prizeName(prize)} is on the table.</p>
+      <button class="btn primary" data-act="unlock">Show my hand</button></div></div>`;
+  } else if (s.phase === "tiebreak") overlay = renderTiebreak();
+  else if (s.phase === "gameOver" || s.phase === "matchOver") overlay = renderResults();
+
+  const sub = G.kind === "online" ? `<span class="online-dot"></span>Online · table ${esc(Online.code.toUpperCase())}`
+    : G.kind === "daily" ? "Daily challenge" : G.kind === "tutorial" ? "Tutorial"
+    : c.gamesToWin > 1 ? `Game ${s.gameNumber} · first to 2 wins` : (usesTeams(c) ? "2 vs 2" : `${n} players`);
+  const coach = G.kind === "tutorial" && coachTip() ? `<div class="coach">${avatar("owl", "sm")}<p><small>Prof. Hoot</small>${esc(coachTip())}</p></div>` : "";
+
+  return `<div class="wrap"><div class="table">
+    <div class="tbar">
+      <button class="icon-btn" data-act="exit" aria-label="Leave game">✕</button>
+      <div class="mid"><b>Gem ${Math.min(s.round + 1, s.prizes.length)} of ${s.prizes.length}</b><small>${sub}</small></div>
+      <div class="right">
+        <button class="icon-btn" data-act="sound" aria-label="${prefs.sound ? "Turn sound off" : "Turn sound on"}">${SPEAKER_SVG(prefs.sound)}</button>
+        <button class="icon-btn" data-act="modal" data-m="cards" aria-label="Cards left and history" title="Cards left">▤</button>
+        <button class="icon-btn" data-act="modal" data-m="rules" aria-label="Rules" title="Rules">?</button>
+      </div>
+    </div>
+    ${teamBar}
+    ${home !== undefined
+      ? `<div class="bars ${tileSeats.length > 1 ? "compact" : ""}">${tileSeats.map(i => playerBar(i, false)).join("")}</div>`
+      : `<div class="tiles" style="grid-template-columns:repeat(${cols}, minmax(0, 1fr))">${tileSeats.map(tile).join("")}</div>`}
+    ${center}
+    ${coach}
+    ${status ? `<div class="status" aria-live="polite"><p>${status}</p><div class="acts">${acts}</div></div>` : ""}
+    ${home !== undefined ? playerBar(home, true) : ""}
+    ${handHTML}
+  </div></div>${overlay}`;
+}
+
+/* ================= End of game ================= */
+function recapFor(s, seat) {
+  const items = [];
+  const rounds = s.history.map((h, k) => Object.assign({ k }, h));
+  const best = rounds.filter(h => h.awards[seat] > 0).sort((a, b) => b.awards[seat] - a.awards[seat])[0];
+  if (best) items.push(["Best round", `Took the ${prizeName(best.prize)} with ${RANK(best.bids[seat].card)}`]);
+  const wasted = rounds.filter(h => h.awards[seat] <= 0 && h.prize > 0 && !(h.leapt === seat)).sort((a, b) => b.bids[seat].card - a.bids[seat].card)[0];
+  if (wasted && wasted.bids[seat].card >= 9) items.push(["Wasted card", `${RANK(wasted.bids[seat].card)} won nothing (gem ${wasted.k + 1})`]);
+  const close = rounds.find(h => h.winners.length === 1 && h.margin === 1 && (h.winners[0] === seat || h.eff[seat] === h.eff[h.winners[0]] - 1));
+  if (close) items.push(["Closest call", close.winners[0] === seat ? `Won the ${prizeName(close.prize)} by one` : `Lost the ${prizeName(close.prize)} by one`]);
+  const gems = rounds.filter(h => h.awards[seat] > 0).length;
+  items.push(["Gems taken", `${gems} of ${s.history.length}`]);
+  return items.slice(0, 4);
+}
+
+function renderResults() {
+  const s = G.s, c = s.config;
+  const winners = s.lastGameWinners;
+  const sides = range(sideCount(c)).sort((a, b) => (winners.includes(b) - winners.includes(a)) || (sideScore(s, b) - sideScore(s, a)));
+  const mws = matchWinners(s), mySide = me() >= 0 ? sideOf(c, me()) : -1;
+  const names = list => list.map(x => esc(sideName(s, x))).join(" and ");
+  const solo = G.kind !== "pass";
+  let head;
+  if (G.kind === "tutorial") head = winners.includes(mySide) ? "You won your first game!" : "Tutorial complete!";
+  else if (G.kind === "daily") head = `You scored ${fmt(s.scores[0])}`;
+  else if (mws.length) {
+    if (solo && mws.includes(mySide)) head = mws.length > 1 ? "You share the match!" : "You win the match!";
+    else head = `${names(mws)} ${mws.length > 1 ? "share" : "wins"} the match!`;
+  } else if (winners.length > 1) head = `${names(winners)} share ${c.gamesToWin > 1 ? `game ${s.gameNumber}` : "the win"}!`;
+  else head = `${names(winners)} ${c.gamesToWin > 1 ? `takes game ${s.gameNumber}` : "wins!"}`;
+  let sub = s.tieNote ? esc(s.tieNote) : "";
+  if (G.kind === "daily") {
+    const best = stats.dailyBest[G.dailyDate];
+    sub = `${winners.includes(0) ? "You beat" : "You lost to"} ${esc(s.seats[1].name)}. Your best today: ${fmt(best)}. ${esc(Daily.status)}`;
+  }
+  const faces = side => `<span class="avs">${seatsOnSide(c, side).map(i => avatar(s.seats[i].char, "sm")).join("")}</span>`;
+  const heroSides = mws.length ? mws : winners;
+  const rows = sides.map((side, place) => `<div class="res ${winners.includes(side) ? "first" : ""}">
+      <span class="place">${place + 1}</span>${faces(side)}
+      <span class="nm">${esc(sideName(s, side))}</span>
+      <span class="pts">${fmt(sideScore(s, side))}</span>
+      ${c.gamesToWin > 1 ? `<span class="gw">${s.gameWins[side]} won</span>` : ""}
+    </div>`).join("");
+  const recapSeat = G.kind === "pass" ? -1 : me();
+  const recap = recapSeat >= 0 ? `<div><div class="opt-label">Your game</div><div class="recap">${recapFor(s, recapSeat).map(([k, v]) => `<div><small>${k}</small><b>${esc(v)}</b></div>`).join("")}</div></div>` : "";
+  const newAch = G.newAch.length ? `<div class="newach">${G.newAch.map(a => `<span>★ ${esc(a)}</span>`).join("")}</div>` : "";
+  const guest = G.kind === "online" && G.role === "guest";
+  let buttons;
+  if (G.kind === "tutorial") buttons = `<button class="btn ghost" data-act="home">Home</button><button class="btn primary" data-act="tutorial-done">Play vs bots</button>`;
+  else if (G.kind === "daily") buttons = `<button class="btn ghost" data-act="home">Home</button><button class="btn primary" data-act="daily">Try again</button>`;
+  else if (guest) buttons = `<button class="btn ghost" data-act="home">Leave table</button><span class="muted">Waiting for the host…</span>`;
+  else if (s.phase === "matchOver") buttons = `<button class="btn ghost" data-act="home">Home</button><button class="btn primary" data-act="rematch">Rematch</button>`;
+  else buttons = `<button class="btn ghost" data-act="home">Home</button><button class="btn primary" data-act="next">Next game</button>`;
+  return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="res-title">
+    <div class="headline">
+      <span class="avs">${heroSides.flatMap(side => seatsOnSide(c, side)).map(i => avatar(s.seats[i].char, "lg")).join("")}</span>
+      <h2 id="res-title">${head}</h2>
+      ${sub ? `<p style="margin:0;color:var(--muted)">${sub}</p>` : ""}
+    </div>
+    ${newAch}
+    <div class="results">${rows}</div>
+    ${recap}
+    <div class="sheet-foot" style="justify-content:center">${buttons}</div>
+  </div></div>`;
+}
+
+function renderTiebreak() {
+  const s = G.s, c = s.config, t = s.tie, n = s.seats.length;
+  const seg = 360 / TIEBREAKS.length;
+  const pt = (deg, r) => { const a = (deg - 90) * Math.PI / 180; return `${(50 + r * Math.cos(a)).toFixed(2)} ${(50 + r * Math.sin(a)).toFixed(2)}`; };
+  const wedges = TIEBREAKS.map((o, k) => `<path d="M50 50 L${pt(k * seg, 48)} A48 48 0 0 1 ${pt((k + 1) * seg, 48)}Z" fill="${o.color}" stroke="#0d1714" stroke-width=".8"/>
+    <text transform="rotate(${(k + .5) * seg} 50 50)" x="50" y="19" text-anchor="middle" font-family="Figtree, sans-serif" font-size="5.4" font-weight="700" fill="#fffaf0">${o.name}</text>`).join("");
+  const spinning = t.spin !== null && !t.result;
+  const gone = spinning ? Math.min(SPIN_MS, Date.now() - G.localSpinAt) : 0;
+  const style = t.spin === null ? "" : `--to:${t.spinTo}deg;${spinning ? `animation-delay:-${gone}ms` : ""}`;
+  const wheel = `<div class="wheel"><svg viewBox="-2 -8 104 110" role="img" aria-label="Tie-breaker wheel">
+      <g class="wheel-g ${t.spin === null ? "idle" : spinning ? "spinning" : "stopped"}" style="${style}"><circle cx="50" cy="50" r="49.5" fill="#0d1714"/>${wedges}</g>
+      <circle cx="50" cy="50" r="9" fill="#0d1714" stroke="#d9ab4f" stroke-width="1.5"/><path d="M50 44 L56 50 L50 56 L44 50Z" fill="#d9ab4f"/>
+      <path d="M44 -7 L56 -7 L50 5Z" fill="#d9ab4f" stroke="#0d1714" stroke-width="1"/></svg></div>`;
+  const tiedNames = t.sides.map(x => `<b>${esc(sideName(s, x))}</b>`).join(" and ");
+  const faces = side => `<span class="avs">${seatsOnSide(c, side).map(i => avatar(s.seats[i].char)).join("")}</span>`;
+  const host = isAuthority();
+  let body;
+  if (!t.result) {
+    body = `<p class="tie-lede">${tiedNames} are tied on <b>${fmt(sideScore(s, t.sides[0]))}</b> points. ${t.round > 1 ? "Still tied, so spin again." : "Spin the wheel to pick the tie-breaker."}</p>
+      <div class="tie-legend">${TIEBREAKS.map(o => `<span><i style="background:${o.color}"></i>${o.name}</span>`).join("")}</div>
+      <div class="sheet-foot" style="justify-content:center">${host
+        ? `<button class="btn primary" data-act="spin" ${spinning ? "disabled" : ""}>${spinning ? "Spinning…" : t.round > 1 ? "Spin again" : "Spin the wheel"}</button>`
+        : `<span class="muted">${spinning ? "Spinning…" : "Waiting for the host to spin…"}</span>`}</div>`;
+  } else {
+    const opt = TIEBREAKS[t.spin], r = t.result;
+    const valueText = side => {
+      const v = r.values[side];
+      if (r.id === "gems") return `${v} gem${v === 1 ? "" : "s"}`;
+      if (r.id === "biggest") return v ? `${v} gem` : "no gems";
+      if (r.id === "recent") return v ? `gem ${v}` : "no gems";
+      if (r.id === "draw") return cardFace(suitFor(seatsOnSide(c, side)[0], n), v, "sm flip");
+      return "Wins";
+    };
+    const rows = t.sides.map(side => `<div class="res ${r.winners.includes(side) ? "first" : ""}">${faces(side)}<span class="nm">${esc(sideName(s, side))}</span><span class="tie-val">${valueText(side)}</span></div>`).join("");
+    const still = r.winners.length > 1 && r.id !== "shared";
+    const verdict = r.id === "shared" ? `${tiedNames} share the win!` : still ? "Still tied! Spin again to settle it." : `<b>${esc(sideName(s, r.winners[0]))}</b> wins the tie-breaker!`;
+    body = `<div class="tie-pick"><span class="chip" style="background:${opt.color}">${opt.name}</span><span>${opt.desc}</span></div>
+      <div class="results">${rows}</div><p class="tie-lede" style="margin:0">${verdict}</p>
+      <div class="sheet-foot" style="justify-content:center">${host ? `<button class="btn primary" data-act="tie-continue">${still ? "Spin again" : "See results"}</button>` : `<span class="muted">Waiting for the host…</span>`}</div>`;
+  }
+  return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="tie-title">
+    <div class="headline"><span class="avs">${t.sides.flatMap(side => seatsOnSide(c, side)).map(i => avatar(s.seats[i].char, "lg")).join("")}</span><h2 id="tie-title">It's a tie!</h2></div>
+    ${wheel}${body}</div></div>`;
+}
+
+function renderModal() {
+  if (!app.modal) return "";
+  let title, body;
+  if (app.modal === "rules") {
+    title = "How to play";
+    const pw = G && G.s.config.powers ? `<p style="margin:0"><b style="color:var(--ink)">Powers at this table:</b> ${G.s.seats.map(p => `${esc(p.name)}: ${esc(POWERS[p.char].name)} (${esc(POWERS[p.char].text)})`).join(" · ")}</p>` : "";
+    body = `<div style="display:flex;flex-direction:column;gap:10px;color:var(--muted)">
+      <p style="margin:0">Every player holds one suit, A to K. A is 1, J is 11, Q is 12 and K is 13.</p>
+      <p style="margin:0">Each round one gem is turned up. Everyone bids one card face down. All bids flip together and the highest card takes the gem, worth its number in points. Used cards are gone.</p>
+      <p style="margin:0"><b style="color:var(--ink)">Ties:</b> split shares the gem between everyone tied for the best bid. Cancel out knocks matching cards out, and the best card left wins.</p>
+      <p style="margin:0"><b style="color:var(--ink)">Extras:</b> Show next gem shows what's coming. A mystery gem stays hidden until the reveal. The jackpot is a 20-point gem in the last four rounds. Curses (−1 to −3) go to the lowest bid. The Double token doubles one round.</p>
+      ${pw}
+      <p style="margin:0"><b style="color:var(--ink)">Tied for first at the end?</b> Spin the wheel: most gems, biggest gem, last gem, a high-card draw, or a shared win.</p>
+      ${G && G.kind === "online" ? `<p style="margin:0"><b style="color:var(--ink)">Online:</b> the host's device runs the table. Bids are hidden on screen until the reveal.</p>` : ""}
+    </div>`;
+  } else {
+    const s = G.s, n = s.seats.length;
+    const upcoming = s.prizes.slice(s.round + 1).map((v, k) => isMystery(s, s.round + 1 + k) ? null : v).sort((a, b) => (b ?? -99) - (a ?? -99));
+    title = "Cards left";
+    body = `<div><div class="opt-label">Gems still to come</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">${upcoming.length ? upcoming.map(v => prizeCard(v, "xs", v === null)).join("") : `<span class="muted">None. This is the last one.</span>`}</div></div>
+      <div class="hand-list"><div class="opt-label" style="margin:0">Cards in each hand</div>
+        ${range(n).map(i => `<div class="hrow">${avatar(s.seats[i].char, "sm")}<div class="cards">${s.hands[i].map(v => cardFace(suitFor(i, n), v, "xs")).join("")}</div></div>`).join("")}</div>
+      ${s.history.length ? `<div><div class="opt-label">History</div>
+        <div class="ledger-wrap"><table class="ledger"><thead><tr><th>Gem</th>${range(n).map(i => `<th>${esc(s.seats[i].name)}</th>`).join("")}</tr></thead>
+        <tbody>${s.history.map(h => `<tr><td>${prizeLabel(h.prize)}</td>${range(n).map(i => `<td class="${h.winners.includes(i) ? "w" : ""}">${RANK(h.bids[i].card)}${h.bids[i].double ? "×2" : ""}${h.bids[i].power ? "★" : ""}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>` : ""}`;
+  }
+  return `<div class="overlay" data-act="close-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="${title}">
+    <div class="sheet-head"><h2>${title}</h2><button class="icon-btn" data-act="close" aria-label="Close">✕</button></div>${body}</div></div>`;
+}
+
+function renderConfirmExit() {
+  const online = G && G.kind === "online";
+  return `<div class="overlay" data-act="close-bg"><div class="sheet" role="dialog" aria-modal="true" style="max-width:420px">
+    <div class="sheet-head"><h2>Leave this game?</h2></div>
+    <p style="margin:0;color:var(--muted)">${online ? (G.role === "host" ? "You're the host, so the game ends for everyone." : "A bot will take your seat.") : "The current game will end and scores won't be kept."}</p>
+    <div class="sheet-foot"><button class="btn ghost" data-act="close">Keep playing</button><button class="btn primary" data-act="home">Leave game</button></div>
+  </div></div>`;
+}
+
+/* ================= Daily leaderboard (shared through the db capability) ================= */
+const Daily = { db: null, user: null, myId: null, rows: [], names: {}, status: "", checked: false };
+function renderLeaderboard() {
+  const date = todayKey();
+  if (!Daily.checked) return `<p class="muted">Loading…</p>`;
+  if (!Daily.db) return `<p class="muted">The shared leaderboard isn't available in this view. Your own best score is still saved.</p>`;
+  const rows = Daily.rows.filter(r => r.date === date && typeof r.score === "number").sort((a, b) => b.score - a.score).slice(0, 10);
+  if (!rows.length) return `<p class="muted">No scores yet today. Play the challenge to set the first one.</p>`;
+  return `<div class="lb">${rows.map((r, k) => `<div class="row ${r.id === Daily.myId ? "me" : ""}">
+      <span class="pl">${k + 1}</span>${avatar(CHAR[r.char] ? r.char : "fox", "sm")}
+      <span class="nm">${esc(Daily.names[r.id] || "Someone")}${r.id === Daily.myId ? " (you)" : ""}</span><span class="sc">${fmt(r.score)}</span></div>`).join("")}</div>`;
+}
+function patchLeaderboard() {
+  const el = document.getElementById("daily-lb");
+  if (el) el.innerHTML = renderLeaderboard();
+}
+async function resolveNames() {
+  if (!Daily.user) return;
+  const ids = Daily.rows.filter(r => r.date === todayKey()).map(r => r.id).filter(id => !Daily.names[id]);
+  if (!ids.length) return;
+  try {
+    const ps = await Daily.user.profiles(ids);
+    ids.forEach(id => { Daily.names[id] = (ps[id] && ps[id].name) || "Someone"; });
+  } catch (e) {}
+  patchLeaderboard();
+}
+async function initDaily() {
+  try { Daily.db = window.claude && window.claude.use ? await window.claude.use("db") : null; } catch (e) { Daily.db = null; }
+  try { Daily.user = window.claude && window.claude.use ? await window.claude.use("user") : null; } catch (e) { Daily.user = null; }
+  if (Daily.user) { try { Daily.myId = await Daily.user.id(); } catch (e) {} }
+  Daily.checked = true;
+  if (Daily.db) {
+    Daily.db.collection("dailyscores").onSnapshot(snap => {
+      Daily.rows = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+      patchLeaderboard();
+      resolveNames();
+    }, () => { Daily.db = null; patchLeaderboard(); });
+  }
+  patchLeaderboard();
+}
+async function postDaily(score, date) {
+  Daily.status = "";
+  if (!Daily.db || !Daily.myId) { Daily.status = "Sign in to post your score to the shared leaderboard."; return; }
+  const mine = Daily.rows.find(r => r.id === Daily.myId);
+  if (mine && mine.date === date && mine.score >= score) return;
+  try {
+    await Daily.db.collection("dailyscores").doc(Daily.myId).set({ date, score, char: prefs.character, at: Date.now() });
+    Daily.status = "Posted to today's leaderboard.";
+  } catch (e) {
+    Daily.status = "Your score couldn't be posted. Posting needs Contributor access to this page.";
+  }
+  if (app.screen === "game") render();
+}
+
+/* ================= Online play (the room capability) ================= */
+/* One device hosts: it runs the table and shares it through its presence (see packState).
+ * Guests share only their bid for the current round. Everyone renders from the host's state. */
+const Online = { room: null, checked: false, named: null, code: "", role: null, peers: [], myPeer: null, error: "", lastG: null, unsub: null };
+async function initOnline() {
+  try { Online.room = window.claude && window.claude.use ? await window.claude.use("room") : null; } catch (e) { Online.room = null; }
+  Online.checked = true;
+  if (app.screen === "home" && !app.setup) render();
+}
+function randomCode() {
+  const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
+  return Array.from({ length: 4 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+}
+async function joinTable(code, host) {
+  code = String(code || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 8);
+  if (code.length < 4) { Online.error = "Enter the 4-character table code."; render(); return; }
+  if (!Online.room) { Online.error = "Online play isn't available in this view."; render(); return; }
+  Online.error = "Connecting…"; render();
+  try {
+    Online.named = await Online.room.join("db-" + code);
+  } catch (e) {
+    Online.error = e && e.code === "not_permitted" ? "You can't join tables from this view." : "Couldn't open that table. Check your connection and try again.";
+    render(); return;
+  }
+  Online.code = code; Online.role = host ? "host" : "guest"; Online.error = ""; Online.lastG = null;
+  try { await Online.named.presence({ app: "diamondbid", v: 11, name: myName(), char: prefs.character, host: !!host, t: Date.now() }); } catch (e) {}
+  Online.unsub = Online.named.onPeers(onPeersChange, () => { Online.error = "The connection to the table was lost."; render(); });
+  app.setup = "online-lobby";
+  render();
+}
+function leaveOnline() {
+  if (Online.named) { try { Online.named.leave(); } catch (e) {} }
+  Object.assign(Online, { named: null, code: "", role: null, peers: [], myPeer: null, error: "", lastG: null, unsub: null });
+}
+const tablePeople = () => Online.peers.filter(p => p.presence && p.presence.app === "diamondbid" && p.kind === "viewer")
+  .sort((a, b) => (b.presence.host ? 1 : 0) - (a.presence.host ? 1 : 0) || (a.presence.t || 0) - (b.presence.t || 0));
+
+function onPeersChange(ch) {
+  Online.peers = ch.peers;
+  const mine = ch.peers.find(p => p.sameTab);
+  if (mine) Online.myPeer = mine.peer;
+  if (Online.role === "host") hostReadPeers(ch);
+  else guestReadPeers(ch);
+}
+function hostReadPeers(ch) {
+  if (!G || G.kind !== "online") { if (app.setup === "online-lobby") render(); return; }
+  const s = G.s;
+  let changed = false;
+  ch.left.forEach(p => {
+    const seat = s.seats.findIndex(x => x.pid === p.peer && !x.bot);
+    if (seat >= 0) { replaceWithBot(s, seat, s.config.botLevel === "easy" ? "normal" : s.config.botLevel); G.notice = `${s.seats[seat].name} left. A bot took their seat.`; changed = true; }
+  });
+  const key = roundKey(s);
+  ch.peers.forEach(p => {
+    const seat = s.seats.findIndex(x => x.pid === p.peer && !x.bot);
+    if (seat < 0 || p.sameTab) return;
+    const pr = p.presence || {};
+    if (s.phase === "bidding" && pr.f === key && usePowerNow(s, seat)) changed = true;
+    const b = pr.b;
+    if (s.phase === "bidding" && b && b.k === key && !s.submitted[seat]) {
+      if (submit(s, seat, { card: Number(b.c), double: !!b.d, power: !!b.p })) changed = true;
+    }
+  });
+  if (changed) progress();
+}
+function guestReadPeers(ch) {
+  const host = ch.peers.find(p => p.presence && p.presence.app === "diamondbid" && p.presence.host && !p.sameTab);
+  if (G && G.kind === "online" && !host) {
+    stopTimers();
+    G = null; app.screen = "home"; app.setup = "online-lobby";
+    Online.error = "The host left, so the game ended.";
+    render(); return;
+  }
+  const g = host && host.presence.g;
+  if (g && g !== Online.lastG) { Online.lastG = g; guestApply(g); return; }
+  if (app.setup === "online-lobby") render();
+}
+function guestApply(g) {
+  let s;
+  try { s = unpackState(g); } catch (e) { return; }
+  const seat = s.seats.findIndex(x => x.pid === Online.myPeer && !x.bot);
+  const mySeats = seat >= 0 ? [seat] : [];
+  if (!G || G.kind !== "online") {
+    beginGame(newG("online", s, mySeats, { role: "guest" }));
+  } else {
+    G.s = s; G.mySeats = mySeats; G.unlocked = mySeats[0] ?? null;
+  }
+  if (s.phase === "reveal" && G.prev.phase !== "reveal") G.revealAt = Date.now();
+  observe();
+  render();
+  scheduleReveal();
+}
+function publish() {
+  if (!G || G.kind !== "online" || G.role !== "host" || !Online.named) return;
+  Online.named.presence({ g: packState(G.s) }).catch(() => {});
+}
+function hostStart() {
+  const people = tablePeople();
+  const c = Object.assign({}, prefs.config);
+  if (people.length > 4) { Online.error = "A table holds up to 4 players."; render(); return; }
+  if (people.length > c.seatCount) c.seatCount = 4;
+  const used = new Set();
+  const seats = people.map(p => {
+    let ch = CHAR[p.presence.char] ? p.presence.char : "fox";
+    if (used.has(ch)) ch = CHAR_IDS.find(x => !used.has(x));
+    used.add(ch);
+    return { name: cleanName(p.presence.name) || CHAR[ch].name, char: ch, bot: false, pid: p.peer };
+  });
+  for (let i = seats.length; i < c.seatCount; i++) {
+    const ch = CHAR_IDS.find(x => !used.has(x)); used.add(ch);
+    seats.push({ name: CHAR[ch].name, char: ch, bot: true, level: c.botLevel });
+  }
+  const mine = seats.findIndex(x => x.pid === Online.myPeer);
+  beginGame(newG("online", newMatch(c, seats), [mine >= 0 ? mine : 0], { role: "host" }));
+  progress();
+}
+
+function renderOnlineSheet() {
+  const head = (title) => `<div class="sheet-head"><h2>${title}</h2><button class="icon-btn" data-act="online-close" aria-label="Close">✕</button></div>`;
+  const err = Online.error ? `<p style="margin:0;color:${Online.error === "Connecting…" ? "var(--muted)" : "#ff9a9a"}">${esc(Online.error)}</p>` : "";
+  if (app.setup === "online-menu") {
+    return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true">
+      ${head("Play online")}
+      <p class="muted" style="margin:0">Play with friends on their own phones. Everyone opens this same page. Your friends need to be able to open it too: share it from the page's Share menu.</p>
+      <div class="choice">
+        <div><h3>Start a table</h3><p class="muted" style="margin:0">You'll get a code to send your friends. You pick the rules.</p><button class="btn primary" data-act="online-create">Start a table</button></div>
+        <div><h3>Join a table</h3><label class="muted" for="join-code" style="font-size:13px">Table code</label><input id="join-code" class="code-input" maxlength="4" autocomplete="off" autocapitalize="characters" placeholder="ABCD"><button class="btn ghost" data-act="online-join">Join</button></div>
+      </div>
+      ${err}
+    </div></div>`;
+  }
+  const people = tablePeople();
+  const host = Online.role === "host";
+  const list = people.map(p => {
+    const ch = CHAR[p.presence.char] ? p.presence.char : "fox";
+    return `<div class="seat-row">${avatar(ch)}<div><b>${esc(cleanName(p.presence.name) || CHAR[ch].name)}${p.sameTab ? " (you)" : ""}</b><small>${p.presence.host ? "Host" : "Player"}${p.guest ? " · guest" : ""}</small></div></div>`;
+  }).join("");
+  const c = prefs.config;
+  const seats = Math.max(c.seatCount, people.length > 2 ? 4 : c.seatCount);
+  return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true">
+    ${head(host ? "Your table" : "Table")}
+    <div><div class="opt-label" style="text-align:center">Table code</div><div class="code">${esc(Online.code.toUpperCase())}</div>
+      <p class="muted" style="margin:4px 0 0;text-align:center">Friends open this page, tap Play online, and enter this code.</p></div>
+    <div><div class="opt-label">At the table (${people.length})</div><div class="peers">${list || `<p class="muted">Connecting…</p>`}</div></div>
+    ${host ? rulesFields("online", people.length < seats) : `<p class="muted" style="margin:0">Waiting for the host to start the game…</p>`}
+    ${err}
+    <div class="sheet-foot"><button class="btn ghost" data-act="online-close">Leave table</button>
+      ${host ? `<button class="btn primary" data-act="online-start" ${people.length < 2 ? "disabled" : ""}>${people.length < 2 ? "Waiting for friends…" : "Start game"}</button>` : ""}</div>
+  </div></div>`;
+}
+
+/* ================= Render + events ================= */
+function render() {
+  applyLook();
+  const root = document.getElementById("app");
+  if (!root) return;
+  if (app.screen === "game" && G) {
+    root.innerHTML = renderGame() + (app.modal === "exit" ? renderConfirmExit() : renderModal())
+      + (G.notice ? `<div class="overlay"><div class="sheet" role="alertdialog" style="max-width:420px"><p style="margin:0">${esc(G.notice)}</p><div class="sheet-foot" style="justify-content:flex-end"><button class="btn primary" data-act="notice-ok">OK</button></div></div></div>` : "");
+  } else {
+    const typing = document.activeElement && document.activeElement.id === "join-code" ? document.activeElement.value : null;
+    root.innerHTML = renderHome() + (app.setup ? renderSetup() : "");
+    if (typing !== null) { const el = document.getElementById("join-code"); if (el) { el.value = typing; el.focus(); } }
+  }
+}
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (!el || el.disabled) return;
+  const act = el.dataset.act;
+  if (act === "close-bg" && e.target !== el) return;
+  Sound.unlock();
+  switch (act) {
+    case "pick-char": prefs.character = el.dataset.id; savePrefs(); Sound.select(); render(); break;
+    case "pick-deck": prefs.deck = el.dataset.id; savePrefs(); Sound.select(); render(); break;
+    case "pick-table": prefs.table = el.dataset.id; savePrefs(); Sound.select(); render(); break;
+    case "four": prefs.fourColor = !prefs.fourColor; savePrefs(); render(); break;
+    case "sound": prefs.sound = !prefs.sound; savePrefs(); if (prefs.sound) Sound.chime(); render(); break;
+    case "open-setup": app.setup = el.dataset.kind; render(); break;
+    case "open-online": app.setup = "online-menu"; Online.error = ""; render(); break;
+    case "online-create": joinTable(randomCode(), true); break;
+    case "online-join": joinTable((document.getElementById("join-code") || {}).value, false); break;
+    case "online-close": leaveOnline(); app.setup = null; render(); break;
+    case "online-start": hostStart(); break;
+    case "close": case "close-bg": if (app.setup && app.setup.startsWith("online")) break; app.setup = null; app.modal = null; render(); break;
+    case "cfg": {
+      const key = el.dataset.key, val = JSON.parse(el.dataset.val);
+      if (key === "localPlayers") prefs.localPlayers = val; else prefs.config[key] = val;
+      if (key === "seatCount") prefs.localPlayers = Math.min(Math.max(prefs.localPlayers, 2), val);
+      savePrefs(); render(); break;
+    }
+    case "cycle-char": {
+      const seat = +el.dataset.seat, plan = seatPlan(app.setup);
+      const taken = new Set(plan.filter((p, i) => !p.bot && i !== seat).map(p => p.char));
+      const cur = CHAR_IDS.indexOf(plan[seat].char);
+      let nextId = plan[seat].char;
+      for (let k = 1; k <= CHAR_IDS.length; k++) { const id = CHAR_IDS[(cur + k) % CHAR_IDS.length]; if (!taken.has(id) && isUnlocked(CHAR[id])) { nextId = id; break; } }
+      if (seat === 0) prefs.character = nextId; else prefs.passChars[seat] = nextId;
+      savePrefs(); render(); break;
+    }
+    case "reroll": app.botOffset++; render(); break;
+    case "start": startLocal(app.setup); break;
+    case "daily": startDaily(); break;
+    case "tutorial": startTutorial(); break;
+    case "tutorial-done": stopTimers(); G = null; app.screen = "home"; app.setup = "bots"; render(); break;
+    case "select": G.selected = G.selected === +el.dataset.v ? null : +el.dataset.v; Sound.select(); render(); break;
+    case "double": G.useDouble = !G.useDouble; Sound.select(); render(); break;
+    case "power": G.usePower = !G.usePower; Sound.select(); render(); break;
+    case "power-now": useInstantPower(); break;
+    case "bid": placeBid(); break;
+    case "unlock": G.unlocked = activeSeat(); render(); break;
+    case "next": nextStep(); break;
+    case "spin": spinWheel(); break;
+    case "tie-continue": tieContinue(); break;
+    case "rematch": doRematch(); break;
+    case "exit": app.modal = "exit"; render(); break;
+    case "home": leaveGame(); break;
+    case "modal": app.modal = el.dataset.m; render(); break;
+    case "notice-ok": G.notice = null; render(); break;
+  }
+});
+document.addEventListener("input", e => {
+  if (e.target.id !== "name") return;
+  prefs.name = e.target.value.slice(0, 16);
+  savePrefs();
+  const label = document.getElementById("playing-name");
+  if (label) label.textContent = myName();
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.id === "join-code") joinTable(e.target.value, false);
+  if (e.key === "Escape" && (app.modal || (app.setup && !app.setup.startsWith("online")))) { app.setup = null; app.modal = null; render(); }
+});
+
+/* Keep a local game in progress across page updates (online games reconnect from scratch). */
+window.claude?.hot?.snapshot?.(() => ({ app: Object.assign({}, app, { setup: app.setup && app.setup.startsWith("online") ? null : app.setup }), G: G && G.kind !== "online" ? G : null }));
+const boot = data => {
+  if (data && data.app) {
+    app = Object.assign(app, data.app, { introDone: true });
+    G = data.G || null;
+    if (!G) app.screen = "home";
+  }
+  render();
+  if (G) { scheduleBots(); scheduleReveal(); scheduleSpin(); }
+  initOnline();
+  initDaily();
+};
+window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});

@@ -387,6 +387,122 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 .ledger th { color: var(--muted); font-weight: 600; font-size: 12px; }
 .ledger td.w { color: var(--brass); font-weight: 700; }
 
+
+/* ---------- 1.1: unlockable looks ---------- */
+:root[data-table="midnight"] { --felt: #1d2350; --felt-deep: #0b0e24; --muted: #aab1d6; }
+[data-deck="gold"] {
+  --card-face: #f8f0d9; --card-edge: #d9c48a; --c-ink: #3b2a12; --c-red: #a8322a; --c-blue: #2c4f8f; --c-green: #3c6e2f;
+  --back: repeating-linear-gradient(45deg, rgba(255,255,255,.18) 0 2px, transparent 2px 8px), linear-gradient(135deg, #a8761f, #f3d27a 45%, #b8862b);
+  --back-rim: #f8f0d9; --back-line: rgba(90,60,10,.55);
+}
+[data-deck="galaxy"] {
+  --card-face: #10133a; --card-edge: #34398a; --c-ink: #e8ecff; --c-red: #ff7a9c; --c-blue: #7fb2ff; --c-green: #7ff0c0;
+  --back: radial-gradient(circle at 20% 30%, #fff 0 1px, transparent 1.5px) 0 0 / 17px 17px, radial-gradient(circle at 70% 60%, rgba(255,255,255,.7) 0 .8px, transparent 1.3px) 0 0 / 11px 11px, linear-gradient(150deg, #3b1e6e, #10133a 60%, #0b3a5c);
+  --back-rim: #b9c3ff; --back-line: rgba(185,195,255,.55);
+}
+
+/* Locked items */
+.locked { position: relative; }
+.locked > *:not(.lock) { filter: grayscale(1) brightness(.55); }
+.lock { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; padding: 10px; font-size: 12px; color: var(--ink); border-radius: inherit; }
+.lock b { font: 700 13px var(--body); background: rgba(0,0,0,.55); padding: 3px 10px; border-radius: 999px; }
+.lock span { background: rgba(0,0,0,.55); padding: 2px 8px; border-radius: 8px; }
+.char .power { font-size: 12.5px; color: var(--ink); background: rgba(0,0,0,.2); border-radius: 10px; padding: 6px 8px; margin-top: 2px; }
+.char .power b { font: 700 12.5px var(--body); color: var(--brass); }
+
+/* Prize extras */
+.card.prize.jackpot { background: linear-gradient(150deg, #fff3c4, #f0c75a 55%, #c8942c); border-color: #fff3c4; color: #7a4a00; box-shadow: 0 0 0 2px #c8942c, 0 0 26px rgba(240,199,90,.55), 0 10px 26px rgba(0,0,0,.45); }
+.card.prize.mystery { background: repeating-linear-gradient(45deg, #2a1d4a 0 6px, #33245a 6px 12px); color: var(--brass); border-color: var(--brass); }
+.card.prize.mystery b { font-size: calc(var(--w) * .5); }
+.nextgem { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.foresight { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--brass); flex-wrap: wrap; justify-content: center; }
+
+/* Gem piles */
+.pile { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; min-height: 16px; }
+.chip-gem { font: 700 10px var(--body); min-width: 18px; height: 16px; padding: 0 4px; border-radius: 4px; display: inline-grid; place-items: center; background: var(--gem); color: #fff6ee; box-shadow: inset 0 -2px 0 rgba(0,0,0,.2); font-variant-numeric: tabular-nums; }
+.chip-gem.j { background: linear-gradient(150deg, #fff3c4, #e2b347); color: #6b4200; }
+.chip-gem.c { background: var(--curse); color: var(--curse-ink); }
+.chip-gem.s { opacity: .75; }
+.chip-more { font-size: 11px; color: var(--muted); }
+
+/* Reveal moments */
+.banner { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); z-index: 6; pointer-events: none; font: 800 italic clamp(30px, 7vw, 52px) var(--display); color: var(--brass); text-shadow: 0 4px 0 rgba(0,0,0,.35), 0 0 30px rgba(217,171,79,.5); white-space: nowrap; animation: banner 1.7s cubic-bezier(.2,.8,.3,1) forwards; }
+.banner.curse { color: var(--curse-ink); text-shadow: 0 4px 0 rgba(0,0,0,.35), 0 0 30px rgba(180,120,220,.6); }
+.banner.power { color: #8fe3ff; }
+@keyframes banner { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.5) rotate(-6deg); } 18% { opacity: 1; transform: translate(-50%, -50%) scale(1.12) rotate(-3deg); } 30% { transform: translate(-50%, -50%) scale(1) rotate(-3deg); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -70%) scale(1) rotate(-3deg); } }
+.floatpts { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font: 800 28px var(--display); color: var(--brass); pointer-events: none; animation: floatup 1.4s ease-out forwards; text-shadow: 0 2px 8px rgba(0,0,0,.5); }
+.floatpts.neg { color: var(--curse-ink); }
+@keyframes floatup { from { opacity: 0; transform: translate(-50%, 10px) scale(.8); } 20% { opacity: 1; transform: translate(-50%, -6px) scale(1.1); } to { opacity: 0; transform: translate(-50%, -54px) scale(1); } }
+.shake { animation: shake .45s ease; }
+@keyframes shake { 20% { transform: translateX(-6px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
+.center { position: relative; }
+#confetti { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+
+/* Toasts */
+.toasts { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 50; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; width: min(92vw, 420px); }
+.toast { display: flex; align-items: center; gap: 12px; background: #10251f; border: 1px solid rgba(217,171,79,.55); border-radius: 16px; padding: 10px 14px; box-shadow: 0 14px 40px rgba(0,0,0,.5); animation: toastin .35s ease both, toastout .4s ease 3.6s forwards; width: 100%; }
+.toast .ti { width: 36px; height: 36px; border-radius: 50%; background: var(--brass); color: #1c1608; display: grid; place-items: center; font: 800 18px var(--display); flex: none; }
+.toast small { display: block; color: var(--muted); font-size: 12px; }
+.toast b { font-size: 14px; }
+@keyframes toastin { from { opacity: 0; transform: translateY(20px); } }
+@keyframes toastout { to { opacity: 0; transform: translateY(10px); } }
+
+/* Powers and coach */
+.pwr { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; border: 1px solid rgba(143,227,255,.5); font-weight: 700; color: #8fe3ff; }
+.pwr[aria-pressed="true"] { background: #8fe3ff; color: #062430; }
+.pwr:disabled { opacity: .4; cursor: default; }
+.tok.pw i { background: #8fe3ff; color: #062430; }
+.tok.pw.used i { background: rgba(255,255,255,.15); color: var(--muted); }
+.coach { display: flex; gap: 12px; align-items: flex-start; background: rgba(143,227,255,.1); border: 1px solid rgba(143,227,255,.35); border-radius: 16px; padding: 12px 14px; }
+.coach p { margin: 0; }
+.coach small { display: block; color: #8fe3ff; font-weight: 700; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 2px; }
+
+/* Recap */
+.recap { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.recap div { background: var(--panel); border-radius: 14px; padding: 10px 12px; }
+.recap small { display: block; color: var(--muted); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; }
+.recap b { font-size: 14px; }
+.newach { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.newach span { background: var(--brass-soft); border: 1px solid rgba(217,171,79,.5); color: var(--brass); font-size: 12.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+
+/* Achievements grid */
+.ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.ach { display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 16px; background: var(--panel); }
+.ach .ai { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font: 800 18px var(--display); background: rgba(255,255,255,.08); color: var(--muted); flex: none; }
+.ach.got .ai { background: var(--brass); color: #1c1608; }
+.ach b { display: block; font-size: 14px; }
+.ach small { color: var(--muted); font-size: 12.5px; }
+.ach:not(.got) b { color: var(--muted); }
+.progress { height: 6px; border-radius: 6px; background: rgba(255,255,255,.1); overflow: hidden; width: 200px; max-width: 100%; }
+.progress span { display: block; height: 100%; background: var(--brass); }
+
+/* Daily */
+.daily { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.daily .panel { background: var(--panel); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.daily h3 { font-size: 22px; }
+.daily .rules { display: flex; flex-wrap: wrap; gap: 6px; }
+.daily .rules span { font-size: 12px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; color: var(--muted); }
+.lb { display: flex; flex-direction: column; gap: 4px; font-variant-numeric: tabular-nums; }
+.lb .row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 10px; }
+.lb .row.me { background: var(--brass-soft); }
+.lb .row .pl { width: 22px; color: var(--muted); font-weight: 700; }
+.lb .row .nm { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb .row .sc { font: 800 18px var(--display); }
+.muted { color: var(--muted); }
+
+/* Online */
+.code { font: 800 44px var(--display); letter-spacing: .14em; color: var(--brass); text-align: center; }
+.code-input { font: 800 28px var(--display); letter-spacing: .3em; text-transform: uppercase; text-align: center; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px; width: 100%; }
+.peers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.online-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #5fd38a; margin-right: 6px; }
+.choice { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.choice > div { background: var(--panel); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.choice h3 { font-size: 19px; }
+.extras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; }
+.cta2 { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 16px; }
+@media (max-width: 860px) { .daily { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .choice, .peers, .extras { grid-template-columns: 1fr; } .code { font-size: 36px; } }
+
 @media (max-width: 860px) {
   .hero { grid-template-columns: 1fr; padding-block: 8px 40px; gap: 8px; }
   .hero-art { order: -1; }
@@ -413,1159 +529,6 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 
 <div id="app"></div>
 
-<script>
-/* ================= Data ================= */
-const CHARACTERS = [
-  { id: "fox", name: "Fennec", title: "The Sly Fox", line: "Saves big cards for the moments that matter.", ring: "#e8732f" },
-  { id: "owl", name: "Prof. Hoot", title: "The Card Counter", line: "Knows exactly what you have left.", ring: "#c79a6b" },
-  { id: "bear", name: "Bruno", title: "The Big Bettor", line: "Never met a King he would not play.", ring: "#a8693a" },
-  { id: "cat", name: "Duchess", title: "The Cool Cat", line: "Unbothered. Unpredictable.", ring: "#b9a3d6" },
-  { id: "frog", name: "Lily", title: "The Lucky Frog", line: "Swears that ties bring good luck.", ring: "#5fae4e" },
-  { id: "panda", name: "Bao", title: "The Gentle Giant", line: "Slow, steady and hard to read.", ring: "#e9e6dc" },
-  { id: "penguin", name: "Tux", title: "The Gentleman", line: "Bows politely, then takes your gem.", ring: "#6f8fb3" },
-  { id: "robot", name: "Unit 13", title: "The Machine", line: "Thirteen cards. Zero emotions.", ring: "#5ef0ff" },
-];
-const CHAR = Object.fromEntries(CHARACTERS.map(c => [c.id, c]));
-const CHAR_IDS = CHARACTERS.map(c => c.id);
-
-const AVATAR_SVG = {
-  fox: `<rect width="100" height="100" fill="#f4dcbc"/>
-    <path d="M18 16 L42 44 L24 54Z" fill="#d9622b"/><path d="M82 16 L58 44 L76 54Z" fill="#d9622b"/>
-    <path d="M24 26 L37 42 L27 47Z" fill="#5a2a14"/><path d="M76 26 L63 42 L73 47Z" fill="#5a2a14"/>
-    <path d="M16 46 Q50 18 84 46 Q80 72 50 90 Q20 72 16 46Z" fill="#e8732f"/>
-    <path d="M24 58 Q40 60 50 90 Q28 78 24 58Z" fill="#fff6ea"/><path d="M76 58 Q60 60 50 90 Q72 78 76 58Z" fill="#fff6ea"/>
-    <ellipse cx="37" cy="54" rx="4.2" ry="5.4" fill="#2b1a10"/><ellipse cx="63" cy="54" rx="4.2" ry="5.4" fill="#2b1a10"/>
-    <circle cx="38.6" cy="52.2" r="1.4" fill="#fff"/><circle cx="64.6" cy="52.2" r="1.4" fill="#fff"/>
-    <ellipse cx="50" cy="80" rx="5.5" ry="3.8" fill="#2b1a10"/>`,
-  owl: `<rect width="100" height="100" fill="#d6e2ef"/>
-    <path d="M16 26 L34 40 L20 50Z" fill="#6e4429"/><path d="M84 26 L66 40 L80 50Z" fill="#6e4429"/>
-    <ellipse cx="50" cy="62" rx="36" ry="40" fill="#8a5a3b"/>
-    <ellipse cx="50" cy="58" rx="29" ry="24" fill="#c79a6b"/>
-    <circle cx="37" cy="54" r="11" fill="#fff"/><circle cx="63" cy="54" r="11" fill="#fff"/>
-    <circle cx="38" cy="55" r="5" fill="#1f1a17"/><circle cx="62" cy="55" r="5" fill="#1f1a17"/>
-    <circle cx="39.5" cy="53.5" r="1.5" fill="#fff"/><circle cx="63.5" cy="53.5" r="1.5" fill="#fff"/>
-    <circle cx="37" cy="54" r="13" fill="none" stroke="#2a2420" stroke-width="3"/><circle cx="63" cy="54" r="13" fill="none" stroke="#2a2420" stroke-width="3"/>
-    <path d="M48 54 Q50 51 52 54" fill="none" stroke="#2a2420" stroke-width="3"/>
-    <path d="M45 66 L55 66 L50 75Z" fill="#f0a830"/>
-    <path d="M30 86 Q36 82 42 86 M44 88 Q50 84 56 88 M58 86 Q64 82 70 86" fill="none" stroke="#6e4429" stroke-width="2.5"/>`,
-  bear: `<rect width="100" height="100" fill="#f1e2c8"/>
-    <circle cx="24" cy="28" r="13" fill="#7a4a2a"/><circle cx="76" cy="28" r="13" fill="#7a4a2a"/>
-    <circle cx="24" cy="28" r="6.5" fill="#c68b5e"/><circle cx="76" cy="28" r="6.5" fill="#c68b5e"/>
-    <circle cx="50" cy="57" r="36" fill="#8b5a34"/>
-    <ellipse cx="50" cy="69" rx="17" ry="13" fill="#d9b48a"/>
-    <ellipse cx="50" cy="62" rx="6.5" ry="4.8" fill="#2b1a10"/>
-    <circle cx="36" cy="49" r="4.2" fill="#2b1a10"/><circle cx="64" cy="49" r="4.2" fill="#2b1a10"/>
-    <circle cx="37.3" cy="47.6" r="1.3" fill="#fff"/><circle cx="65.3" cy="47.6" r="1.3" fill="#fff"/>
-    <path d="M50 66 Q50 74 43 74 M50 66 Q50 74 57 74" fill="none" stroke="#2b1a10" stroke-width="2.4" stroke-linecap="round"/>`,
-  cat: `<rect width="100" height="100" fill="#e6dcf2"/>
-    <path d="M18 44 L24 12 L46 30Z" fill="#6d6f7d"/><path d="M82 44 L76 12 L54 30Z" fill="#6d6f7d"/>
-    <path d="M24 36 L27 20 L38 30Z" fill="#f2a7bd"/><path d="M76 36 L73 20 L62 30Z" fill="#f2a7bd"/>
-    <ellipse cx="50" cy="60" rx="34" ry="30" fill="#7b7e8d"/>
-    <path d="M36 28 L40 14 L46 22 L50 9 L54 22 L60 14 L64 28Z" fill="#e8c050" stroke="#b8902a" stroke-width="1.5" stroke-linejoin="round"/>
-    <ellipse cx="37" cy="56" rx="6.5" ry="7.5" fill="#9be07a"/><ellipse cx="63" cy="56" rx="6.5" ry="7.5" fill="#9be07a"/>
-    <ellipse cx="37" cy="56" rx="1.8" ry="6" fill="#1d1f24"/><ellipse cx="63" cy="56" rx="1.8" ry="6" fill="#1d1f24"/>
-    <path d="M46.5 66 L53.5 66 L50 70.5Z" fill="#f2a7bd"/>
-    <path d="M50 70.5 Q46 76 42 73 M50 70.5 Q54 76 58 73" fill="none" stroke="#3a3c46" stroke-width="2" stroke-linecap="round"/>
-    <path d="M42 68 L20 64 M42 71 L21 73 M58 68 L80 64 M58 71 L79 73" stroke="#dcdde4" stroke-width="1.5" stroke-linecap="round"/>`,
-  frog: `<rect width="100" height="100" fill="#d6efe1"/>
-    <circle cx="31" cy="40" r="15" fill="#5fae4e"/><circle cx="69" cy="40" r="15" fill="#5fae4e"/>
-    <ellipse cx="50" cy="64" rx="40" ry="28" fill="#5fae4e"/>
-    <circle cx="31" cy="39" r="10" fill="#fff"/><circle cx="69" cy="39" r="10" fill="#fff"/>
-    <circle cx="32" cy="40" r="5" fill="#1d2a18"/><circle cx="68" cy="40" r="5" fill="#1d2a18"/>
-    <circle cx="33.5" cy="38.5" r="1.6" fill="#fff"/><circle cx="69.5" cy="38.5" r="1.6" fill="#fff"/>
-    <path d="M26 66 Q50 84 74 66" fill="none" stroke="#2d5a24" stroke-width="3.2" stroke-linecap="round"/>
-    <ellipse cx="22" cy="68" rx="6.5" ry="4" fill="#f29a9a" opacity=".85"/><ellipse cx="78" cy="68" rx="6.5" ry="4" fill="#f29a9a" opacity=".85"/>
-    <circle cx="44" cy="58" r="1.5" fill="#2d5a24"/><circle cx="56" cy="58" r="1.5" fill="#2d5a24"/>`,
-  panda: `<rect width="100" height="100" fill="#f4e6dc"/>
-    <circle cx="24" cy="28" r="13" fill="#1f1f24"/><circle cx="76" cy="28" r="13" fill="#1f1f24"/>
-    <circle cx="50" cy="57" r="36" fill="#fbfaf6"/>
-    <ellipse cx="36" cy="53" rx="9" ry="12" transform="rotate(28 36 53)" fill="#1f1f24"/>
-    <ellipse cx="64" cy="53" rx="9" ry="12" transform="rotate(-28 64 53)" fill="#1f1f24"/>
-    <circle cx="37" cy="52" r="3.6" fill="#fff"/><circle cx="63" cy="52" r="3.6" fill="#fff"/>
-    <circle cx="37.6" cy="52.4" r="1.8" fill="#1f1f24"/><circle cx="62.4" cy="52.4" r="1.8" fill="#1f1f24"/>
-    <ellipse cx="50" cy="66" rx="5.5" ry="3.8" fill="#1f1f24"/>
-    <path d="M50 69 Q50 75 44 75 M50 69 Q50 75 56 75" fill="none" stroke="#1f1f24" stroke-width="2.2" stroke-linecap="round"/>
-    <ellipse cx="27" cy="68" rx="5" ry="3" fill="#f5b5b5" opacity=".7"/><ellipse cx="73" cy="68" rx="5" ry="3" fill="#f5b5b5" opacity=".7"/>`,
-  penguin: `<rect width="100" height="100" fill="#d9e6f4"/>
-    <circle cx="50" cy="54" r="40" fill="#23262e"/>
-    <path d="M50 40 C38 24 14 36 24 60 C29 74 42 82 50 84 C58 82 71 74 76 60 C86 36 62 24 50 40Z" fill="#f7f5ef"/>
-    <circle cx="40" cy="53" r="4.2" fill="#23262e"/><circle cx="60" cy="53" r="4.2" fill="#23262e"/>
-    <circle cx="41.4" cy="51.6" r="1.3" fill="#fff"/><circle cx="61.4" cy="51.6" r="1.3" fill="#fff"/>
-    <circle cx="60" cy="53" r="8.5" fill="none" stroke="#d9ab4f" stroke-width="2"/>
-    <path d="M68 57 Q74 66 70 76" fill="none" stroke="#d9ab4f" stroke-width="1.4"/>
-    <path d="M43 61 L57 61 L50 70Z" fill="#f0a030"/>
-    <path d="M36 88 L47 92.5 L36 97Z M64 88 L53 92.5 L64 97Z" fill="#c42a3c"/><rect x="46" y="89.5" width="8" height="6" rx="2" fill="#a51f30"/>`,
-  robot: `<rect width="100" height="100" fill="#dfe6ea"/>
-    <line x1="50" y1="10" x2="50" y2="24" stroke="#5b6770" stroke-width="3"/><circle cx="50" cy="10" r="4.5" fill="#ff4f5e"/>
-    <circle cx="16" cy="54" r="6" fill="#5b6770"/><circle cx="84" cy="54" r="6" fill="#5b6770"/>
-    <rect x="18" y="24" width="64" height="58" rx="15" fill="#9aa7b0"/>
-    <rect x="26" y="34" width="48" height="32" rx="9" fill="#1d2a33"/>
-    <rect x="33" y="42" width="11" height="9" rx="2.5" fill="#5ef0ff"/><rect x="56" y="42" width="11" height="9" rx="2.5" fill="#5ef0ff"/>
-    <rect x="37" y="57" width="4" height="3" fill="#5ef0ff"/><rect x="44" y="57" width="4" height="3" fill="#5ef0ff"/><rect x="51" y="57" width="4" height="3" fill="#5ef0ff"/><rect x="58" y="57" width="4" height="3" fill="#5ef0ff"/>
-    <text x="50" y="77" text-anchor="middle" font-family="Figtree, sans-serif" font-size="9" font-weight="700" fill="#4a565e">13</text>`,
-};
-
-const DECKS = [
-  { id: "classic", name: "Classic", note: "Ivory and oxblood" },
-  { id: "royal", name: "Royal", note: "Navy with gold" },
-  { id: "sakura", name: "Sakura", note: "Blossom pink" },
-  { id: "noir", name: "Noir", note: "Black and gold ink" },
-  { id: "retro", name: "Retro", note: "Seventies stripes" },
-  { id: "arcade", name: "Arcade", note: "Neon grid" },
-];
-const TABLES = [
-  { id: "green", name: "Baize", a: "#1d5a4b", b: "#0b2620" },
-  { id: "ocean", name: "Ocean", a: "#1c4a78", b: "#0a1d33" },
-  { id: "wine", name: "Wine", a: "#6a2236", b: "#2a0b15" },
-  { id: "slate", name: "Slate", a: "#3e464e", b: "#15181c" },
-  { id: "plum", name: "Plum", a: "#53306f", b: "#1d0f2b" },
-];
-
-const GEM_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 L36 20 L20 37 L4 20Z" style="fill:var(--gem)"/><path d="M20 3 L36 20 L20 20Z" style="fill:var(--gem-hi)"/><path d="M20 20 L4 20 L20 37Z" style="fill:var(--gem-lo)"/><path d="M20 3 L36 20 L20 37 L4 20Z" style="fill:none;stroke:var(--brass)" stroke-width="2" stroke-linejoin="round"/></svg>`;
-const CURSE_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 C24 11 33 15 31 26 C30 33 25 37 20 37 C14 37 9 33 9 26 C9 20 13 17 14 12 C17 16 17 19 19 20 C20 14 18 9 20 3Z" fill="currentColor"/></svg>`;
-
-/* ================= Rules engine ================= */
-const PIP = { h: "♥︎", c: "♣︎", d: "♦︎", s: "♠︎" };
-const SUIT_NAME = { h: "Hearts", c: "Clubs", d: "Diamonds", s: "Spades" };
-const RANK = v => ({ 1: "A", 11: "J", 12: "Q", 13: "K" })[v] || String(v);
-const range = n => Array.from({ length: n }, (_, i) => i);
-const ALL13 = range(13).map(i => i + 1);
-const suitFor = (seat, n) => n === 2 ? ["h", "s"][seat] : ["h", "c", "d", "s"][seat];
-const prizeLabel = v => v < 0 ? "−" + (-v) : String(v);
-const prizeName = v => v < 0 ? `${prizeLabel(v)} curse` : `${v} gem`;
-const usesTeams = c => !!c.teams && c.seatCount === 4;
-const sideCount = c => usesTeams(c) ? 2 : c.seatCount;
-const sideOf = (c, seat) => usesTeams(c) ? seat % 2 : seat;
-const seatsOnSide = (c, side) => range(c.seatCount).filter(i => sideOf(c, i) === side);
-const TEAM_NAME = ["Red team", "Black team"];
-const TEAM_COLOR = ["#e0485a", "#e9e3d3"];
-/** Suit color for a pip drawn on the felt, where a deck's black ink would vanish. */
-const feltPip = suit => {
-  const four = prefs.fourColor;
-  const color = { h: "#ef5a6c", d: four ? "#6f9bff" : "#ef5a6c", c: four ? "#5fd38a" : "var(--ink)", s: "var(--ink)" }[suit];
-  return `<span style="color:${color}">${PIP[suit]}</span>`;
-};
-
-/** Points are kept in twelfths so splits between 2, 3 or 4 players stay exact. */
-function fmt(t) {
-  const sign = t < 0 ? "−" : "";
-  const a = Math.abs(t), whole = Math.floor(a / 12), rem = a % 12;
-  const fr = { 3: "¼", 4: "⅓", 6: "½", 8: "⅔", 9: "¾" };
-  if (rem === 0) return sign + whole;
-  if (fr[rem]) return sign + (whole ? whole : "") + fr[rem];
-  return sign + (a / 12).toFixed(1);
-}
-function shuffle(a) {
-  a = a.slice();
-  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-  return a;
-}
-
-function newMatch(config, seats) {
-  const s = { config, seats, gameNumber: 1, gameWins: Array(sideCount(config)).fill(0), lastGameWinners: [] };
-  deal(s);
-  return s;
-}
-function deal(s) {
-  const n = s.seats.length;
-  s.prizes = shuffle(s.config.cursed ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -1, -2, -3] : ALL13);
-  s.round = 0;
-  s.hands = range(n).map(() => ALL13.slice());
-  s.doubleAvail = Array(n).fill(!!s.config.double);
-  s.submitted = Array(n).fill(false);
-  s.bids = Array(n).fill(null);
-  s.ready = s.seats.map(x => x.bot);
-  s.history = [];
-  s.scores = Array(n).fill(0);
-  s.phase = "bidding";
-  s.tie = null;
-  s.tieNote = "";
-}
-const prizeNow = s => s.prizes[Math.min(s.round, s.prizes.length - 1)];
-const isLast = s => s.round >= s.prizes.length - 1;
-const sideScore = (s, side) => seatsOnSide(s.config, side).reduce((t, i) => t + s.scores[i], 0);
-const sideName = (s, side) => usesTeams(s.config) ? TEAM_NAME[side] : s.seats[side].name;
-const matchWinners = s => s.phase === "matchOver" ? range(s.gameWins.length).filter(i => s.gameWins[i] >= s.config.gamesToWin) : [];
-
-function submit(s, seat, bid) {
-  if (s.phase !== "bidding" || s.submitted[seat]) return false;
-  if (!s.hands[seat].includes(bid.card)) return false;
-  if (bid.double && !s.doubleAvail[seat]) return false;
-  s.bids[seat] = bid;
-  s.submitted[seat] = true;
-  return true;
-}
-/** Positive prizes go to the highest card, curses to the lowest. */
-function pickWinners(prize, cards, tieRule) {
-  let cand = range(cards.length), cancelled = [];
-  if (tieRule === "cancel") {
-    const count = {};
-    cards.forEach(c => { count[c] = (count[c] || 0) + 1; });
-    cancelled = cand.filter(i => count[cards[i]] > 1);
-    cand = cand.filter(i => count[cards[i]] === 1);
-  }
-  if (!cand.length) return { winners: [], cancelled };
-  const vals = cand.map(i => cards[i]);
-  const target = prize >= 0 ? Math.max(...vals) : Math.min(...vals);
-  return { winners: cand.filter(i => cards[i] === target), cancelled };
-}
-function resolve(s) {
-  const bids = s.bids.slice(), prize = prizeNow(s);
-  const { winners, cancelled } = pickWinners(prize, bids.map(b => b.card), s.config.tieRule);
-  const awards = Array(s.seats.length).fill(0);
-  if (winners.length) {
-    const share = prize * 12 / winners.length;
-    winners.forEach(w => { awards[w] = bids[w].double ? share * 2 : share; });
-  }
-  s.seats.forEach((_, i) => {
-    s.hands[i] = s.hands[i].filter(v => v !== bids[i].card);
-    if (bids[i].double) s.doubleAvail[i] = false;
-    s.scores[i] += awards[i];
-  });
-  s.history.push({ prize, bids, winners, cancelled, awards });
-  s.ready = s.seats.map(x => x.bot);
-  s.phase = "reveal";
-}
-function advance(s) {
-  const n = s.seats.length;
-  if (s.phase === "reveal") {
-    if (isLast(s)) finishGame(s);
-    else { s.round++; s.submitted = Array(n).fill(false); s.bids = Array(n).fill(null); s.phase = "bidding"; }
-  } else if (s.phase === "gameOver") {
-    s.gameNumber++;
-    deal(s);
-  } else return;
-  s.ready = s.seats.map(x => x.bot);
-}
-function finishGame(s) {
-  const sc = range(sideCount(s.config)).map(side => sideScore(s, side));
-  const best = Math.max(...sc);
-  const top = range(sc.length).filter(i => sc[i] === best);
-  if (top.length > 1) {
-    // Tied for first: the tie-breaker wheel decides (see TIEBREAKS).
-    s.lastGameWinners = [];
-    s.tie = { sides: top, spin: null, spinTo: 0, spinAt: 0, result: null, round: 1 };
-    s.phase = "tiebreak";
-    return;
-  }
-  awardGame(s, top);
-}
-function awardGame(s, winners) {
-  s.lastGameWinners = winners;
-  winners.forEach(w => { s.gameWins[w]++; });
-  s.phase = s.gameWins.some(w => w >= s.config.gamesToWin) ? "matchOver" : "gameOver";
-  s.ready = s.seats.map(x => x.bot);
-}
-
-/* ---- Tie-breaker wheel ---- */
-const TIEBREAKS = [
-  { id: "gems", name: "Most gems", color: "#c9962f", desc: "Whoever won the most rounds wins." },
-  { id: "biggest", name: "Biggest gem", color: "#c4482a", desc: "Whoever took the highest single gem wins." },
-  { id: "recent", name: "Last gem", color: "#2f7f6a", desc: "Whoever took a gem most recently wins." },
-  { id: "draw", name: "High card", color: "#6a4a9e", desc: "Each tied side draws a random card. Highest card wins." },
-  { id: "shared", name: "Shared win", color: "#2d6497", desc: "Everyone tied wins together." },
-];
-/** Gems a side took (any share of a positive gem counts), in round order. */
-function gemsTaken(s, side) {
-  return s.history.map((h, k) => ({ round: k + 1, prize: h.prize, got: seatsOnSide(s.config, side).reduce((t, i) => t + h.awards[i], 0) }))
-    .filter(x => x.got > 0 && x.prize > 0);
-}
-function tieValue(s, side, id) {
-  const won = gemsTaken(s, side);
-  if (id === "gems") return won.length;
-  if (id === "biggest") return won.length ? Math.max(...won.map(x => x.prize)) : 0;
-  if (id === "recent") return won.length ? won[won.length - 1].round : 0;
-  return 0;
-}
-function spinTie(s) {
-  const t = s.tie, seg = 360 / TIEBREAKS.length;
-  t.spin = Math.floor(Math.random() * TIEBREAKS.length);
-  // Land the chosen wedge under the pointer at the top, a little off-center so it looks natural.
-  const offset = (Math.random() - .5) * seg * .6;
-  t.spinTo = 360 * 5 - ((t.spin + .5) * seg) + offset;
-  t.spinAt = Date.now();
-  t.result = null;
-}
-function applyTiebreak(s) {
-  const t = s.tie, opt = TIEBREAKS[t.spin], values = {};
-  let winners;
-  if (opt.id === "shared") winners = t.sides.slice();
-  else {
-    if (opt.id === "draw") { const deck = shuffle(ALL13); t.sides.forEach((side, k) => { values[side] = deck[k]; }); }
-    else t.sides.forEach(side => { values[side] = tieValue(s, side, opt.id); });
-    const best = Math.max(...t.sides.map(x => values[x]));
-    winners = t.sides.filter(x => values[x] === best);
-  }
-  t.result = { id: opt.id, values, winners };
-}
-/** After the wheel: award the game, or spin again if the chosen rule left players tied. */
-function finishTiebreak(s) {
-  const t = s.tie, r = t.result, opt = TIEBREAKS[t.spin];
-  if (r.winners.length > 1 && r.id !== "shared") {
-    s.tie = { sides: r.winners, spin: null, spinTo: 0, spinAt: 0, result: null, round: t.round + 1 };
-    return;
-  }
-  s.tieNote = r.id === "shared"
-    ? `Tied on ${fmt(sideScore(s, t.sides[0]))} points. The wheel picked a shared win.`
-    : `Tied on ${fmt(sideScore(s, t.sides[0]))} points. The wheel picked ${opt.name}.`;
-  s.tie = null;
-  awardGame(s, r.winners);
-}
-function rematch(s) {
-  s.gameWins = Array(sideCount(s.config)).fill(0);
-  s.lastGameWinners = [];
-  s.gameNumber = 1;
-  deal(s);
-}
-
-/* Bots only use public information: every hand and the prizes still to come. */
-function quantile(v, sorted) {
-  const i = sorted.indexOf(v);
-  if (sorted.length < 2 || i < 0) return v > 0 ? 1 : 0;
-  return i / (sorted.length - 1);
-}
-function botChoose(s, seat, level) {
-  const hand = s.hands[seat].slice().sort((a, b) => a - b);
-  const prize = prizeNow(s), canDouble = s.doubleAvail[seat];
-  const at = i => hand[Math.max(0, Math.min(hand.length - 1, i))];
-  const idx = q => Math.round(q * (hand.length - 1));
-  const jitter = () => Math.floor(Math.random() * 3) - 1;
-  if (hand.length === 1) return { card: hand[0], double: canDouble && prize > 0 };
-
-  const mySide = sideOf(s.config, seat);
-  const rivals = range(s.seats.length).filter(i => sideOf(s.config, i) !== mySide);
-  const positives = s.prizes.slice(s.round).filter(v => v > 0).sort((a, b) => a - b);
-  const q = quantile(prize, positives);
-
-  if (level === "easy") {
-    return { card: hand[Math.floor(Math.random() * hand.length)], double: canDouble && prize >= 8 && Math.random() < .3 };
-  }
-  if (level === "normal") {
-    if (prize < 0) return { card: at(idx(.3 + .1 * -prize) + jitter()), double: false };
-    return { card: at(idx(q) + jitter()), double: canDouble && prize >= 9 && q >= .8 && Math.random() < .5 };
-  }
-  const rh = rivals.map(i => s.hands[i].slice().sort((a, b) => a - b));
-  if (prize < 0) {
-    const lowestRivalMax = Math.min(...rh.map(h => h[h.length - 1]));
-    const safe = hand.find(c => c > lowestRivalMax);
-    if (safe !== undefined && hand.indexOf(safe) <= Math.floor(hand.length / 2)) return { card: safe, double: false };
-    return { card: at(idx(.4) + jitter()), double: false };
-  }
-  const rivalMax = Math.max(...rh.map(h => h[h.length - 1]));
-  if (q >= .7) {
-    const sure = hand.find(c => c > rivalMax);
-    if (sure !== undefined) return { card: sure, double: canDouble && q >= .85 };
-  }
-  if (q <= .25) return { card: hand[0], double: false };
-  const guess = Math.max(...rh.map(h => h[Math.round(q * (h.length - 1))]));
-  let i = idx(q);
-  const over = hand.find(c => c > guess);
-  if (over !== undefined && over - guess <= 2) i = hand.indexOf(over);
-  if (Math.random() < .2) i += Math.random() < .5 ? 1 : -1;
-  return { card: at(i), double: canDouble && q >= .9 && hand.length <= 6 };
-}
-
-function summary(s, r) {
-  const prize = prizeName(r.prize), parts = [];
-  const nm = i => `<b>${esc(s.seats[i].name)}</b>`;
-  if (r.cancelled.length) {
-    const vals = [...new Set(r.cancelled.map(i => r.bids[i].card))].sort((a, b) => a - b).map(RANK);
-    parts.push(`${vals.join(" and ")} cancelled out.`);
-  }
-  if (!r.winners.length) parts.push(`Nobody takes the ${prize}.`);
-  else if (r.winners.length === 1) {
-    const w = r.winners[0], card = RANK(r.bids[w].card);
-    let t = r.prize >= 0 ? `${nm(w)} wins the ${prize} with ${card}` : `${nm(w)} bid lowest (${card}) and takes the ${prize}`;
-    if (r.bids[w].double) t += `, doubled to ${fmt(r.awards[w])}`;
-    parts.push(t + ".");
-  } else {
-    parts.push(`Tie at ${RANK(r.bids[r.winners[0]].card)}. ${r.winners.map(nm).join(" and ")} split the ${prize}, ${fmt(r.prize * 12 / r.winners.length)} each.`);
-  }
-  return parts.join(" ");
-}
-
-/* ================= Preferences ================= */
-const store = {
-  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
-};
-const APP_VERSION = "1.0";
-const DEFAULT_PREFS = {
-  character: "fox", name: "", deck: "classic", table: "green", fourColor: false,
-  config: { seatCount: 2, teams: false, tieRule: "split", cursed: false, double: false, gamesToWin: 1, botLevel: "normal" },
-  localPlayers: 2, passChars: {},
-};
-let prefs = Object.assign({}, DEFAULT_PREFS, store.get("diamondbid.prefs", {}));
-prefs.config = Object.assign({}, DEFAULT_PREFS.config, prefs.config);
-if (!CHAR[prefs.character]) prefs.character = "fox";
-let stats = Object.assign({ played: 0, won: 0 }, store.get("diamondbid.stats", {}));
-const savePrefs = () => store.set("diamondbid.prefs", prefs);
-
-function applyLook() {
-  const root = document.documentElement;
-  root.dataset.deck = prefs.deck;
-  root.dataset.table = prefs.table;
-  root.dataset.four = prefs.fourColor ? "1" : "0";
-}
-
-/* ================= App state ================= */
-let app = { screen: "home", setup: null, modal: null, botOffset: Math.floor(Math.random() * 8), introDone: false };
-let G = null; // the current game
-let botTimer = null;
-let revealTimer = null, tickTimer = null;
-/** How long the revealed bids stay on the table before the next gem is dealt. */
-const REVEAL_MS = 3000;
-
-const esc = v => String(v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-const myName = () => (prefs.name || "").trim() || CHAR[prefs.character].name;
-
-/* ================= Markup helpers ================= */
-const avatar = (id, cls = "") => `<span class="avatar ${cls}" style="--ring:${CHAR[id].ring}" role="img" aria-label="${esc(CHAR[id].name)}"><svg viewBox="0 0 100 100">${AVATAR_SVG[id]}</svg></span>`;
-function cardFace(suit, v, cls = "", tag = "div", attrs = "") {
-  return `<${tag} class="card suit-${suit} ${cls}" ${attrs} aria-label="${RANK(v)} of ${SUIT_NAME[suit]}"><span class="ix"><b>${RANK(v)}</b><i>${PIP[suit]}</i></span><span class="pip">${PIP[suit]}</span><span class="ix b"><b>${RANK(v)}</b><i>${PIP[suit]}</i></span></${tag}>`;
-}
-const cardBack = (cls = "") => `<div class="card back ${cls}" aria-label="Face-down card"></div>`;
-const prizeCard = (v, cls = "") => `<div class="card prize ${v < 0 ? "curse" : ""} ${cls}" aria-label="${prizeName(v)}">${v < 0 ? CURSE_SVG : GEM_SVG}<b>${prizeLabel(v)}</b></div>`;
-const thinking = `<span class="thinking" aria-label="choosing"><span></span><span></span><span></span></span>`;
-
-/* ================= Home ================= */
-function renderHome() {
-  const c = CHAR[prefs.character];
-  const intro = app.introDone ? "" : "intro";
-  app.introDone = true;
-  const fanCards = [
-    [cardFace("h", 13, "xl"), -26, 18, 0],
-    [cardFace("c", 12, "xl"), -13, 4, 1],
-    [prizeCard(13, "xl"), 0, 0, 2],
-    [cardFace("d", 11, "xl"), 13, 4, 3],
-    [cardFace("s", 1, "xl"), 26, 18, 4],
-  ].map(([html, r, y, i]) => html.replace('class="card', `style="--r:${r}deg;--y:${y}px;--d:${i * 90}ms;z-index:${i === 2 ? 5 : i}" class="card`)).join("");
-
-  return `
-  <div class="wrap">
-    <header class="topbar">
-      <div class="brand">${GEM_SVG}Diamond Bid</div>
-      <nav class="topnav" aria-label="Sections">
-        <a href="#characters">Characters</a><a href="#designs">Card designs</a><a href="#how">How to play</a>
-      </nav>
-    </header>
-
-    <section class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">A card game of secret bids · 2 or 4 players</p>
-        <h1>Diamond <em>Bid</em></h1>
-        <p class="lede">Thirteen gems, thirteen cards each. Everyone bids one card face down, all cards flip at once, and the highest card takes the gem.</p>
-        <div class="cta">
-          <button class="btn primary" data-act="open-setup" data-kind="bots">Play vs bots</button>
-          <button class="btn ghost" data-act="open-setup" data-kind="pass">Pass and play</button>
-        </div>
-        <div class="playing-as">
-          ${avatar(c.id)}
-          <div><small>Playing as</small><b id="playing-name">${esc(myName())}</b></div>
-          <a href="#characters">Change</a>
-        </div>
-      </div>
-      <div class="hero-art">
-        <div class="fan ${intro}">${fanCards}</div>
-      </div>
-    </section>
-
-    <section class="block" id="characters">
-      <div class="block-head">
-        <div>
-          <h2>Choose your character</h2>
-          <p>Bots take the characters you don't pick. In pass and play, each person picks their own at the start.</p>
-        </div>
-        <label class="name-field" for="name">Your name (optional)
-          <input id="name" maxlength="16" placeholder="${esc(c.name)}" value="${esc(prefs.name)}" autocomplete="nickname">
-        </label>
-      </div>
-      <div class="char-grid">
-        ${CHARACTERS.map(ch => `
-          <button class="char" data-act="pick-char" data-id="${ch.id}" aria-pressed="${ch.id === prefs.character}">
-            ${avatar(ch.id, "lg")}
-            <b>${esc(ch.name)}</b>
-            <span class="title">${esc(ch.title)}</span>
-            <span class="line">${esc(ch.line)}</span>
-          </button>`).join("")}
-      </div>
-    </section>
-
-    <section class="block" id="designs">
-      <div class="block-head">
-        <div>
-          <h2>Card design</h2>
-          <p>Changes the faces and backs of every card, the hero above included.</p>
-        </div>
-      </div>
-      <div class="deck-grid">
-        ${DECKS.map(d => `
-          <button class="deck" data-act="pick-deck" data-id="${d.id}" data-deck="${d.id}" aria-pressed="${d.id === prefs.deck}">
-            <div class="mini">${cardBack("md")}${cardFace("h", 13, "md")}${cardFace("c", 12, "md")}</div>
-            <b>${d.name}</b><small>${d.note}</small>
-          </button>`).join("")}
-      </div>
-      <div class="options-row">
-        <div>
-          <div class="opt-label">Table</div>
-          <div class="swatches">
-            ${TABLES.map(t => `<div><button class="swatch" data-act="pick-table" data-id="${t.id}" aria-pressed="${t.id === prefs.table}" aria-label="${t.name} table" style="background:radial-gradient(circle at 35% 30%, ${t.a}, ${t.b})"></button><div class="swatch-label">${t.name}</div></div>`).join("")}
-          </div>
-        </div>
-        <div>
-          <div class="opt-label">Suit colors</div>
-          <button class="switch" data-act="four" aria-pressed="${prefs.fourColor}"><span class="track"></span>Four-color suits</button>
-          <div class="swatch-label" style="text-align:left;margin-top:8px">Gives Clubs and Diamonds their own colors. Handy with 4 players.</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="how">
-      <div class="block-head"><div><h2>How to play</h2><p>One round per gem. A game is 13 rounds.</p></div></div>
-      <div class="steps">
-        <div class="step"><span class="n">1</span><div class="art">${prizeCard(9, "sm")}</div><h3>A gem is turned up</h3><p>It's worth its number in points: 1 to 13.</p></div>
-        <div class="step"><span class="n">2</span><div class="art">${cardBack("sm")}${cardBack("sm")}</div><h3>Everyone bids</h3><p>Each player picks one card from their suit, A to K, and lays it face down.</p></div>
-        <div class="step"><span class="n">3</span><div class="art">${cardFace("h", 12, "sm")}${cardFace("s", 8, "sm")}</div><h3>Reveal</h3><p>All bids flip together. The highest card takes the gem. Used cards are gone.</p></div>
-        <div class="step"><span class="n">4</span><div class="art">${prizeCard(13, "sm")}${prizeCard(7, "sm")}</div><h3>Most points wins</h3><p>After 13 gems, add up your gems. Spend your Kings wisely.</p></div>
-      </div>
-      <div class="variants">
-        <div class="variant"><h3>Tied bids</h3><p>Split: everyone tied shares the gem. Cancel out: matching cards knock each other out.</p></div>
-        <div class="variant"><h3>Tied at the end?</h3><p>Spin the wheel: most gems, biggest gem, last gem, high card or a shared win.</p></div>
-        <div class="variant"><h3>Cursed gems</h3><p>−1, −2 and −3 replace the 11, 12 and 13. The lowest bid takes the curse.</p></div>
-        <div class="variant"><h3>Double token</h3><p>Once per game, double what you get in one round. Curses double too.</p></div>
-        <div class="variant"><h3>4 players or 2 vs 2</h3><p>Play free-for-all, or as partners: Hearts and Diamonds against Clubs and Spades.</p></div>
-        <div class="variant"><h3>Best of 3</h3><p>First side to win two games takes the match.</p></div>
-      </div>
-    </section>
-
-    <footer class="foot">
-      <span>Your record vs bots: ${stats.won} won of ${stats.played} matches</span>
-      <span>Diamond Bid · Version ${APP_VERSION}</span>
-    </footer>
-  </div>`;
-}
-
-/* ================= Setup ================= */
-function seatPlan(kind) {
-  const c = prefs.config, n = c.seatCount;
-  const people = kind === "bots" ? 1 : Math.min(prefs.localPlayers, n);
-  const used = new Set([prefs.character]);
-  const chars = [prefs.character];
-  for (let i = 1; i < people; i++) {
-    let id = prefs.passChars[i];
-    if (!id || used.has(id)) id = CHAR_IDS.find(x => !used.has(x));
-    chars[i] = id; used.add(id);
-  }
-  const rotated = CHAR_IDS.map((_, k) => CHAR_IDS[(k + app.botOffset) % CHAR_IDS.length]);
-  for (let i = people; i < n; i++) {
-    const id = rotated.find(x => !used.has(x));
-    chars[i] = id; used.add(id);
-  }
-  return range(n).map(i => ({
-    char: chars[i],
-    name: i === 0 ? myName() : CHAR[chars[i]].name,
-    bot: i >= people,
-    level: c.botLevel,
-  }));
-}
-
-function renderSetup() {
-  const kind = app.setup, c = prefs.config;
-  const seg = (key, options, value = c[key]) => `<div class="seg" role="group">${options.map(([val, label]) =>
-    `<button type="button" data-act="cfg" data-key="${key}" data-val='${JSON.stringify(val)}' aria-pressed="${value === val}">${label}</button>`).join("")}</div>`;
-  const toggle = (key, label) => `<button type="button" class="switch" data-act="cfg" data-key="${key}" data-val='${JSON.stringify(!c[key])}' aria-pressed="${!!c[key]}"><span class="track"></span>${label}</button>`;
-  const plan = seatPlan(kind);
-  const people = plan.filter(p => !p.bot).length;
-  const hasBots = plan.some(p => p.bot);
-
-  const seats = plan.map((p, i) => {
-    const suit = suitFor(i, c.seatCount);
-    const role = p.bot ? `Bot · ${c.botLevel}` : (kind === "bots" ? "You" : `Player ${i + 1}`);
-    const team = usesTeams(c) ? `<span class="team-dot" style="background:${TEAM_COLOR[sideOf(c, i)]}"></span>` : "";
-    return `<div class="seat-row">
-      <button class="avatar-btn" data-act="cycle-char" data-seat="${i}" ${p.bot ? "disabled" : ""} aria-label="Change character for seat ${i + 1}">${avatar(p.char)}</button>
-      <div><b>${esc(p.name)}</b><small>${team}${feltPip(suit)} ${SUIT_NAME[suit]} · ${role}</small></div>
-    </div>`;
-  }).join("");
-
-  return `<div class="overlay" data-act="close-bg">
-    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setup-title">
-      <div class="sheet-head">
-        <h2 id="setup-title">${kind === "bots" ? "Play vs bots" : "Pass and play"}</h2>
-        <button class="icon-btn" data-act="close" aria-label="Close">✕</button>
-      </div>
-      <div class="field"><span>Players</span>${seg("seatCount", [[2, "2 players"], [4, "4 players"]])}</div>
-      ${c.seatCount === 4 ? `<div class="field"><span>Mode</span>${seg("teams", [[false, "Free-for-all"], [true, "2 vs 2 teams"]])}</div>` : ""}
-      ${kind === "pass" ? `<div class="field"><span>People here</span>${seg("localPlayers", range(c.seatCount - 1).map(k => [k + 2, String(k + 2)]), Math.min(prefs.localPlayers, c.seatCount))}</div>` : ""}
-      ${hasBots ? `<div class="field"><span>Bots</span>${seg("botLevel", [["easy", "Easy"], ["normal", "Normal"], ["hard", "Hard"]])}</div>` : ""}
-      <div class="field"><span>Ties</span>${seg("tieRule", [["split", "Split the gem"], ["cancel", "Cancel out"]])}
-        <div class="hint">${c.tieRule === "split" ? "Everyone tied for the best bid shares the gem." : "Matching cards knock each other out; the best card left wins."}</div></div>
-      <div class="field"><span>Extras</span><div style="display:flex;gap:18px;flex-wrap:wrap">${toggle("cursed", "Cursed gems")}${toggle("double", "Double token")}</div></div>
-      <div class="field"><span>Match</span>${seg("gamesToWin", [[1, "Single game"], [2, "Best of 3"]])}</div>
-      <div>
-        <div class="opt-label">At the table${people > 1 ? " · tap an avatar to change character" : ""}</div>
-        <div class="seats">${seats}</div>
-      </div>
-      <div class="sheet-foot">
-        ${hasBots ? `<button class="link" data-act="reroll">Seat different bots</button>` : "<span></span>"}
-        <button class="btn primary" data-act="start">Deal the cards</button>
-      </div>
-    </div>
-  </div>`;
-}
-
-/* ================= Game controller ================= */
-function startGame() {
-  const kind = app.setup;
-  const config = Object.assign({}, prefs.config);
-  const seats = seatPlan(kind);
-  const mySeats = range(seats.length).filter(i => !seats[i].bot);
-  G = { kind, s: newMatch(config, seats), mySeats, unlocked: mySeats.length === 1 ? mySeats[0] : null,
-        selected: null, useDouble: false, revealAnim: false, seen: [], recorded: false };
-  app.setup = null;
-  app.screen = "game";
-  app.modal = null;
-  window.scrollTo(0, 0);
-  progress();
-}
-const activeSeat = () => G.s.phase === "bidding" ? G.mySeats.find(i => !G.s.submitted[i]) : undefined;
-const needsHandoff = () => { const a = activeSeat(); return a !== undefined && G.mySeats.length > 1 && G.unlocked !== a; };
-const homeSeat = () => G.mySeats.length === 1 ? G.mySeats[0] : undefined;
-function handSeat() {
-  const a = activeSeat();
-  if (a !== undefined) return needsHandoff() ? undefined : a;
-  return homeSeat();
-}
-const iAmReady = () => G.mySeats.every(i => G.s.ready[i]);
-
-function progress() {
-  const s = G.s;
-  if (s.phase === "bidding" && s.submitted.every(Boolean)) {
-    resolve(s);
-    G.revealAnim = true;
-    G.revealAt = Date.now();
-  } else if ((s.phase === "reveal" || s.phase === "gameOver") && s.ready.every(Boolean)) {
-    advance(s);
-    G.seen = [];
-  }
-  if (G.mySeats.length > 1 && s.phase !== "bidding") G.unlocked = null;
-  if (s.phase === "matchOver" && !G.recorded && G.kind === "bots") {
-    G.recorded = true;
-    stats.played++;
-    if (matchWinners(s).includes(sideOf(s.config, G.mySeats[0]))) stats.won++;
-    store.set("diamondbid.stats", stats);
-  }
-  if (s.phase !== "reveal") G.revealAt = null;
-  scheduleBots();
-  render();
-  scheduleReveal();
-}
-/** After a reveal, deal the next gem automatically once the countdown runs out. */
-function scheduleReveal() {
-  clearTimeout(revealTimer);
-  clearInterval(tickTimer);
-  if (!G || G.s.phase !== "reveal") return;
-  if (!G.revealAt) G.revealAt = Date.now();
-  const left = () => REVEAL_MS - (Date.now() - G.revealAt);
-  revealTimer = setTimeout(() => { if (G && G.s.phase === "reveal") nextStep(); }, Math.max(0, left()));
-  tickTimer = setInterval(() => {
-    if (!G || !G.revealAt) return;
-    const secs = String(Math.max(1, Math.ceil(left() / 1000)));
-    ["countdown", "countdown-big"].forEach(id => {
-      const el = document.getElementById(id);
-      if (el && el.textContent !== secs) {
-        el.textContent = secs;
-        el.classList.remove("tick");
-        void el.offsetWidth; // restart the pop animation
-        el.classList.add("tick");
-      }
-    });
-  }, 150);
-}
-function scheduleBots() {
-  clearTimeout(botTimer);
-  const s = G.s;
-  if (s.phase !== "bidding" || !s.seats.some((x, i) => x.bot && !s.submitted[i])) return;
-  botTimer = setTimeout(() => {
-    if (!G || G.s.phase !== "bidding") return;
-    G.s.seats.forEach((x, i) => { if (x.bot && !G.s.submitted[i]) submit(G.s, i, botChoose(G.s, i, x.level)); });
-    progress();
-  }, 650 + Math.random() * 650);
-}
-function placeBid() {
-  const seat = activeSeat();
-  if (seat === undefined || G.selected == null) return;
-  if (submit(G.s, seat, { card: G.selected, double: G.useDouble })) {
-    G.selected = null;
-    G.useDouble = false;
-    progress();
-  }
-}
-function nextStep() {
-  G.mySeats.forEach(i => { G.s.ready[i] = true; });
-  progress();
-}
-const SPIN_MS = 4200;
-let spinTimer = null;
-function spinWheel() {
-  if (G.s.phase !== "tiebreak" || G.s.tie.spin !== null) return;
-  spinTie(G.s);
-  render();
-  scheduleSpin();
-}
-function scheduleSpin() {
-  clearTimeout(spinTimer);
-  const t = G && G.s.tie;
-  if (!t || t.spin === null || t.result) return;
-  spinTimer = setTimeout(() => {
-    if (!G || !G.s.tie || G.s.tie.result) return;
-    applyTiebreak(G.s);
-    render();
-  }, Math.max(0, SPIN_MS - (Date.now() - t.spinAt)));
-}
-function tieContinue() {
-  if (!G.s.tie || !G.s.tie.result) return;
-  finishTiebreak(G.s);
-  progress();
-}
-function leaveGame() {
-  clearTimeout(botTimer);
-  clearTimeout(spinTimer);
-  clearTimeout(revealTimer);
-  clearInterval(tickTimer);
-  G = null;
-  app.screen = "home";
-  app.modal = null;
-  render();
-}
-
-/* ================= Table ================= */
-function renderGame() {
-  const s = G.s, c = s.config, n = s.seats.length;
-  const home = homeSeat();
-  const tileSeats = range(n).filter(i => i !== home);
-  const cols = tileSeats.length === 4 ? 2 : tileSeats.length;
-  const result = s.phase === "reveal" ? s.history[s.history.length - 1] : null;
-  const anim = G.revealAnim;
-  G.revealAnim = false;
-  const prize = prizeNow(s);
-  const roundKey = `${s.gameNumber}-${s.round}`;
-  const prizeAnim = G.prizeKey !== roundKey ? " drop" : "";
-  G.prizeKey = roundKey;
-
-  const dropClass = i => {
-    if (s.phase === "bidding" && s.submitted[i] && !G.seen[i]) { G.seen[i] = true; return " drop"; }
-    return "";
-  };
-  // Work out the deal-in animations once, so the tiles and the middle of the table agree.
-  const drops = range(n).map(dropClass);
-
-  const tile = i => {
-    const p = s.seats[i], suit = suitFor(i, n);
-    const win = result && result.winners.includes(i);
-    let bid;
-    if (result) {
-      const cx = result.cancelled.includes(i);
-      bid = cardFace(suit, result.bids[i].card, "sm" + (anim ? " flip" : "") + (cx ? " cancelled" : "")) + (cx ? `<span class="cancel-x">✕</span>` : "");
-      if (result.bids[i].double) bid += `<span class="x2">×2</span>`;
-    } else if (s.phase === "bidding" && s.submitted[i]) bid = cardBack("sm" + drops[i]);
-    else bid = `<div class="slot sm">${s.phase === "bidding" ? thinking : ""}</div>`;
-    const aw = result && result.awards[i] ? `<span class="award ${result.awards[i] < 0 ? "neg" : ""}">${result.awards[i] > 0 ? "+" : ""}${fmt(result.awards[i])}</span>` : "";
-    const stripe = usesTeams(c) ? `<span class="stripe" style="background:${TEAM_COLOR[sideOf(c, i)]}"></span>` : "";
-    const dbl = c.double ? `<span class="tok ${s.doubleAvail[i] ? "" : "used"}" title="${s.doubleAvail[i] ? "Double token ready" : "Double token used"}"><i>×2</i></span>` : "";
-    return `<div class="tile ${win ? "win" : ""}">${stripe}
-      <div class="who">${avatar(p.char)}<div><b>${esc(p.name)}</b><small>${feltPip(suit)} ${p.bot ? "Bot" : SUIT_NAME[suit]}</small></div></div>
-      <div class="row"><div class="bidwrap">${bid}</div><div><div class="score">${fmt(s.scores[i])}</div>${aw}</div></div>
-      <div class="tokens"><span>${s.hands[i].length} cards</span>${dbl}</div>
-    </div>`;
-  };
-
-  // My spot in the middle (single-human games)
-  let mine = "";
-  if (home !== undefined) {
-    const suit = suitFor(home, n);
-    let card;
-    if (result) card = cardFace(suit, result.bids[home].card, "lg" + (anim ? " flip" : "") + (result.cancelled.includes(home) ? " cancelled" : ""));
-    else if (s.submitted[home]) card = cardBack("lg" + drops[home]);
-    else card = `<div class="slot lg">${G.selected != null ? "" : "Pick a card"}</div>`;
-    const bid = s.bids[home];
-    const aw = result && result.awards[home] ? `<span class="award ${result.awards[home] < 0 ? "neg" : ""}">${result.awards[home] > 0 ? "+" : ""}${fmt(result.awards[home])}</span>` : "";
-    mine = `<div class="spot ${result && result.winners.includes(home) ? "win" : ""}">
-      <span class="lbl">Your bid</span>
-      <div class="bidwrap" style="position:relative">${card}${bid && bid.double ? `<span class="x2">×2</span>` : ""}</div>
-      <span class="sub">${aw}</span>
-    </div>`;
-  }
-
-  // Opponents' bids to the left of the gem (single-human games)
-  let theirs = "";
-  if (home !== undefined) {
-    const size = tileSeats.length === 1 ? "lg" : "md";
-    const one = i => {
-      const suit = suitFor(i, n);
-      let card;
-      if (result) {
-        const cx = result.cancelled.includes(i);
-        card = cardFace(suit, result.bids[i].card, size + (anim ? " flip" : "") + (cx ? " cancelled" : "")) + (cx ? `<span class="cancel-x">✕</span>` : "");
-        if (result.bids[i].double) card += `<span class="x2">×2</span>`;
-      } else if (s.submitted[i]) card = cardBack(size + drops[i]);
-      else card = `<div class="slot ${size}">${thinking}</div>`;
-      const aw = result && result.awards[i] ? `<span class="award ${result.awards[i] < 0 ? "neg" : ""}">${result.awards[i] > 0 ? "+" : ""}${fmt(result.awards[i])}</span>` : "";
-      return `<div class="opp ${result && result.winners.includes(i) ? "win" : ""}">
-        ${tileSeats.length > 1 ? avatar(s.seats[i].char, "sm") : ""}
-        <div class="bidwrap" style="position:relative">${card}</div>
-        <span class="sub">${aw}</span>
-      </div>`;
-    };
-    const label = tileSeats.length === 1 ? `${esc(s.seats[tileSeats[0]].name)}'s bid` : "Their bids";
-    theirs = `<div class="spot">
-      <span class="lbl">${label}</span>
-      <div class="opps">${tileSeats.map(one).join("")}</div>
-    </div>`;
-  }
-
-  // My score bar above my hand (single-human games)
-  // Score bars: the same design for you and for each opponent (single-human games)
-  const playerBar = (i, you) => {
-    const p = s.seats[i], suit = suitFor(i, n);
-    const aw = result && result.awards[i] ? `<span class="award ${result.awards[i] < 0 ? "neg" : ""}">${result.awards[i] > 0 ? "+" : ""}${fmt(result.awards[i])} this round</span>` : "";
-    const sorted = range(n).map(k => s.scores[k]).sort((a, b) => b - a);
-    const place = sorted.indexOf(s.scores[i]) + 1;
-    const tied = sorted.filter(v => v === s.scores[i]).length > 1;
-    const standing = s.scores.every(v => v === 0) ? "" : `${tied ? "Tied " : ""}${["", "1st", "2nd", "3rd", "4th"][place]} of ${n}`;
-    const team = usesTeams(c) ? `<span class="team-dot" style="background:${TEAM_COLOR[sideOf(c, i)]}"></span>` : "";
-    const dbl = c.double ? `<span class="tok ${s.doubleAvail[i] ? "" : "used"}"><i>×2</i>${s.doubleAvail[i] ? "ready" : "used"}</span>` : "";
-    const win = result && result.winners.includes(i);
-    return `<div class="mebar ${you ? "you" : ""} ${win ? "win" : ""}">
-      ${avatar(p.char)}
-      <div class="me-who"><b>${esc(p.name)} <small>${you ? "(you)" : p.bot ? "(bot)" : ""}</small></b><small>${team}${feltPip(suit)} ${SUIT_NAME[suit]} · ${s.hands[i].length} cards${standing ? " · " + standing : ""}</small></div>
-      <div class="me-score"><span class="lbl">${you ? "Your score" : "Score"}</span><b>${fmt(s.scores[i])}</b>${aw}</div>
-      ${dbl ? `<div class="tokens">${dbl}</div>` : ""}
-    </div>`;
-  };
-  const meBar = home !== undefined ? playerBar(home, true) : "";
-
-  // Status
-  let status = "", acts = "";
-  if (s.phase === "bidding") {
-    const a = activeSeat();
-    if (a !== undefined && !needsHandoff()) {
-      status = G.selected != null
-        ? `Bid <b>${RANK(G.selected)}</b> on the ${prizeName(prize)}?`
-        : prize < 0 ? `Pick a card. Don't be the lowest, or you take the ${prizeName(prize)}.` : `Pick a card to bid on the ${prizeName(prize)}.`;
-    } else {
-      const waiting = range(n).filter(i => !s.submitted[i]).map(i => esc(s.seats[i].name));
-      status = waiting.length ? `Waiting for ${waiting.join(", ")}…` : "Revealing…";
-    }
-  } else if (s.phase === "reveal") {
-    status = summary(s, result);
-    const elapsed = Math.min(REVEAL_MS, Date.now() - (G.revealAt || Date.now()));
-    const secs = Math.max(1, Math.ceil((REVEAL_MS - elapsed) / 1000));
-    acts = `<span class="countdown">${isLast(s) ? "Results" : "Next gem"} in <b id="countdown">${secs}</b></span>
-      <button class="btn ghost" data-act="next">Skip</button>`;
-    status += `<span class="timebar" aria-hidden="true"><span style="animation-delay:-${elapsed}ms"></span></span>`;
-  }
-
-  // Hand
-  let handHTML = "";
-  const hs = handSeat();
-  if (hs !== undefined) {
-    const suit = suitFor(hs, n);
-    const canBid = activeSeat() === hs && !needsHandoff();
-    const pendingCard = s.phase === "bidding" && s.bids[hs] ? s.bids[hs].card : null;
-    handHTML = `<div class="hand" role="group" aria-label="Your cards">${s.hands[hs].map(v =>
-      cardFace(suit, v, `md ${G.selected === v ? "sel" : ""} ${pendingCard === v ? "pending" : ""}`, "button",
-        `data-act="select" data-v="${v}" ${canBid ? "" : "disabled"} aria-pressed="${G.selected === v}"`)).join("")}</div>`;
-    if (canBid) {
-      handHTML += `<div class="bidbar">
-        ${c.double && s.doubleAvail[hs] ? `<button class="dbl" data-act="double" aria-pressed="${G.useDouble}">×2 Double${G.useDouble ? " on" : ""}</button>` : ""}
-        <button class="btn primary" data-act="bid" ${G.selected == null ? "disabled" : ""}>Place bid face down</button>
-      </div>`;
-    }
-  }
-
-  const teamBar = usesTeams(c) ? `<div class="teambar">
-      ${[0, 1].map(side => `<span class="t"><span class="team-dot" style="background:${TEAM_COLOR[side]}"></span>${TEAM_NAME[side]} <b>${fmt(sideScore(s, side))}</b>${c.gamesToWin > 1 ? `<small style="color:var(--muted)">· ${s.gameWins[side]} won</small>` : ""}</span>`).join(`<span style="color:var(--muted)">vs</span>`)}
-    </div>` : "";
-
-  let overlay = "";
-  if (needsHandoff()) {
-    const a = activeSeat(), p = s.seats[a];
-    overlay = `<div class="cover"><div class="box">
-      ${avatar(p.char, "xl")}
-      <h2>${esc(p.name)}, your bid</h2>
-      <p>Pass the device to ${esc(p.name)}. Everyone else, look away.<br>The ${prizeName(prize)} is on the table.</p>
-      <button class="btn primary" data-act="unlock">Show my hand</button>
-    </div></div>`;
-  } else if (s.phase === "tiebreak") {
-    overlay = renderTiebreak();
-  } else if (s.phase === "gameOver" || s.phase === "matchOver") {
-    overlay = renderResults();
-  }
-
-  return `<div class="wrap"><div class="table">
-    <div class="tbar">
-      <button class="icon-btn" data-act="exit" aria-label="Leave game">✕</button>
-      <div class="mid"><b>Gem ${Math.min(s.round + 1, s.prizes.length)} of ${s.prizes.length}</b>
-        <small>${c.gamesToWin > 1 ? `Game ${s.gameNumber} · first to 2 wins` : (usesTeams(c) ? "2 vs 2" : `${n} players`)}${c.tieRule === "cancel" ? " · ties cancel" : " · ties split"}</small></div>
-      <div class="right">
-        <button class="icon-btn" data-act="modal" data-m="cards" aria-label="Cards left and history" title="Cards left">▤</button>
-        <button class="icon-btn" data-act="modal" data-m="rules" aria-label="Rules" title="Rules">?</button>
-      </div>
-    </div>
-    ${teamBar}
-    ${home !== undefined
-      ? `<div class="bars ${tileSeats.length > 1 ? "compact" : ""}">${tileSeats.map(i => playerBar(i, false)).join("")}</div>`
-      : `<div class="tiles" style="grid-template-columns:repeat(${cols}, minmax(0, 1fr))">${tileSeats.map(tile).join("")}</div>`}
-    <div class="center">
-      ${theirs}
-      <div class="spot">
-        <span class="lbl ${prize < 0 ? "cursed" : "gold"}">${prize < 0 ? "Cursed" : "Up for grabs"}</span>
-        ${prizeCard(prize, "lg" + prizeAnim)}
-        ${s.phase === "reveal" ? (() => {
-          const gone = G.revealAt ? Math.min(REVEAL_MS, Date.now() - G.revealAt) : 0;
-          return `<div class="bigcount" role="timer" aria-label="Next gem soon">
-            <svg viewBox="0 0 36 36" aria-hidden="true"><circle class="track" cx="18" cy="18" r="15.915"/><circle class="ring" cx="18" cy="18" r="15.915" style="animation-delay:-${gone}ms"/></svg>
-            <b id="countdown-big">${Math.max(1, Math.ceil((REVEAL_MS - gone) / 1000))}</b>
-          </div>`;
-        })() : `<span class="sub">${prize < 0 ? "Lowest bid takes it" : "Highest bid wins"}</span>`}
-      </div>
-      ${mine}
-    </div>
-    ${status ? `<div class="status" aria-live="polite"><p>${status}</p><div class="acts">${acts}</div></div>` : ""}
-    ${meBar}
-    ${handHTML}
-  </div></div>${overlay}`;
-}
-
-function renderResults() {
-  const s = G.s, c = s.config;
-  const winners = s.lastGameWinners;
-  const sides = range(sideCount(c)).sort((a, b) =>
-    (winners.includes(b) - winners.includes(a)) || (sideScore(s, b) - sideScore(s, a)));
-  const mws = matchWinners(s), mySide = sideOf(c, G.mySeats[0]);
-  const names = list => list.map(x => esc(sideName(s, x))).join(" and ");
-  let head;
-  if (mws.length) {
-    if (G.kind === "bots" && mws.includes(mySide)) head = mws.length > 1 ? "You share the match!" : "You win the match!";
-    else head = `${names(mws)} ${mws.length > 1 ? "share" : "wins"} the match!`;
-  } else if (winners.length > 1) {
-    head = `${names(winners)} share ${c.gamesToWin > 1 ? `game ${s.gameNumber}` : "the win"}!`;
-  } else {
-    head = `${names(winners)} ${c.gamesToWin > 1 ? `takes game ${s.gameNumber}` : "wins!"}`;
-  }
-  const sub = s.tieNote ? esc(s.tieNote) : "";
-  const faces = side => `<span class="avs">${seatsOnSide(c, side).map(i => avatar(s.seats[i].char, "sm")).join("")}</span>`;
-  const heroSides = mws.length ? mws : winners;
-  const rows = sides.map((side, place) => `<div class="res ${winners.includes(side) ? "first" : ""}">
-      <span class="place">${place + 1}</span>${faces(side)}
-      <span class="nm">${esc(sideName(s, side))}</span>
-      <span class="pts">${fmt(sideScore(s, side))}</span>
-      ${c.gamesToWin > 1 ? `<span class="gw">${s.gameWins[side]} won</span>` : ""}
-    </div>`).join("");
-  const buttons = s.phase === "matchOver"
-    ? `<button class="btn ghost" data-act="home">Home</button><button class="btn primary" data-act="rematch">Rematch</button>`
-    : `<button class="btn ghost" data-act="home">Home</button><button class="btn primary" data-act="next">Next game</button>`;
-  return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="res-title">
-    <div class="headline">
-      <span class="avs">${heroSides.flatMap(side => seatsOnSide(c, side)).map(i => avatar(s.seats[i].char, "lg")).join("")}</span>
-      <h2 id="res-title">${head}</h2>
-      ${sub ? `<p style="margin:0;color:var(--muted)">${sub}</p>` : ""}
-    </div>
-    <div class="results">${rows}</div>
-    <div class="sheet-foot" style="justify-content:center">${buttons}</div>
-  </div></div>`;
-}
-
-function renderTiebreak() {
-  const s = G.s, c = s.config, t = s.tie, n = s.seats.length;
-  const seg = 360 / TIEBREAKS.length;
-  const pt = (deg, r) => { const a = (deg - 90) * Math.PI / 180; return `${(50 + r * Math.cos(a)).toFixed(2)} ${(50 + r * Math.sin(a)).toFixed(2)}`; };
-  const wedges = TIEBREAKS.map((o, k) => `
-    <path d="M50 50 L${pt(k * seg, 48)} A48 48 0 0 1 ${pt((k + 1) * seg, 48)}Z" fill="${o.color}" stroke="#0d1714" stroke-width=".8"/>
-    <text transform="rotate(${(k + .5) * seg} 50 50)" x="50" y="19" text-anchor="middle" font-family="Figtree, sans-serif" font-size="5.4" font-weight="700" fill="#fffaf0">${o.name}</text>`).join("");
-  const spinning = t.spin !== null && !t.result;
-  const gone = spinning ? Math.min(SPIN_MS, Date.now() - t.spinAt) : 0;
-  const wheelStyle = t.spin === null ? "" : `--to:${t.spinTo}deg;${spinning ? `animation-delay:-${gone}ms` : ""}`;
-  const wheel = `<div class="wheel">
-    <svg viewBox="-2 -8 104 110" role="img" aria-label="Tie-breaker wheel">
-      <g class="wheel-g ${t.spin === null ? "idle" : spinning ? "spinning" : "stopped"}" style="${wheelStyle}">
-        <circle cx="50" cy="50" r="49.5" fill="#0d1714"/>${wedges}
-      </g>
-      <circle cx="50" cy="50" r="9" fill="#0d1714" stroke="#d9ab4f" stroke-width="1.5"/>
-      <path d="M50 44 L56 50 L50 56 L44 50Z" fill="#d9ab4f"/>
-      <path d="M44 -7 L56 -7 L50 5Z" fill="#d9ab4f" stroke="#0d1714" stroke-width="1"/>
-    </svg>
-  </div>`;
-
-  const tiedNames = t.sides.map(x => `<b>${esc(sideName(s, x))}</b>`).join(" and ");
-  const faces = side => `<span class="avs">${seatsOnSide(c, side).map(i => avatar(s.seats[i].char)).join("")}</span>`;
-  let body;
-  if (!t.result) {
-    body = `<p class="tie-lede">${tiedNames} are tied on <b>${fmt(sideScore(s, t.sides[0]))}</b> points.
-      ${t.round > 1 ? "Still tied, so spin again." : "Spin the wheel to pick the tie-breaker."}</p>
-      <div class="tie-legend">${TIEBREAKS.map(o => `<span><i style="background:${o.color}"></i>${o.name}</span>`).join("")}</div>
-      <div class="sheet-foot" style="justify-content:center">
-        <button class="btn primary" data-act="spin" ${spinning ? "disabled" : ""}>${spinning ? "Spinning…" : t.round > 1 ? "Spin again" : "Spin the wheel"}</button>
-      </div>`;
-  } else {
-    const opt = TIEBREAKS[t.spin], r = t.result;
-    const valueText = side => {
-      const v = r.values[side];
-      if (r.id === "gems") return `${v} gem${v === 1 ? "" : "s"}`;
-      if (r.id === "biggest") return v ? `${v} gem` : "no gems";
-      if (r.id === "recent") return v ? `round ${v}` : "no gems";
-      if (r.id === "draw") return cardFace(suitFor(seatsOnSide(c, side)[0], n), v, "sm flip");
-      return "Wins";
-    };
-    const rows = t.sides.map(side => `<div class="res ${r.winners.includes(side) ? "first" : ""}">
-        ${faces(side)}<span class="nm">${esc(sideName(s, side))}</span><span class="tie-val">${valueText(side)}</span>
-      </div>`).join("");
-    const still = r.winners.length > 1 && r.id !== "shared";
-    const verdict = r.id === "shared" ? `${tiedNames} share the win!`
-      : still ? "Still tied! Spin again to settle it."
-      : `<b>${esc(sideName(s, r.winners[0]))}</b> wins the tie-breaker!`;
-    body = `<div class="tie-pick"><span class="chip" style="background:${opt.color}">${opt.name}</span><span>${opt.desc}</span></div>
-      <div class="results">${rows}</div>
-      <p class="tie-lede" style="margin:0">${verdict}</p>
-      <div class="sheet-foot" style="justify-content:center">
-        <button class="btn primary" data-act="tie-continue">${still ? "Spin again" : "See results"}</button>
-      </div>`;
-  }
-  return `<div class="overlay"><div class="sheet tie" role="dialog" aria-modal="true" aria-labelledby="tie-title">
-    <div class="headline">
-      <span class="avs">${t.sides.flatMap(side => seatsOnSide(c, side)).map(i => avatar(s.seats[i].char, "lg")).join("")}</span>
-      <h2 id="tie-title">It's a tie!</h2>
-    </div>
-    ${wheel}
-    ${body}
-  </div></div>`;
-}
-
-function renderModal() {
-  if (!app.modal) return "";
-  let title, body;
-  if (app.modal === "rules") {
-    title = "How to play";
-    body = `<div style="display:flex;flex-direction:column;gap:10px;color:var(--muted)">
-      <p style="margin:0">Every player holds one suit, A to K. A is 1, J is 11, Q is 12 and K is 13.</p>
-      <p style="margin:0">Each round one gem is turned up. Everyone bids one card face down. All bids flip together and the highest card takes the gem, worth its number in points. Used cards are gone.</p>
-      <p style="margin:0"><b style="color:var(--ink)">Ties:</b> split shares the gem between everyone tied for the best bid. Cancel out knocks matching cards out, and the best card left wins.</p>
-      <p style="margin:0"><b style="color:var(--ink)">Cursed gems:</b> −1, −2 and −3. The lowest bid has to take them.</p>
-      <p style="margin:0"><b style="color:var(--ink)">Double token:</b> once per game, doubles what you get that round, curses included.</p>
-      <p style="margin:0"><b style="color:var(--ink)">2 vs 2:</b> partners add their points together. <b style="color:var(--ink)">Best of 3:</b> first side to two game wins takes the match.</p>
-      <p style="margin:0"><b style="color:var(--ink)">Tied for first at the end?</b> Spin the wheel. It picks most gems, biggest gem, last gem, a high-card draw, or a shared win. If the pick still leaves a tie, spin again.</p>
-    </div>`;
-  } else {
-    const s = G.s, n = s.seats.length;
-    const upcoming = s.prizes.slice(s.round + 1).sort((a, b) => b - a);
-    title = "Cards left";
-    body = `<div>
-        <div class="opt-label">Prizes still to come</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px">${upcoming.length ? upcoming.map(v => prizeCard(v, "xs")).join("") : `<span style="color:var(--muted)">None. This is the last one.</span>`}</div>
-      </div>
-      <div class="hand-list">
-        <div class="opt-label" style="margin:0">Cards in each hand</div>
-        ${range(n).map(i => `<div class="hrow">${avatar(s.seats[i].char, "sm")}<div class="cards">${s.hands[i].map(v => cardFace(suitFor(i, n), v, "xs")).join("")}</div></div>`).join("")}
-      </div>
-      ${s.history.length ? `<div>
-        <div class="opt-label">History</div>
-        <div class="ledger-wrap"><table class="ledger"><thead><tr><th>Gem</th>${range(n).map(i => `<th>${esc(s.seats[i].name)}</th>`).join("")}</tr></thead>
-        <tbody>${s.history.map(h => `<tr><td>${prizeLabel(h.prize)}</td>${range(n).map(i => `<td class="${h.winners.includes(i) ? "w" : ""}">${RANK(h.bids[i].card)}${h.bids[i].double ? "×2" : ""}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
-      </div>` : ""}`;
-  }
-  return `<div class="overlay" data-act="close-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="${title}">
-    <div class="sheet-head"><h2>${title}</h2><button class="icon-btn" data-act="close" aria-label="Close">✕</button></div>
-    ${body}
-  </div></div>`;
-}
-
-function renderConfirmExit() {
-  return `<div class="overlay" data-act="close-bg"><div class="sheet" role="dialog" aria-modal="true" style="max-width:420px">
-    <div class="sheet-head"><h2>Leave this game?</h2></div>
-    <p style="margin:0;color:var(--muted)">The current game will end and scores won't be kept.</p>
-    <div class="sheet-foot"><button class="btn ghost" data-act="close">Keep playing</button><button class="btn primary" data-act="home">Leave game</button></div>
-  </div></div>`;
-}
-
-/* ================= Render + events ================= */
-function render() {
-  applyLook();
-  const root = document.getElementById("app");
-  if (app.screen === "game" && G) {
-    root.innerHTML = renderGame() + (app.modal === "exit" ? renderConfirmExit() : renderModal());
-  } else {
-    root.innerHTML = renderHome() + (app.setup ? renderSetup() : "");
-  }
-}
-
-document.addEventListener("click", e => {
-  const el = e.target.closest("[data-act]");
-  if (!el) return;
-  const act = el.dataset.act;
-  if (act === "close-bg" && e.target !== el) return; // clicks inside the sheet
-  switch (act) {
-    case "pick-char": prefs.character = el.dataset.id; savePrefs(); render(); break;
-    case "pick-deck": prefs.deck = el.dataset.id; savePrefs(); render(); break;
-    case "pick-table": prefs.table = el.dataset.id; savePrefs(); render(); break;
-    case "four": prefs.fourColor = !prefs.fourColor; savePrefs(); render(); break;
-    case "open-setup": app.setup = el.dataset.kind; render(); break;
-    case "close": case "close-bg":
-      app.setup = null; if (app.modal) app.modal = null; render(); break;
-    case "cfg": {
-      const key = el.dataset.key, val = JSON.parse(el.dataset.val);
-      if (key === "localPlayers") prefs.localPlayers = val;
-      else prefs.config[key] = val;
-      if (key === "seatCount") prefs.localPlayers = Math.min(Math.max(prefs.localPlayers, 2), val);
-      savePrefs(); render(); break;
-    }
-    case "cycle-char": {
-      const seat = +el.dataset.seat, plan = seatPlan(app.setup);
-      const taken = new Set(plan.filter((p, i) => !p.bot && i !== seat).map(p => p.char));
-      const cur = CHAR_IDS.indexOf(plan[seat].char);
-      let next = cur;
-      for (let k = 1; k <= CHAR_IDS.length; k++) { const id = CHAR_IDS[(cur + k) % CHAR_IDS.length]; if (!taken.has(id)) { next = CHAR_IDS.indexOf(id); break; } }
-      if (seat === 0) prefs.character = CHAR_IDS[next]; else prefs.passChars[seat] = CHAR_IDS[next];
-      savePrefs(); render(); break;
-    }
-    case "reroll": app.botOffset++; render(); break;
-    case "start": startGame(); break;
-    case "select": G.selected = G.selected === +el.dataset.v ? null : +el.dataset.v; render(); break;
-    case "double": G.useDouble = !G.useDouble; render(); break;
-    case "bid": placeBid(); break;
-    case "unlock": G.unlocked = activeSeat(); render(); break;
-    case "next": nextStep(); break;
-    case "spin": spinWheel(); break;
-    case "tie-continue": tieContinue(); break;
-    case "rematch": rematch(G.s); G.seen = []; G.recorded = false; progress(); break;
-    case "exit": app.modal = "exit"; render(); break;
-    case "home": leaveGame(); break;
-    case "modal": app.modal = el.dataset.m; render(); break;
-  }
-});
-
-document.addEventListener("input", e => {
-  if (e.target.id !== "name") return;
-  prefs.name = e.target.value.slice(0, 16);
-  savePrefs();
-  const label = document.getElementById("playing-name");
-  if (label) label.textContent = myName();
-});
-
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape" && (app.setup || app.modal)) { app.setup = null; app.modal = null; render(); }
-});
-
-/* Keep a game in progress across page updates. */
-window.claude?.hot?.snapshot?.(() => ({ app, G }));
-const boot = data => {
-  if (data && data.app) {
-    app = Object.assign(app, data.app, { introDone: true });
-    G = data.G || null;
-    if (!G) app.screen = "home";
-  }
-  render();
-  if (G) { scheduleBots(); scheduleReveal(); scheduleSpin(); }
-};
-window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
-</script>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="engine.js"></script>
+<script src="app.js"></script>
