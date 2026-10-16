@@ -52,9 +52,9 @@ const TABLES = [
 
 /* Coins. Starters are free; everything else is bought with coins earned by playing. */
 const PRICES = {
-  fox: 0, owl: 0, bear: 0, cat: 400, frog: 400, panda: 500, penguin: 500, robot: 600, raccoon: 900, dragon: 1200,
-  classic: 0, royal: 0, sakura: 300, noir: 400, retro: 400, arcade: 500, gold: 800, galaxy: 1000,
-  green: 0, ocean: 150, wine: 150, slate: 200, plum: 200, midnight: 500,
+  fox: 0, owl: 0, bear: 0, cat: 1000, frog: 1000, panda: 1250, penguin: 1250, robot: 1500, raccoon: 2500, dragon: 3500,
+  classic: 0, royal: 0, sakura: 750, noir: 1000, retro: 1000, arcade: 1250, gold: 2000, galaxy: 3000,
+  green: 0, ocean: 400, wine: 400, slate: 500, plum: 500, midnight: 1250,
 };
 const GIFT_LADDER = [100, 120, 140, 160, 180, 200, 250]; // daily gift by streak day, day 7 and on pays the most
 const BOT_REWARD = { easy: 10, normal: 15, hard: 20, expert: 30 };

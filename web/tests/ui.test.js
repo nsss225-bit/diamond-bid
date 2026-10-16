@@ -225,8 +225,8 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   c.click("close");
   c.click("buy", { id: "dragon" });
   ok(c.html().includes("You need") && /data-act="confirm-buy"[^>]*disabled/.test(c.html()), "can't buy what you can't afford");
-  c.click("close"); c.click("buy", { id: "sakura" }); c.click("confirm-buy");
-  ok(c.get("stats.coins") === 0 && c.get(`isUnlocked(DECKS.find(d => d.id === "sakura"))`) && c.get("prefs.deck") === "sakura", "buying Sakura cards for 300 coins works and switches to them");
+  c.click("close"); c.get("stats.coins += 450"); c.click("buy", { id: "sakura" }); c.click("confirm-buy");
+  ok(c.get("stats.coins") === 0 && c.get(`isUnlocked(DECKS.find(d => d.id === "sakura"))`) && c.get("prefs.deck") === "sakura", "buying Sakura cards for 750 coins works and switches to them");
   c.get(`Object.assign(prefs.config, { seatCount: 2, botLevel: "hard", powers: false, mystery: false, jackpot: false, cursed: false, double: false, gamesToWin: 1 })`);
   c.click("open-setup", { kind: "bots" }); c.click("start");
   end = await playOut(c);
