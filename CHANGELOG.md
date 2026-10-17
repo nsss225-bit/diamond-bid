@@ -1,6 +1,7 @@
 # Diamond Bid changelog
 
 ## Unreleased
+- Play tab: the one-line description is gone, and Play again, Daily challenge and Tutorial are now three equal, easy-to-tap buttons.
 - End-of-game screen is shorter: the "Your game" recap (best round, closest call, gems taken) is gone.
 - Character picker: small tiles, 3 per row on phones (picture, name and nickname only). Picking a character shows its power in a short pop-up; locked ones show just their price.
 

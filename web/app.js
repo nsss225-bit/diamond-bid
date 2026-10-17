@@ -404,16 +404,15 @@ function renderHome() {
       <div class="hero-copy">
         <p class="eyebrow">${t("A card game of secret bids · 2 or 4 players")}</p>
         <h1>Diamond <em>Bid</em></h1>
-        <p class="lede">${t("Thirteen gems, thirteen cards each. Everyone bids one card face down, all cards flip at once, and the highest card takes the gem.")}</p>
         <div class="cta">
           <button class="btn primary" data-act="open-setup" data-kind="bots">${t("Play vs bots")}</button>
           <button class="btn ghost" data-act="open-online" ${onlineReady ? "" : `style="opacity:.6"`}>${t("Play online")}</button>
           <button class="btn ghost" data-act="open-setup" data-kind="pass">${t("Pass and play")}</button>
         </div>
         <div class="cta2">
-          ${prefs.lastKind && stats.played ? `<button class="link replay" data-act="replay">↻ ${t("Play again")}</button>` : ""}
-          <button class="link" data-act="daily">${t("Today's daily challenge")} ${ARROW()}</button>
-          <button class="link" data-act="tutorial">${t("New here? Play the 2-minute tutorial")} ${ARROW()}</button>
+          ${prefs.lastKind && stats.played ? `<button class="chip" data-act="replay"><span aria-hidden="true">↻</span>${t("Play again")}</button>` : ""}
+          <button class="chip" data-act="daily"><span aria-hidden="true">★</span>${t("Daily challenge")}</button>
+          <button class="chip" data-act="tutorial"><span aria-hidden="true">?</span>${t("Tutorial")}</button>
         </div>
         <div class="playing-as">
           ${avatar(c.id)}
