@@ -1,7 +1,13 @@
 # Diamond Bid changelog
 
-## 1.1
+## 1.2
 - **Languages:** English, العربية (Arabic, right-to-left), Español, Français and 中文. The app picks the phone's language on first visit; change it anytime from the globe button on the home screen.
+- **Coins:** 3 characters (Fennec, Prof. Hoot, Bruno) and 2 card designs (Classic, Royal) are free; everything else is bought with coins in the shop. Players already using something from 1.1 keep it.
+- **Daily gift:** free coins every day, growing over a 7-day streak (100 → 250). Missing a day starts the streak again.
+- **Coins per game:** 10/15/20/30 vs Easy/Normal/Hard/Expert bots (3× for a win), 20 online (60 for a win), 50 + your score for the daily challenge, 50 per achievement, 100 for finishing the tutorial, 10 for pass-and-play.
+- **Online:** if everyone joined a table by code, anyone can tap "Host this table" to start it. If two people tap at once, the first one keeps it. The app now explains why online play isn't available (for example, in a public link or an in-app browser).
+
+## 1.1
 
 **Play together**
 - Online play with friends: start a table, share the 4-letter code, and play on your own phones. Empty seats get bots. If a player leaves, a bot takes over.

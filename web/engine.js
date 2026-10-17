@@ -1,4 +1,4 @@
-/* Diamond Bid rules engine (version 1.1).
+/* Diamond Bid rules engine (version 1.2).
  * Pure game logic: no DOM. Loaded by index.html as a plain script, and by Node for tests. */
 
 /* ================= Basics ================= */

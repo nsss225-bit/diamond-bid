@@ -1,6 +1,6 @@
-/* Diamond Bid app (version 1.1): screens, sound, effects, progress, daily challenge, tutorial and online play.
+/* Diamond Bid app (version 1.2): screens, sound, effects, progress, daily challenge, tutorial and online play.
  * The rules live in engine.js. */
-const APP_VERSION = "1.1";
+const APP_VERSION = "1.2";
 
 /* ================= Content ================= */
 const CHARACTERS = [

@@ -101,7 +101,7 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   const b = browser("solo");
   await sleep(20);
   const home = b.html();
-  ok(["Daily challenge", "Choose your character", "Achievements", "Card design", "Rosa", "Ember", "Gold Leaf", "Galaxy", "Version 1.1", "tutorial"].every(t => home.includes(t)), "home shows daily, characters, achievements, unlockables, version");
+  ok(["Daily challenge", "Choose your character", "Achievements", "Card design", "Rosa", "Ember", "Gold Leaf", "Galaxy", "Version 1.2", "tutorial"].every(t => home.includes(t)), "home shows daily, characters, achievements, unlockables, version");
   ok(home.includes("Tap to buy"), "items for sale shown with prices");
 
   // 2) Every extra on, vs Expert bots, 4 players
