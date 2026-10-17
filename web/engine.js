@@ -59,6 +59,12 @@ const POWERS = {
   robot: { name: "Copycat", timing: "bid", text: "Your card copies the highest card an opponent played." },
   raccoon: { name: "Pickpocket", timing: "bid", text: "If someone else wins this round, you take 2 of their points." },
   dragon: { name: "Fire breath", timing: "bid", text: "The highest card an opponent played counts as 0 this round." },
+  monkey: { name: "Mimic", timing: "bid", text: "Your card counts as the gem's number this round." },
+  bunny: { name: "Soft landing", timing: "bid", text: "If you don't win this round, you still get 1 point." },
+  lion: { name: "Royal share", timing: "bid", text: "If you win this round, the gem counts double." },
+  octopus: { name: "Ink cloud", timing: "bid", text: "Every opponent's card counts 2 lower this round." },
+  unicorn: { name: "Wish", timing: "bid", text: "If you win this round with a 5 or lower, you get 5 extra points." },
+  shark: { name: "Bite", timing: "bid", text: "Take 1 point from each opponent this round." },
 };
 
 /* ================= Setting up ================= */
@@ -185,6 +191,8 @@ function resolve(s) {
   const eff = bids.map(b => b.card);
   const fox = used("fox");
   if (fox >= 0) eff[fox] += 2;
+  const monkey = used("monkey");
+  if (monkey >= 0) eff[monkey] = Math.abs(prize);
   const robot = used("robot");
   if (robot >= 0) eff[robot] = Math.max(...rivalsOf(robot).map(k => bids[k].card));
   const dragon = used("dragon");
@@ -194,6 +202,8 @@ function resolve(s) {
     eff[top] = 0;
     r.burned = top;
   }
+  const octopus = used("octopus");
+  if (octopus >= 0) rivalsOf(octopus).forEach(k => { eff[k] -= 2; });
   r.reverse = used("penguin") >= 0;
   const bully = used("bear");
   const { winners, cancelled } = pickWinners(prize, eff, c.tieRule, { reverse: r.reverse, bully });
@@ -208,6 +218,14 @@ function resolve(s) {
   }
   const panda = used("panda");
   if (panda >= 0 && winners.includes(panda) && awards[panda] > 0) awards[panda] += 36;
+  const lion = used("lion");
+  if (lion >= 0 && winners.includes(lion) && awards[lion] > 0) awards[lion] *= 2;
+  const unicorn = used("unicorn");
+  if (unicorn >= 0 && winners.includes(unicorn) && awards[unicorn] > 0 && bids[unicorn].card <= 5) awards[unicorn] += 60;
+  const bunny = used("bunny");
+  if (bunny >= 0 && !winners.includes(bunny)) awards[bunny] += 12;
+  const shark = used("shark");
+  if (shark >= 0) rivalsOf(shark).forEach(k => { awards[k] -= 12; awards[shark] += 12; });
   const raccoon = used("raccoon");
   if (raccoon >= 0 && winners.length === 1 && winners[0] !== raccoon && sideOf(c, winners[0]) !== sideOf(c, raccoon)) {
     awards[winners[0]] -= 24;
@@ -370,7 +388,7 @@ function botChoose(s, seat, level) {
   const at = i => hand[Math.max(0, Math.min(hand.length - 1, i))];
   const idx = q => Math.round(q * (hand.length - 1));
   const jitter = () => Math.floor(rnd(s) * 3) - 1;
-  if (hand.length === 1) return { card: hand[0], double: canDouble && prize > 0, power: !!power && power.timing === "bid" && prize > 0 && char !== "cat" && char !== "penguin" };
+  if (hand.length === 1) return { card: hand[0], double: canDouble && prize > 0, power: !!power && power.timing === "bid" && prize > 0 && !["cat", "penguin", "unicorn"].includes(char) };
 
   const mySide = sideOf(s.config, seat);
   const rivals = range(s.seats.length).filter(i => sideOf(s.config, i) !== mySide);
@@ -388,6 +406,13 @@ function botChoose(s, seat, level) {
     return { card: hand[0], double: false, power: true }; // play the lowest and let the power do the work
   }
   const next = prizeNext(s);
+  if (usePower(char === "monkey" && prize >= 9 && hand[hand.length - 1] < prize)) {
+    return { card: hand[0], double: false, power: true }; // the gem's number beats anything left in hand
+  }
+  if (usePower(char === "unicorn" && prize >= 8 && q >= .7 && hand[0] <= 5)) {
+    return { card: hand.filter(c => c <= 5).pop(), double: false, power: true };
+  }
+  if (usePower(char === "bunny" && prize > 0 && q <= .3)) return { card: hand[0], double: false, power: true };
   if (usePower(char === "cat" && next != null && !isMystery(s, s.round + 1) && next >= 11 && prize <= 5)) {
     return { card: hand[hand.length - 1], double: false, power: true };
   }
@@ -397,7 +422,7 @@ function botChoose(s, seat, level) {
     return {
       card: at(idx(q) + jitter()),
       double: canDouble && prize >= 9 && q >= .8 && rnd(s) < .5,
-      power: usePower(q >= .85 && ["fox", "bear", "panda", "frog", "dragon", "raccoon"].includes(char)),
+      power: usePower(q >= .85 && ["fox", "bear", "panda", "frog", "dragon", "raccoon", "lion", "octopus", "shark"].includes(char)),
     };
   }
 
@@ -431,7 +456,7 @@ function botChoose(s, seat, level) {
   return {
     card: at(i),
     double: canDouble && q >= .9 && hand.length <= 6,
-    power: usePower(strong && ["fox", "bear", "frog", "dragon", "raccoon", "panda"].includes(char)),
+    power: usePower(strong && ["fox", "bear", "frog", "dragon", "raccoon", "panda", "lion", "octopus", "shark"].includes(char)),
   };
 }
 /** Bots use instant powers too (Foresight helps a human more, but a bot still spends it). */

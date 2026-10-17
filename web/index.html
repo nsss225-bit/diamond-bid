@@ -705,6 +705,19 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 .char.locked .title { display: none; }
 .char.locked .lock span { display: none; }
 @media (max-width: 600px) { .char-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* ---------- Account ---------- */
+.acctbtn { overflow: hidden; padding: 0; }
+.acctbtn img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.acctbtn.in { box-shadow: 0 0 0 2px var(--brass); }
+.acct-me { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; background: var(--panel); }
+.acct-me img, .acct-pic { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; display: grid; place-items: center; background: rgba(255,255,255,.08); box-shadow: 0 0 0 2px var(--brass); flex: none; }
+.acct-me small { display: block; color: var(--muted); font-size: 12px; }
+.acct-me b { font: 700 19px var(--display); }
+.acct-state { margin: 0; font-size: 13px; color: var(--brass); font-weight: 600; min-height: 1.2em; }
+.acct-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.acct-stats > div { background: var(--panel); border-radius: 14px; padding: 10px 6px; text-align: center; }
+.acct-stats b { display: block; font: 800 22px var(--display); }
+.acct-stats small { color: var(--muted); font-size: 11.5px; }
 /* ---------- Quick match ---------- */
 .quick { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 16px; background: var(--brass-soft); border: 1px solid rgba(217,171,79,.45); flex-wrap: wrap; }
 .quick > div { flex: 1 1 200px; }

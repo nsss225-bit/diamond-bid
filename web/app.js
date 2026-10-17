@@ -14,6 +14,12 @@ const CHARACTERS = [
   { id: "robot", name: "Unit 13", title: "The Machine", line: "Thirteen cards. Zero emotions.", ring: "#5ef0ff" },
   { id: "raccoon", name: "Rosa", title: "The Pickpocket", line: "Your points look better in her pocket.", ring: "#8f8b86" },
   { id: "dragon", name: "Ember", title: "The Hoarder", line: "Guards every gem she takes.", ring: "#e0583f" },
+  { id: "bunny", name: "Pip", title: "The Lucky Charm", line: "Always lands on her feet.", ring: "#f2a7bd" },
+  { id: "monkey", name: "Coco", title: "The Trickster", line: "Copies whatever is worth copying.", ring: "#b5793f" },
+  { id: "octopus", name: "Inky", title: "The Inkmaster", line: "Eight arms, zero tells.", ring: "#a874e0" },
+  { id: "unicorn", name: "Stella", title: "The Dreamer", line: "Wishes on small cards and big gems.", ring: "#f49ac1" },
+  { id: "shark", name: "Finn", title: "The Closer", line: "Smells a lead from across the table.", ring: "#5f90b2" },
+  { id: "lion", name: "Leo", title: "The Proud King", line: "Every gem he wins, he wins twice.", ring: "#e8a93a" },
 ];
 const CHAR = Object.fromEntries(CHARACTERS.map(c => [c.id, c]));
 const CHAR_IDS = CHARACTERS.map(c => c.id);
@@ -29,6 +35,12 @@ const AVATAR_SVG = {
   robot: `<rect width="100" height="100" fill="#dfe6ea"/><line x1="50" y1="10" x2="50" y2="24" stroke="#5b6770" stroke-width="3"/><circle cx="50" cy="10" r="4.5" fill="#ff4f5e"/><circle cx="16" cy="54" r="6" fill="#5b6770"/><circle cx="84" cy="54" r="6" fill="#5b6770"/><rect x="18" y="24" width="64" height="58" rx="15" fill="#9aa7b0"/><rect x="26" y="34" width="48" height="32" rx="9" fill="#1d2a33"/><rect x="33" y="42" width="11" height="9" rx="2.5" fill="#5ef0ff"/><rect x="56" y="42" width="11" height="9" rx="2.5" fill="#5ef0ff"/><rect x="37" y="57" width="4" height="3" fill="#5ef0ff"/><rect x="44" y="57" width="4" height="3" fill="#5ef0ff"/><rect x="51" y="57" width="4" height="3" fill="#5ef0ff"/><rect x="58" y="57" width="4" height="3" fill="#5ef0ff"/><text x="50" y="77" text-anchor="middle" font-family="Figtree, sans-serif" font-size="9" font-weight="700" fill="#4a565e">13</text>`,
   raccoon: `<rect width="100" height="100" fill="#e3dfd7"/><path d="M16 34 L26 8 L42 28Z" fill="#6f6c69"/><path d="M84 34 L74 8 L58 28Z" fill="#6f6c69"/><path d="M23 28 L28 15 L35 26Z" fill="#f0e9e0"/><path d="M77 28 L72 15 L65 26Z" fill="#f0e9e0"/><ellipse cx="50" cy="58" rx="36" ry="32" fill="#8f8b86"/><path d="M15 54 Q50 34 85 54 Q78 67 63 62 Q50 57 37 62 Q22 67 15 54Z" fill="#26231f"/><circle cx="37" cy="54" r="5.2" fill="#fff"/><circle cx="63" cy="54" r="5.2" fill="#fff"/><circle cx="37.6" cy="54.6" r="2.7" fill="#1a1714"/><circle cx="62.4" cy="54.6" r="2.7" fill="#1a1714"/><path d="M33 70 Q50 94 67 70 Q50 63 33 70Z" fill="#f4efe8"/><ellipse cx="50" cy="70" rx="5.2" ry="3.7" fill="#1a1714"/><path d="M50 74 Q50 80 45 80 M50 74 Q50 80 55 80" fill="none" stroke="#1a1714" stroke-width="2" stroke-linecap="round"/>`,
   dragon: `<rect width="100" height="100" fill="#f6dccf"/><path d="M28 32 L18 6 L42 24Z" fill="#e8c050"/><path d="M72 32 L82 6 L58 24Z" fill="#e8c050"/><ellipse cx="50" cy="57" rx="35" ry="33" fill="#c8402c"/><path d="M30 26 Q50 16 70 26 L64 34 Q50 28 36 34Z" fill="#a83220"/><ellipse cx="50" cy="73" rx="21" ry="14" fill="#e8735b"/><circle cx="43" cy="71" r="2.2" fill="#5a1a10"/><circle cx="57" cy="71" r="2.2" fill="#5a1a10"/><ellipse cx="35" cy="51" rx="7.5" ry="6.5" fill="#ffe27a"/><ellipse cx="65" cy="51" rx="7.5" ry="6.5" fill="#ffe27a"/><ellipse cx="35" cy="51" rx="2.2" ry="5.5" fill="#2a120c"/><ellipse cx="65" cy="51" rx="2.2" ry="5.5" fill="#2a120c"/><path d="M27 41 L42 45 M73 41 L58 45" stroke="#7a2014" stroke-width="3" stroke-linecap="round"/><path d="M40 84 L43 90 L46 84 M54 84 L57 90 L60 84" fill="#fff"/>`,
+  monkey: `<rect width="100" height="100" fill="#f3e3c9"/><circle cx="16" cy="54" r="12" fill="#7b4b2a"/><circle cx="84" cy="54" r="12" fill="#7b4b2a"/><circle cx="16" cy="54" r="6" fill="#e3b98d"/><circle cx="84" cy="54" r="6" fill="#e3b98d"/><circle cx="50" cy="52" r="34" fill="#7b4b2a"/><path d="M50 40 C40 30 24 36 28 52 C24 68 36 82 50 82 C64 82 76 68 72 52 C76 36 60 30 50 40Z" fill="#e8c399"/><circle cx="37" cy="50" r="4.4" fill="#2b1a10"/><circle cx="63" cy="50" r="4.4" fill="#2b1a10"/><circle cx="38.4" cy="48.5" r="1.4" fill="#fff"/><circle cx="64.4" cy="48.5" r="1.4" fill="#fff"/><ellipse cx="46" cy="63" rx="1.8" ry="1.4" fill="#2b1a10"/><ellipse cx="54" cy="63" rx="1.8" ry="1.4" fill="#2b1a10"/><path d="M40 70 Q50 78 60 70" fill="none" stroke="#2b1a10" stroke-width="2.4" stroke-linecap="round"/>`,
+  bunny: `<rect width="100" height="100" fill="#f6e1ea"/><ellipse cx="36" cy="22" rx="9" ry="24" fill="#f2f0ee"/><ellipse cx="64" cy="22" rx="9" ry="24" fill="#f2f0ee"/><ellipse cx="36" cy="22" rx="4.5" ry="17" fill="#f2a7bd"/><ellipse cx="64" cy="22" rx="4.5" ry="17" fill="#f2a7bd"/><circle cx="50" cy="62" r="32" fill="#f2f0ee"/><circle cx="37" cy="56" r="4.4" fill="#2b1a10"/><circle cx="63" cy="56" r="4.4" fill="#2b1a10"/><circle cx="38.4" cy="54.5" r="1.4" fill="#fff"/><circle cx="64.4" cy="54.5" r="1.4" fill="#fff"/><circle cx="30" cy="68" r="5" fill="#f6b7c8" opacity=".7"/><circle cx="70" cy="68" r="5" fill="#f6b7c8" opacity=".7"/><path d="M46 65 L54 65 L50 70Z" fill="#e87d99"/><path d="M50 70 Q50 76 44 76 M50 70 Q50 76 56 76" fill="none" stroke="#2b1a10" stroke-width="2" stroke-linecap="round"/>`,
+  lion: `<rect width="100" height="100" fill="#f5e4c3"/><circle cx="50" cy="54" r="44" fill="#c86f24"/><g fill="#a9551a"><circle cx="18" cy="40" r="10"/><circle cx="82" cy="40" r="10"/><circle cx="16" cy="66" r="10"/><circle cx="84" cy="66" r="10"/><circle cx="30" cy="88" r="10"/><circle cx="70" cy="88" r="10"/><circle cx="32" cy="18" r="10"/><circle cx="68" cy="18" r="10"/></g><circle cx="50" cy="56" r="29" fill="#f1b553"/><circle cx="29" cy="34" r="7" fill="#f1b553"/><circle cx="71" cy="34" r="7" fill="#f1b553"/><circle cx="37" cy="52" r="4.4" fill="#2b1a10"/><circle cx="63" cy="52" r="4.4" fill="#2b1a10"/><circle cx="38.4" cy="50.5" r="1.4" fill="#fff"/><circle cx="64.4" cy="50.5" r="1.4" fill="#fff"/><ellipse cx="50" cy="68" rx="12" ry="9" fill="#fbe0a6"/><path d="M45 63 L55 63 L50 68Z" fill="#6b3a1a"/><path d="M50 68 Q50 74 44 74 M50 68 Q50 74 56 74" fill="none" stroke="#2b1a10" stroke-width="2.2" stroke-linecap="round"/><path d="M38 8 L42 20 L50 12 L58 20 L62 8 L64 22 L36 22Z" fill="#e8c050" stroke="#a87b1c" stroke-width="1.2"/>`,
+  octopus: `<rect width="100" height="100" fill="#e4dcf3"/><g fill="#8f5cc8"><path d="M18 70 C10 88 22 96 28 84 C30 92 40 92 38 80Z"/><path d="M38 76 C34 94 46 98 50 86 C54 98 66 94 62 76Z"/><path d="M62 80 C60 92 70 92 72 84 C78 96 90 88 82 70Z"/></g><ellipse cx="50" cy="48" rx="34" ry="32" fill="#a874e0"/><circle cx="34" cy="34" r="4" fill="#c9a2f2"/><circle cx="64" cy="28" r="3" fill="#c9a2f2"/><circle cx="70" cy="40" r="2.5" fill="#c9a2f2"/><circle cx="37" cy="52" r="4.4" fill="#24123a"/><circle cx="63" cy="52" r="4.4" fill="#24123a"/><circle cx="38.4" cy="50.5" r="1.4" fill="#fff"/><circle cx="64.4" cy="50.5" r="1.4" fill="#fff"/><path d="M42 64 Q50 70 58 64" fill="none" stroke="#24123a" stroke-width="2.4" stroke-linecap="round"/><circle cx="30" cy="60" r="4.5" fill="#f2a7bd" opacity=".7"/><circle cx="70" cy="60" r="4.5" fill="#f2a7bd" opacity=".7"/>`,
+  unicorn: `<rect width="100" height="100" fill="#efe3f7"/><path d="M50 4 L57 30 L43 30Z" fill="#f2cf63" stroke="#c99a2a" stroke-width="1"/><path d="M45 12 L55 16 M44 20 L56 24" stroke="#c99a2a" stroke-width="1.4"/><path d="M22 36 L28 14 L40 32Z" fill="#fbfaf6"/><path d="M78 36 L72 14 L60 32Z" fill="#fbfaf6"/><circle cx="50" cy="58" r="33" fill="#fbfaf6"/><path d="M24 40 C14 56 18 76 28 86 C22 70 26 54 34 44Z" fill="#f49ac1"/><path d="M76 40 C88 52 86 72 76 84 C80 68 76 54 66 44Z" fill="#9fc8f5"/><path d="M34 30 C42 24 58 24 66 30 C58 34 42 34 34 30Z" fill="#c7a6f2"/><circle cx="37" cy="56" r="4.4" fill="#2b1a10"/><circle cx="63" cy="56" r="4.4" fill="#2b1a10"/><circle cx="38.4" cy="54.5" r="1.4" fill="#fff"/><circle cx="64.4" cy="54.5" r="1.4" fill="#fff"/><circle cx="32" cy="68" r="5" fill="#f6b7c8" opacity=".7"/><circle cx="68" cy="68" r="5" fill="#f6b7c8" opacity=".7"/><path d="M42 72 Q50 78 58 72" fill="none" stroke="#2b1a10" stroke-width="2.2" stroke-linecap="round"/>`,
+  shark: `<rect width="100" height="100" fill="#d6e8f2"/><path d="M50 6 L64 30 L38 30Z" fill="#4f7d9c"/><ellipse cx="50" cy="58" rx="40" ry="34" fill="#5f90b2"/><path d="M14 64 C24 92 76 92 86 64 C70 72 30 72 14 64Z" fill="#eef4f7"/><circle cx="37" cy="48" r="4.4" fill="#14212b"/><circle cx="63" cy="48" r="4.4" fill="#14212b"/><circle cx="38.4" cy="46.5" r="1.4" fill="#fff"/><circle cx="64.4" cy="46.5" r="1.4" fill="#fff"/><path d="M30 40 L42 44 M70 40 L58 44" stroke="#14212b" stroke-width="2.6" stroke-linecap="round"/><path d="M26 66 L32 74 L38 67 L44 75 L50 68 L56 75 L62 67 L68 74 L74 66" fill="#fff" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/>`,
 };
 
 const DECKS = [
@@ -52,7 +64,7 @@ const TABLES = [
 
 /* Coins. Starters are free; everything else is bought with coins earned by playing. */
 const PRICES = {
-  fox: 0, owl: 0, bear: 0, cat: 1000, frog: 1000, panda: 1250, penguin: 1250, robot: 1500, raccoon: 2500, dragon: 3500,
+  fox: 0, owl: 0, bear: 0, cat: 1000, frog: 1000, panda: 1250, penguin: 1250, robot: 1500, raccoon: 2500, dragon: 3500, bunny: 1500, monkey: 1750, octopus: 2000, unicorn: 2500, shark: 3000, lion: 4000,
   classic: 0, royal: 0, sakura: 750, noir: 1000, retro: 1000, arcade: 1250, gold: 2000, galaxy: 3000,
   green: 0, ocean: 400, wine: 400, slate: 500, plum: 500, midnight: 1250,
 };
@@ -80,6 +92,20 @@ const ACHIEVEMENTS = [
   { id: "daily", icon: "☼", name: "Daily player", desc: "Finish a daily challenge." },
   { id: "online", icon: "☁", name: "Good game", desc: "Finish an online game with friends." },
   { id: "learner", icon: "✑", name: "Quick learner", desc: "Finish the tutorial." },
+  { id: "ace", icon: "A", name: "Ace in the hole", desc: "Win a gem with an Ace." },
+  { id: "fair_share", icon: "½", name: "Fair share", desc: "Share a gem in a tie." },
+  { id: "big_haul", icon: "♦", name: "Big haul", desc: "Score 60 or more points in one game." },
+  { id: "sweep", icon: "≡", name: "Clean sweep", desc: "Take 10 or more gems in one game." },
+  { id: "comeback", icon: "↺", name: "Comeback kid", desc: "Win a game you were losing at the halfway point." },
+  { id: "nail_biter", icon: "≈", name: "Nail-biter", desc: "Win a game by 1 point or less." },
+  { id: "rematch", icon: "↻", name: "Again!", desc: "Play a rematch." },
+  { id: "regular", icon: "⌂", name: "Regular", desc: "Finish 25 matches." },
+  { id: "champion", icon: "♚", name: "Champion", desc: "Win 50 matches." },
+  { id: "collector", icon: "☺", name: "Collector", desc: "Buy 5 characters." },
+  { id: "stylist", icon: "▦", name: "Stylist", desc: "Buy 3 card designs." },
+  { id: "saver", icon: "◎", name: "Big saver", desc: "Have 5,000 coins at once." },
+  { id: "loyal", icon: "♥", name: "Loyal player", desc: "Collect the daily gift 7 days in a row." },
+  { id: "polyglot", icon: "✈", name: "Globetrotter", desc: "Play in another language." },
 ];
 
 const GEM_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 L36 20 L20 37 L4 20Z" style="fill:var(--gem)"/><path d="M20 3 L36 20 L20 20Z" style="fill:var(--gem-hi)"/><path d="M20 20 L4 20 L20 37Z" style="fill:var(--gem-lo)"/><path d="M20 3 L36 20 L20 37 L4 20Z" style="fill:none;stroke:var(--brass)" stroke-width="2" stroke-linejoin="round"/></svg>`;
@@ -154,7 +180,7 @@ let prefs = Object.assign({}, DEFAULT_PREFS, store.get("diamondbid.prefs", {}));
 prefs.config = Object.assign({}, DEFAULT_CONFIG, prefs.config);
 let stats = Object.assign({ played: 0, won: 0, ach: {}, dailyDays: [], dailyBest: {}, coins: 0, owned: [], lastGift: "", giftStreak: 0, walletV: 0, tutorialPaid: false }, store.get("diamondbid.stats", {}));
 const savePrefs = () => store.set("diamondbid.prefs", prefs);
-const saveStats = () => store.set("diamondbid.stats", stats);
+const saveStats = () => { store.set("diamondbid.stats", stats); cloudQueue(); };
 const achCount = () => Object.keys(stats.ach).length;
 
 const priceOf = item => PRICES[item.id] || 0;
@@ -297,6 +323,7 @@ function addCoins(n, why) {
   if (!n) return;
   stats.coins += n;
   saveStats();
+  if (stats.coins >= 5000) setTimeout(() => grant("saver"), 0);
   if (G) G.coinsEarned = (G.coinsEarned || 0) + n;
   setTimeout(() => toast("\u25C9", t("+{n} coins", { n }), why), 350);
   const badge = document.getElementById("coin-count");
@@ -395,7 +422,7 @@ function renderHome() {
       <div style="display:flex;gap:8px;align-items:center">
         <button class="langbtn" data-act="lang" aria-label="${t("Language")}">${GLOBE_SVG}<b>${LANG.toUpperCase()}</b></button>
         <button class="coinbtn" data-act="coins" aria-label="${t("{n} coins. How to earn more", { n: fmtCoins(stats.coins) })}">${COIN}<b id="coin-count">${fmtCoins(stats.coins)}</b></button>
-        <button class="icon-btn" data-act="sound" aria-label="${prefs.sound ? t("Turn sound off") : t("Turn sound on")}" aria-pressed="${prefs.sound}">${SPEAKER_SVG(prefs.sound)}</button>
+        ${accountButton()}
       </div>
     </header>`;
 
@@ -733,6 +760,8 @@ function onReveal(r) {
     if (r.prize === JACKPOT) grant("jackpot");
   }
   if (mine >= 240) grant("double_trouble");
+  if (w.length === 1 && w[0] === i && mine > 0 && r.bids[i].card === 1) grant("ace");
+  if (w.length > 1 && w.includes(i) && mine > 0) grant("fair_share");
   if (r.powers.includes(i) && w.includes(i) && mine > 0) grant("power_play");
   G.streak = w.includes(i) && mine > 0 ? G.streak + 1 : 0;
   if (G.streak >= 3) grant("hat_trick");
@@ -748,6 +777,16 @@ function onGameEnd() {
   if (G.track && i >= 0) {
     if (s.config.cursed && !s.history.some(h => h.awards[i] < 0) && s.history.some(h => h.prize < 0)) grant("curse_dodger");
     if (s.tieWonBy && s.tieWonBy.includes(mySide)) grant("wheel");
+    if (s.scores[i] >= 720) grant("big_haul");
+    if (s.history.filter(h => h.winners.includes(i) && h.awards[i] > 0).length >= 10) grant("sweep");
+    if (iWon) {
+      const sides = range(sideCount(s.config));
+      const sideAt = (side, upto) => seatsOnSide(s.config, side).reduce((sum, k) => sum + s.history.slice(0, upto).reduce((a, h) => a + h.awards[k], 0), 0);
+      const half = Math.ceil(s.history.length / 2);
+      if (sides.some(side => side !== mySide && sideAt(side, half) > sideAt(mySide, half))) grant("comeback");
+      const others = sides.filter(side => side !== mySide).map(side => sideScore(s, side));
+      if (others.length && sideScore(s, mySide) - Math.max(...others) <= 12) grant("nail_biter");
+    }
   }
   if (G.kind === "daily") {
     const score = s.scores[0], date = G.dailyDate;
@@ -770,6 +809,9 @@ function onMatchEnd() {
   if (won) stats.won++;
   saveStats();
   if (G.kind === "online") grant("online");
+  if (stats.played >= 25) grant("regular");
+  if (stats.won >= 50) grant("champion");
+  if (LANG !== "en") grant("polyglot");
   if (won) {
     grant("first_win");
     const levels = s.seats.filter((x, k) => x.bot && sideOf(s.config, k) !== mySide).map(x => x.level);
@@ -884,6 +926,7 @@ function doRematch() {
   if (!isAuthority()) return;
   rematch(G.s);
   G.seen = []; G.recorded = false; G.newAch = []; G.coinsEarned = 0; G.streak = 0;
+  if (G.track) grant("rematch");
   progress();
 }
 function stopTimers() {
@@ -1349,6 +1392,91 @@ function renderConfirmExit() {
 
 /* ================= Daily leaderboard (shared through the db capability) ================= */
 const Daily = { db: null, user: null, myId: null, rows: [], names: {}, status: "", checked: false };
+
+/* ================= Account and cloud save ================= */
+/* On claude.ai your Claude account is your Diamond Bid account: progress is saved in your own private
+   space (data/users/<you>/save), so it follows you to any phone or computer where you open the game. */
+var Account = { checked: false, id: null, name: "", avatar: "", state: "", savedAt: 0, doc: null, timer: null };
+const SAVE_PREFS = ["character", "name", "deck", "table", "fourColor", "lang"];
+function mergeProgress(cloud) {
+  const c = cloud.stats || {}, firstSync = !stats.syncedAt;
+  stats.owned = [...new Set(stats.owned.concat(c.owned || []))];
+  Object.entries(c.ach || {}).forEach(([k, v]) => { stats.ach[k] = Math.min(stats.ach[k] || v, v); });
+  stats.dailyDays = [...new Set(stats.dailyDays.concat(c.dailyDays || []))];
+  Object.entries(c.dailyBest || {}).forEach(([d, v]) => { stats.dailyBest[d] = Math.max(stats.dailyBest[d] ?? v, v); });
+  stats.played = Math.max(stats.played, c.played || 0);
+  stats.won = Math.max(stats.won, c.won || 0);
+  if ((c.lastGift || "") > stats.lastGift) { stats.lastGift = c.lastGift; stats.giftStreak = c.giftStreak || 1; }
+  stats.tutorialPaid = stats.tutorialPaid || !!c.tutorialPaid;
+  // Coins: on the first sync keep the bigger wallet; after that, the most recent save wins.
+  if (typeof c.coins === "number") stats.coins = firstSync ? Math.max(stats.coins, c.coins) : (cloud.at > stats.syncedAt ? c.coins : stats.coins);
+  if (cloud.prefs && (firstSync ? false : cloud.at > stats.syncedAt)) SAVE_PREFS.forEach(k => { if (cloud.prefs[k] !== undefined) prefs[k] = cloud.prefs[k]; });
+  if (prefs.lang && prefs.lang !== LANG) setLang(prefs.lang);
+  savePrefs();
+}
+async function initAccount() {
+  const user = Daily.user, db = Daily.db;
+  if (user) {
+    try { const me = await user.me(); Account.id = me.id; Account.name = me.name || ""; Account.avatar = me.avatarUrl || ""; } catch (e) {}
+  }
+  if (Account.id && db) {
+    Account.doc = db.collection("data/users/" + Account.id).doc("save");
+    try {
+      const snap = await Account.doc.get();
+      const cloud = snap && (typeof snap.data === "function" ? snap.data() : snap);
+      if (cloud && cloud.stats) { mergeProgress(cloud); store.set("diamondbid.stats", stats); }
+      cloudQueue(true);
+    } catch (e) { Account.state = "error"; }
+  }
+  Account.checked = true;
+  render();
+}
+function cloudQueue(now) {
+  if (!Account || !Account.doc) return;
+  clearTimeout(Account.timer);
+  Account.state = "saving";
+  Account.timer = setTimeout(cloudSave, now ? 0 : 1500);
+}
+async function cloudSave() {
+  if (!Account || !Account.doc) return;
+  const at = Date.now();
+  const p = {}; SAVE_PREFS.forEach(k => { if (prefs[k] !== undefined) p[k] = prefs[k]; });
+  try {
+    await Account.doc.set({ v: 1, at, stats: Object.assign({}, stats, { syncedAt: null }), prefs: p });
+    stats.syncedAt = at; store.set("diamondbid.stats", stats);
+    Account.state = "saved"; Account.savedAt = at;
+  } catch (e) { Account.state = "error"; }
+  const el = document.getElementById("save-state");
+  if (el) el.textContent = saveStateText();
+}
+const saveStateText = () => Account.state === "saving" ? t("Saving…") : Account.state === "error" ? t("Couldn't save to your account. Your progress is still on this device.") : Account.savedAt ? t("Saved to your account") : "";
+const PERSON_SVG = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="8.5" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 20.5c1.4-4 4.4-6 8-6s6.6 2 8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+function accountButton() {
+  const pic = Account.id && Account.avatar ? `<img src="${esc(Account.avatar)}" alt="">` : PERSON_SVG;
+  return `<button class="icon-btn acctbtn ${Account.id ? "in" : ""}" data-act="account" aria-label="${Account.id ? t("Account") : t("Sign in")}">${pic}</button>`;
+}
+function renderAccount() {
+  const sound = `<button class="switch" data-act="sound" aria-pressed="${prefs.sound}"><span class="track"></span>${t("Sound")}</button>`;
+  let body;
+  if (Account.id) {
+    body = `<div class="acct-me">${Account.avatar ? `<img src="${esc(Account.avatar)}" alt="">` : `<span class="acct-pic">${PERSON_SVG}</span>`}
+        <div><small>${t("Signed in as")}</small><b>${esc(Account.name || t("you"))}</b></div></div>
+      <p class="muted" style="margin:0">${t("Your coins, characters, card designs and achievements are saved to your account. Open Diamond Bid on any phone or computer with the same account and pick up where you left off.")}</p>
+      <p class="acct-state" id="save-state">${saveStateText()}</p>`;
+  } else if (IN_APP) {
+    body = `<p style="margin:0">${t("Sign in with Apple or Google is coming with the App Store and Google Play release.")}</p>
+      <p class="muted" style="margin:0">${t("Until then, your progress is saved on this device.")}</p>`;
+  } else {
+    body = `<p style="margin:0">${Account.checked ? t("You're not signed in, so your progress is only saved on this device.") : t("Loading…")}</p>
+      <p class="muted" style="margin:0">${t("Diamond Bid uses your Claude account: sign in at claude.ai, then open the game from the link you were sent (not inside WhatsApp or another app). Your progress then follows you to every device.")}</p>`;
+  }
+  return `<div class="overlay" data-act="close-bg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="acct-h" style="max-width:440px">
+    <div class="sheet-head"><h2 id="acct-h">${Account.id ? t("Account") : t("Sign in")}</h2><button class="icon-btn" data-act="close" aria-label="${t("Close")}">✕</button></div>
+    ${body}
+    <div class="acct-stats"><div><b>${stats.won}</b><small>${t("Matches won")}</small></div><div><b>${achCount()}</b><small>${t("Achievements")}</small></div><div><b>${fmtCoins(stats.coins)}</b><small>${t("Coins")}</small></div></div>
+    <div>${sound}</div>
+  </div></div>`;
+}
 function renderLeaderboard() {
   const date = todayKey();
   if (!Daily.checked) return `<p class="muted">${t("Loading…")}</p>`;
@@ -1386,6 +1514,7 @@ async function initDaily() {
     }, () => { Daily.db = null; patchLeaderboard(); });
   }
   patchLeaderboard();
+  initAccount();
 }
 async function postDaily(score, date) {
   Daily.status = "";
@@ -1709,10 +1838,12 @@ function checkDailyGift() {
   stats.lastGift = today;
   stats.coins += amount;
   saveStats();
+  if (stats.giftStreak >= 7) setTimeout(() => grant("loyal"), 0);
   app.gift = amount;
   if (!G) app.modal = "gift";
 }
 function renderHomeModal() {
+  if (app.modal === "account") return renderAccount();
   const m = app.modal;
   if (!m) return "";
   const wrap = (title, body, foot) => `<div class="overlay" data-act="close-bg"><div class="sheet" role="dialog" aria-modal="true" style="max-width:460px">
@@ -1761,6 +1892,8 @@ function buy(id) {
   saveStats(); savePrefs();
   app.modal = null;
   Sound.fanfare(); confetti(80);
+  if (stats.owned.filter(x => CHAR[x]).length >= 5) grant("collector");
+  if (stats.owned.filter(x => DECKS.some(d => d.id === x)).length >= 3) grant("stylist");
   toast("\u2726", t("{name} is yours", { name: CHAR[id] ? charName(id) : t(item.name) }), t("New " + kindOf(id)));
   render();
 }
@@ -1914,7 +2047,7 @@ document.addEventListener("click", e => {
     }
     case "reroll": app.botOffset++; render(); break;
     case "start": startLocal(app.setup); break;
-    case "replay": startLocal(prefs.lastKind); break;
+    case "replay": startLocal(prefs.lastKind); grant("rematch"); break;
     case "rematch-ask": askRematch(); break;
     case "daily": startDaily(); break;
     case "tutorial": startTutorial(); break;
@@ -1945,6 +2078,7 @@ document.addEventListener("click", e => {
     case "come-back": comeBack(); break;
     case "coins": app.modal = "coins"; render(); break;
     case "lang": app.modal = "lang"; render(); break;
+    case "account": app.modal = "account"; Sound.select(); render(); break;
     case "tab": app.tab = el.dataset.tab; Sound.select(); window.scrollTo(0, 0); render(); break;
     case "set-lang": setLang(el.dataset.id); prefs.lang = LANG; savePrefs(); app.modal = null; Sound.select(); render(); break;
     case "buy": app.buyId = el.dataset.id; app.modal = "buy"; Sound.select(); render(); break;

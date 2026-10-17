@@ -27,6 +27,19 @@ s = table({ powers: true, tieRule: "cancel" }, ["bear", "owl"], P); r = play(s, 
 ok(r.winners + "" === "0", "Bully not cancelled");
 s = table({ powers: true }, ["cat", "owl"], P); r = play(s, [{ card: 13, power: true }, { card: 1 }]);
 ok(r.prize === 9 && s.prizes[1] === 5 && s.scores[0] === 108, "Swap plays the next gem now");
+// new characters (1.5): prize 1 is 5
+s = table({ powers: true }, ["monkey", "owl"], P); r = play(s, [{ card: 1, power: true }, { card: 4 }]);
+ok(r.winners + "" === "0" && r.eff[0] === 5, "Mimic: card counts as the gem's number");
+s = table({ powers: true }, ["bunny", "owl"], P); r = play(s, [{ card: 1, power: true }, { card: 4 }]);
+ok(s.scores[0] === 12 && s.scores[1] === 60, "Soft landing: 1 point when losing");
+s = table({ powers: true }, ["lion", "owl"], P); r = play(s, [{ card: 9, power: true }, { card: 4 }]);
+ok(s.scores[0] === 120, "Royal share doubles the gem");
+s = table({ powers: true }, ["octopus", "owl"], P); r = play(s, [{ card: 8, power: true }, { card: 9 }]);
+ok(r.winners + "" === "0" && r.eff[1] === 7, "Ink cloud: opponents 2 lower");
+s = table({ powers: true }, ["unicorn", "owl"], P); r = play(s, [{ card: 5, power: true }, { card: 4 }]);
+ok(s.scores[0] === 120, "Wish: +5 when winning with 5 or lower");
+s = table({ powers: true }, ["shark", "owl", "bear", "cat"], P); r = play(s, [{ card: 1, power: true }, { card: 9 }, { card: 2 }, { card: 3 }]);
+ok(s.scores[0] === 36 && s.scores[1] === 48 && s.scores[2] === -12, "Bite: 1 point from each opponent");
 s = table({ powers: true }, ["frog", "owl"], P); r = play(s, [{ card: 12, power: true }, { card: 13 }]);
 ok(s.hands[0].includes(12) && r.leapt === 0, "Lucky leap returns card");
 s = table({ powers: true }, ["panda", "owl"], P); r = play(s, [{ card: 12, power: true }, { card: 3 }]);

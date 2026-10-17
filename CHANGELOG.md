@@ -1,6 +1,9 @@
 # Diamond Bid changelog
 
 ## Unreleased
+- 6 new characters, each with a new power: Pip (Soft landing), Coco (Mimic), Inky (Ink cloud), Stella (Wish), Finn (Bite) and Leo (Royal share). Bots know how to use them.
+- 14 new achievements (31 in all), from Ace in the hole to Champion.
+- Account: tap the person button at the top of the home screen. On claude.ai you're signed in with your Claude account, and your coins, characters, designs and achievements are saved to it and follow you to other devices.
 - Play tab: the one-line description is gone, and Play again, Daily challenge and Tutorial are now three equal, easy-to-tap buttons.
 - End-of-game screen is shorter: the "Your game" recap (best round, closest call, gems taken) is gone.
 - Character picker: small tiles, 3 per row on phones (picture, name and nickname only). Picking a character shows its power in a short pop-up; locked ones show just their price.

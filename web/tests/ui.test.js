@@ -276,6 +276,20 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   q3.get("noOneFound()"); await sleep(20);
   ok(q3.get("G && G.kind === 'bots'") && q3.get("app.screen") === "game", "nobody online: you play a bot");
 
+  // 9c) Account: progress saves to your account and loads on another device
+  const cloud = {};
+  const fakeDoc = { async set(v) { cloud.save = JSON.parse(JSON.stringify(v)); }, async get() { return { data: () => cloud.save }; } };
+  const A1 = browser("phone1"); await sleep(20);
+  A1.__doc = fakeDoc;
+  A1.get(`Account.id = "u_1"; Account.doc = __doc; stats.coins = 4321; stats.owned.push("lion"); stats.ach.ace = 1; stats.won = 7; saveStats()`);
+  await sleep(1700);
+  ok(cloud.save && cloud.save.stats.coins === 4321 && A1.get("Account.state") === "saved", "progress is saved to the account");
+  const A2 = browser("phone2"); await sleep(20);
+  A2.get(`mergeProgress(${JSON.stringify(cloud.save)})`);
+  ok(A2.get(`stats.owned.includes("lion") && !!stats.ach.ace && stats.won === 7 && stats.coins >= 4321`), "another device picks up the saved progress");
+  A1.click("account");
+  ok(A1.html().includes("Signed in as") && A1.html().includes("Saved to your account"), "the account sheet shows who is signed in and the save status");
+
   // 10a) Double-tap a card to play it
   const D = browser("doubletap");
   await sleep(20); D.click("close");
