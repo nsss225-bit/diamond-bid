@@ -1209,19 +1209,6 @@ function renderGame() {
 }
 
 /* ================= End of game ================= */
-function recapFor(s, seat) {
-  const items = [];
-  const rounds = s.history.map((h, k) => Object.assign({ k }, h));
-  const best = rounds.filter(h => h.awards[seat] > 0).sort((a, b) => b.awards[seat] - a.awards[seat])[0];
-  if (best) items.push([t("Best round"), t("Took the {prize} with {card}", { prize: pName(best.prize), card: RANK(best.bids[seat].card) })]);
-  const wasted = rounds.filter(h => h.awards[seat] <= 0 && h.prize > 0 && !(h.leapt === seat)).sort((a, b) => b.bids[seat].card - a.bids[seat].card)[0];
-  if (wasted && wasted.bids[seat].card >= 9) items.push([t("Wasted card"), t("{card} won nothing (gem {n})", { card: RANK(wasted.bids[seat].card), n: wasted.k + 1 })]);
-  const close = rounds.find(h => h.winners.length === 1 && h.margin === 1 && (h.winners[0] === seat || h.eff[seat] === h.eff[h.winners[0]] - 1));
-  if (close) items.push([t("Closest call"), t(close.winners[0] === seat ? "Won the {prize} by one" : "Lost the {prize} by one", { prize: pName(close.prize) })]);
-  const gems = rounds.filter(h => h.awards[seat] > 0).length;
-  items.push([t("Gems taken"), t("{a} of {b}", { a: gems, b: s.history.length })]);
-  return items.slice(0, 4);
-}
 
 function renderResults() {
   const s = G.s, c = s.config;
@@ -1251,8 +1238,6 @@ function renderResults() {
       <span class="pts">${fmt(sideScore(s, side))}</span>
       ${c.gamesToWin > 1 ? `<span class="gw">${t("{n} won", { n: s.gameWins[side] })}</span>` : ""}
     </div>`).join("");
-  const recapSeat = G.kind === "pass" ? -1 : me();
-  const recap = recapSeat >= 0 ? `<div><div class="opt-label">${t("Your game")}</div><div class="recap">${recapFor(s, recapSeat).map(([k, v]) => `<div><small>${k}</small><b>${esc(v)}</b></div>`).join("")}</div></div>` : "";
   const newAch = G.newAch.length || G.coinsEarned ? `<div class="newach">${G.coinsEarned ? `<span class="coins-earned">${COIN} ${t("+{n} coins", { n: fmtCoins(G.coinsEarned) })}</span>` : ""}${G.newAch.map(a => `<span>★ ${esc(t(a))}</span>`).join("")}</div>` : "";
   const guest = G.kind === "online" && G.role === "guest";
   let buttons;
@@ -1273,7 +1258,6 @@ function renderResults() {
     </div>
     ${newAch}
     <div class="results">${rows}</div>
-    ${recap}
     <div class="sheet-foot" style="justify-content:center">${buttons}</div>
   </div></div>`;
 }

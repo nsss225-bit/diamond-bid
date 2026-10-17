@@ -115,7 +115,7 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   ok(b.html().includes("class=\"scorebar") && b.html().includes("Gem 1 of 13"), "table renders");
   let end = await playOut(b);
   ok(end === "matchOver", "4-player match with every extra finishes");
-  ok(b.html().includes("Your game") && b.html().includes("Gems taken"), "results show the recap");
+  ok(!b.html().includes("Your game") && b.html().includes('data-act="rematch"'), "results are short: scores and buttons, no recap");
   ok(b.get("stats.played") === 1, "match counted in stats");
   ok(b.get("Object.keys(stats.ach).length") >= 1, "achievements earned: " + b.get("Object.keys(stats.ach).join(', ')"));
   b.click("home");
