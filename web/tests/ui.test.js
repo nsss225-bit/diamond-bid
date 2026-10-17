@@ -292,12 +292,12 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
 
   // 9e) Achievements need several completions
   const H2 = browser("ach"); await sleep(20);
-  H2.get("grant('ace'); grant('ace')");
-  ok(!H2.get("stats.ach.ace") && H2.get("stats.achProg.ace") === 2, "an achievement isn't granted before its goal");
+  H2.get("for (let k = 0; k < 9; k++) grant('ace')");
+  ok(!H2.get("stats.ach.ace") && H2.get("stats.achProg.ace") === 9, "an achievement isn't granted before its goal");
   H2.get("grant('ace')");
-  ok(!!H2.get("stats.ach.ace"), "it is granted on the 3rd time");
+  ok(!!H2.get("stats.ach.ace"), "it is granted on the 10th time");
   H2.click("close"); H2.click("tab", { tab: "ach" });
-  ok(H2.html().includes("0 / 25"), "achievements show progress like 0 / 25");
+  ok(H2.html().includes("0 / 100"), "achievements show progress like 0 / 100");
 
   // 9d) Vibration: picking and playing a card vibrate; the switch turns it off
   const V = browser("vibe"); await sleep(20); V.click("close");

@@ -1,6 +1,7 @@
 # Diamond Bid changelog
 
 ## Unreleased
+- Achievements are much harder: for example win 100 gems, 25 matches, 30 daily challenges, beat an Expert bot 10 times, finish 100 matches, win 250, buy 10 characters, save 20,000 coins, or collect the daily gift 30 days in a row. Achievements already earned stay earned.
 - New scoreboard: a dark glass panel with each player's picture ringed in their color, a crown on the leader, big scores facing each other around a gem, "+5" pops when points land, and a tug-of-war bar showing who is ahead and by how much.
 - Achievements now have goals: most must be done several times (for example win 25 gems, win 5 rounds by exactly one, beat an Expert bot in 3 matches). Each one shows a progress bar like 12 / 25. Achievements already earned stay earned.
 - Vibration on/off button next to the sound button during a game.

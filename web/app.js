@@ -75,39 +75,40 @@ const COIN = `<span class="coin" aria-hidden="true"></span>`;
 const fmtCoins = n => Number(n).toLocaleString("en-US");
 
 const ACHIEVEMENTS = [
-  { id: "first_gem", icon: "◆", name: "First sparkle", desc: "Win 25 gems.", goal: 25 },
-  { id: "first_win", icon: "★", name: "Winner", desc: "Win 5 matches.", goal: 5 },
-  { id: "steal", icon: "↯", name: "Steal!", desc: "Win 5 rounds by exactly one.", goal: 5 },
-  { id: "giant_slayer", icon: "⚔", name: "Giant slayer", desc: "Take the 13 gem or the jackpot with a 7 or lower, 3 times.", goal: 3 },
-  { id: "hat_trick", icon: "∴", name: "Hat trick", desc: "Win three rounds in a row, 3 times.", goal: 3 },
-  { id: "double_trouble", icon: "×", name: "Double trouble", desc: "Score 20 or more points in one round, 3 times.", goal: 3 },
-  { id: "jackpot", icon: "☀", name: "Jackpot!", desc: "Take the 20 jackpot gem 3 times.", goal: 3 },
-  { id: "curse_dodger", icon: "☂", name: "Curse dodger", desc: "Finish 3 games with cursed gems and take no curse.", goal: 3 },
-  { id: "power_play", icon: "⚡", name: "Power play", desc: "Win 5 rounds with your character's power.", goal: 5 },
-  { id: "wheel", icon: "☸", name: "Wheel of fortune", desc: "Win 3 games on the tie-breaker wheel.", goal: 3 },
-  { id: "hard_win", icon: "♜", name: "Tough cookie", desc: "Beat a Hard bot in 3 matches.", goal: 3 },
-  { id: "expert_win", icon: "♛", name: "Mind reader", desc: "Beat an Expert bot in 3 matches.", goal: 3 },
-  { id: "full_table", icon: "♣", name: "Last one standing", desc: "Win 3 four-player free-for-alls.", goal: 3 },
-  { id: "teamwork", icon: "♡", name: "Teamwork", desc: "Win 3 matches 2 vs 2.", goal: 3 },
-  { id: "daily", icon: "☼", name: "Daily player", desc: "Finish 5 daily challenges.", goal: 5 },
-  { id: "online", icon: "☁", name: "Good game", desc: "Finish 3 online games with friends.", goal: 3 },
+  { id: "first_gem", icon: "◆", name: "First sparkle", desc: "Win {n} gems.", goal: 100 },
+  { id: "first_win", icon: "★", name: "Winner", desc: "Win {n} matches.", goal: 25 },
+  { id: "steal", icon: "↯", name: "Steal!", desc: "Win {n} rounds by exactly one.", goal: 20 },
+  { id: "giant_slayer", icon: "⚔", name: "Giant slayer", desc: "Take the 13 gem or the jackpot with a 7 or lower, {n} times.", goal: 10 },
+  { id: "hat_trick", icon: "∴", name: "Hat trick", desc: "Win three rounds in a row, {n} times.", goal: 10 },
+  { id: "double_trouble", icon: "×", name: "Double trouble", desc: "Score 20 or more points in one round, {n} times.", goal: 10 },
+  { id: "jackpot", icon: "☀", name: "Jackpot!", desc: "Take the 20 jackpot gem {n} times.", goal: 10 },
+  { id: "curse_dodger", icon: "☂", name: "Curse dodger", desc: "Finish {n} games with cursed gems and take no curse.", goal: 10 },
+  { id: "power_play", icon: "⚡", name: "Power play", desc: "Win {n} rounds with your character's power.", goal: 25 },
+  { id: "wheel", icon: "☸", name: "Wheel of fortune", desc: "Win {n} games on the tie-breaker wheel.", goal: 10 },
+  { id: "hard_win", icon: "♜", name: "Tough cookie", desc: "Beat a Hard bot in {n} matches.", goal: 15 },
+  { id: "expert_win", icon: "♛", name: "Mind reader", desc: "Beat an Expert bot in {n} matches.", goal: 10 },
+  { id: "full_table", icon: "♣", name: "Last one standing", desc: "Win {n} four-player free-for-alls.", goal: 10 },
+  { id: "teamwork", icon: "♡", name: "Teamwork", desc: "Win {n} matches 2 vs 2.", goal: 15 },
+  { id: "daily", icon: "☼", name: "Daily player", desc: "Finish {n} daily challenges.", goal: 30 },
+  { id: "online", icon: "☁", name: "Good game", desc: "Finish {n} online games with friends.", goal: 20 },
   { id: "learner", icon: "✑", name: "Quick learner", desc: "Finish the tutorial." },
-  { id: "ace", icon: "A", name: "Ace in the hole", desc: "Win 3 gems with an Ace.", goal: 3 },
-  { id: "fair_share", icon: "½", name: "Fair share", desc: "Share 5 gems in ties.", goal: 5 },
-  { id: "big_haul", icon: "♦", name: "Big haul", desc: "Score 60 or more points in 3 games.", goal: 3 },
-  { id: "sweep", icon: "≡", name: "Clean sweep", desc: "Take 10 or more gems in one game, twice.", goal: 2 },
-  { id: "comeback", icon: "↺", name: "Comeback kid", desc: "Win 3 games you were losing at the halfway point.", goal: 3 },
-  { id: "nail_biter", icon: "≈", name: "Nail-biter", desc: "Win 3 games by 1 point or less.", goal: 3 },
-  { id: "rematch", icon: "↻", name: "Again!", desc: "Play 5 rematches.", goal: 5 },
-  { id: "regular", icon: "⌂", name: "Regular", desc: "Finish 25 matches." },
-  { id: "champion", icon: "♚", name: "Champion", desc: "Win 50 matches." },
-  { id: "collector", icon: "☺", name: "Collector", desc: "Buy 5 characters." },
-  { id: "stylist", icon: "▦", name: "Stylist", desc: "Buy 3 card designs." },
-  { id: "saver", icon: "◎", name: "Big saver", desc: "Have 5,000 coins at once." },
-  { id: "loyal", icon: "♥", name: "Loyal player", desc: "Collect the daily gift 7 days in a row." },
-  { id: "polyglot", icon: "✈", name: "Globetrotter", desc: "Finish 3 matches in another language.", goal: 3 },
+  { id: "ace", icon: "A", name: "Ace in the hole", desc: "Win {n} gems with an Ace.", goal: 10 },
+  { id: "fair_share", icon: "½", name: "Fair share", desc: "Share {n} gems in ties.", goal: 20 },
+  { id: "big_haul", icon: "♦", name: "Big haul", desc: "Score 60 or more points in {n} games.", goal: 10 },
+  { id: "sweep", icon: "≡", name: "Clean sweep", desc: "Take 10 or more gems in one game, {n} times.", goal: 5 },
+  { id: "comeback", icon: "↺", name: "Comeback kid", desc: "Win {n} games you were losing at the halfway point.", goal: 10 },
+  { id: "nail_biter", icon: "≈", name: "Nail-biter", desc: "Win {n} games by 1 point or less.", goal: 10 },
+  { id: "rematch", icon: "↻", name: "Again!", desc: "Play {n} rematches.", goal: 25 },
+  { id: "regular", icon: "⌂", name: "Regular", desc: "Finish {n} matches.", need: 100 },
+  { id: "champion", icon: "♚", name: "Champion", desc: "Win {n} matches.", need: 250 },
+  { id: "collector", icon: "☺", name: "Collector", desc: "Buy {n} characters.", need: 10 },
+  { id: "stylist", icon: "▦", name: "Stylist", desc: "Buy {n} card designs.", need: 6 },
+  { id: "saver", icon: "◎", name: "Big saver", desc: "Have {n} coins at once.", need: 20000 },
+  { id: "loyal", icon: "♥", name: "Loyal player", desc: "Collect the daily gift {n} days in a row.", need: 30 },
+  { id: "polyglot", icon: "✈", name: "Globetrotter", desc: "Finish {n} matches in another language.", goal: 10 },
 ];
 
+const ACH = Object.fromEntries(ACHIEVEMENTS.map(a => [a.id, a]));
 const GEM_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 L36 20 L20 37 L4 20Z" style="fill:var(--gem)"/><path d="M20 3 L36 20 L20 20Z" style="fill:var(--gem-hi)"/><path d="M20 20 L4 20 L20 37Z" style="fill:var(--gem-lo)"/><path d="M20 3 L36 20 L20 37 L4 20Z" style="fill:none;stroke:var(--brass)" stroke-width="2" stroke-linejoin="round"/></svg>`;
 /* The Diamond Bid logo: a cut gem in front of a hearts card and a spades card, inside a gold ring. Each copy gets its own ids. */
 let logoCount = 0;
@@ -387,7 +388,7 @@ function addCoins(n, why) {
   if (!n) return;
   stats.coins += n;
   saveStats();
-  if (stats.coins >= 5000) setTimeout(() => grant("saver"), 0);
+  if (stats.coins >= ACH.saver.need) setTimeout(() => grant("saver"), 0);
   if (G) G.coinsEarned = (G.coinsEarned || 0) + n;
   setTimeout(() => toast("\u25C9", t("+{n} coins", { n }), why), 350);
   const badge = document.getElementById("coin-count");
@@ -590,7 +591,7 @@ function renderHome() {
       <div class="ach-grid">
         ${ACHIEVEMENTS.map(a => {
           const goal = a.goal || 1, got = !!stats.ach[a.id], n = got ? goal : Math.min(goal, (stats.achProg || {})[a.id] || 0);
-          return `<div class="ach ${got ? "got" : ""}"><span class="ai">${a.icon}</span><div><b>${t(a.name)}</b><small>${t(a.desc)}</small>
+          return `<div class="ach ${got ? "got" : ""}"><span class="ai">${a.icon}</span><div><b>${t(a.name)}</b><small>${t(a.desc, { n: fmtCoins(a.need || goal) })}</small>
             ${goal > 1 && !got ? `<span class="achbar" aria-label="${n} / ${goal}"><span style="width:${Math.round(100 * n / goal)}%"></span></span><span class="achn">${n} / ${goal}</span>` : ""}</div></div>`;
         }).join("")}
       </div>
@@ -877,8 +878,8 @@ function onMatchEnd() {
   if (won) stats.won++;
   saveStats();
   if (G.kind === "online") grant("online");
-  if (stats.played >= 25) grant("regular");
-  if (stats.won >= 50) grant("champion");
+  if (stats.played >= ACH.regular.need) grant("regular");
+  if (stats.won >= ACH.champion.need) grant("champion");
   if (LANG !== "en") grant("polyglot");
   if (won) {
     grant("first_win");
@@ -1921,7 +1922,7 @@ function checkDailyGift() {
   stats.lastGift = today;
   stats.coins += amount;
   saveStats();
-  if (stats.giftStreak >= 7) setTimeout(() => grant("loyal"), 0);
+  if (stats.giftStreak >= ACH.loyal.need) setTimeout(() => grant("loyal"), 0);
   app.gift = amount;
   if (!G) app.modal = "gift";
 }
@@ -1975,8 +1976,8 @@ function buy(id) {
   saveStats(); savePrefs();
   app.modal = null;
   Sound.fanfare(); Haptics.buy(); confetti(80);
-  if (stats.owned.filter(x => CHAR[x]).length >= 5) grant("collector");
-  if (stats.owned.filter(x => DECKS.some(d => d.id === x)).length >= 3) grant("stylist");
+  if (stats.owned.filter(x => CHAR[x]).length >= ACH.collector.need) grant("collector");
+  if (stats.owned.filter(x => DECKS.some(d => d.id === x)).length >= ACH.stylist.need) grant("stylist");
   toast("\u2726", t("{name} is yours", { name: CHAR[id] ? charName(id) : t(item.name) }), t("New " + kindOf(id)));
   render();
 }
