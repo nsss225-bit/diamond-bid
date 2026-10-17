@@ -1,6 +1,6 @@
 # Diamond Bid changelog
 
-## Unreleased
+## 1.3
 - Your cards are held in an overlapping fan, dealt in one by one at the start of each game; the card you bid glides to the table.
 - Red vs blue see-through scoreboard at the top with each player's picture and name (the per-player score panels are gone). "Black team" is now "Blue team".
 - New sounds for winning and losing a hand, and for losing a game.
