@@ -87,7 +87,8 @@ const JACKPOT_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2 
 const CURSE_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 C24 11 33 15 31 26 C30 33 25 37 20 37 C14 37 9 33 9 26 C9 20 13 17 14 12 C17 16 17 19 19 20 C20 14 18 9 20 3Z" fill="currentColor"/></svg>`;
 const SPEAKER_SVG = on => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>${on ? `<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>` : `<path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`}</svg>`;
 // Score colors for each side: red and blue like a scoreboard, then green and gold for 3–4 players.
-const SIDE_COLOR = ["#e0485a", "#3d7bf0", "#2fb46c", "#e0a92a"];
+const DEAL_GAP = 75;
+const SIDE_COLOR = ["#ff7b8a", "#6ea8ff", "#5fd896", "#f5c75a"];
 const TEAM_COLOR = SIDE_COLOR.slice(0, 2);
 const REVEAL_MS = 3000;
 const SPIN_MS = 4200;
@@ -186,9 +187,16 @@ const Sound = (() => {
     select() { tone(1500, .035, { type: "triangle", vol: .05 }); },
     snap() { noise(.07, { freq: 2600, vol: .38 }); tone(170, .07, { vol: .07 }); },
     flip() { noise(.05, { freq: 3200, vol: .25 }); noise(.05, { freq: 2300, vol: .22, at: .1 }); },
-    win() { [880, 1109, 1319].forEach((f, i) => tone(f, .28, { type: "triangle", vol: .11, at: .12 + i * .08 })); },
-    big() { [784, 988, 1175, 1568].forEach((f, i) => tone(f, .35, { type: "triangle", vol: .12, at: .12 + i * .09 })); },
-    lose() { tone(190, .32, { glide: 70, vol: .16, at: .1 }); },
+    // Winning a hand: a bright rising "ta-da" with a sparkle on top.
+    win() { [784, 988, 1175, 1568].forEach((f, i) => tone(f, i === 3 ? .5 : .16, { type: "triangle", vol: .16, at: .15 + i * .08 })); [2637, 3136].forEach((f, i) => tone(f, .18, { vol: .05, at: .5 + i * .06 })); },
+    big() { [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, i === 5 ? .7 : .16, { type: "triangle", vol: .16, at: .15 + i * .08 })); [2093, 2637, 3136].forEach((f, i) => tone(f, .25, { vol: .06, at: .7 + i * .07 })); },
+    // Losing a hand: a "wah-wah" sliding down.
+    lose() { tone(392, .22, { type: "sawtooth", vol: .07, at: .15, glide: 370 }); tone(330, .55, { type: "sawtooth", vol: .07, at: .4, glide: 220 }); tone(165, .55, { vol: .12, at: .4, glide: 110 }); },
+    // Losing the whole game: four sad steps down.
+    sad() { [392, 370, 349].forEach((f, i) => tone(f, .3, { type: "sawtooth", vol: .06, at: i * .32 })); tone(330, 1, { type: "sawtooth", vol: .06, at: .96, glide: 300 }); tone(165, 1, { vol: .1, at: .96, glide: 150 }); },
+    // A card sliding onto the felt (dealing and placing).
+    card(at = 0) { noise(.06, { freq: 3800, q: .7, vol: .22, at }); },
+    deal(n, gap) { for (let k = 0; k < n; k++) noise(.05, { freq: 3400 + Math.random() * 900, q: .7, vol: .2, at: k * gap }); },
     tick() { tone(1050, .035, { type: "square", vol: .035 }); },
     wheel(ms) { let t = 0, gap = .04; while (t < ms / 1000 - .2) { tone(1800, .02, { type: "square", vol: .03, at: t }); t += gap; gap *= 1.09; } },
     fanfare() { [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tone(f, i > 3 ? .5 : .2, { type: "triangle", vol: .13, at: i * .12 })); },
@@ -663,6 +671,7 @@ function onGameEnd() {
   const mySide = i >= 0 ? sideOf(s.config, i) : -1;
   const iWon = mySide >= 0 && s.lastGameWinners.includes(mySide);
   if (iWon) { Sound.fanfare(); confetti(s.phase === "matchOver" ? 180 : 90); }
+  else if (mySide >= 0 && G.kind !== "pass" && s.lastGameWinners.length) Sound.sad();
   if (G.kind === "pass") { Sound.fanfare(); confetti(120); }
   if (G.track && i >= 0) {
     if (s.config.cursed && !s.history.some(h => h.awards[i] < 0) && s.history.some(h => h.prize < 0)) grant("curse_dodger");
@@ -737,6 +746,8 @@ function placeBid() {
   const seat = activeSeat();
   if (seat === undefined || G.selected == null) return;
   const bid = { card: G.selected, double: G.useDouble, power: G.usePower };
+  const from = document.querySelector && document.querySelector(".hand .card.sel");
+  G.flyFrom = from && from.getBoundingClientRect ? from.getBoundingClientRect() : null;
   if (G.kind === "online" && G.role === "guest") {
     G.myBid = { seat, key: roundKey(G.s), bid };
     Online.named && Online.named.presence({ b: { k: roundKey(G.s), c: bid.card, d: bid.double ? 1 : 0, p: bid.power ? 1 : 0 } }).catch(() => {});
@@ -841,7 +852,12 @@ function renderGame() {
   const guest = G.kind === "online" && G.role === "guest";
 
   const dropClass = i => {
-    if (s.phase === "bidding" && shownSubmitted(i) && !G.seen[i]) { G.seen[i] = true; return " drop"; }
+    if (s.phase === "bidding" && shownSubmitted(i) && !G.seen[i]) {
+      G.seen[i] = true;
+      if (i === home && G.flyFrom) return "";
+      Sound.card();
+      return " drop";
+    }
     return "";
   };
   const drops = range(n).map(dropClass);
@@ -908,7 +924,7 @@ function renderGame() {
     const myAward = result ? result.awards[home] : 0;
     mine = `<div class="spot ${result && result.winners.includes(home) ? "win" : ""}">
       <span class="lbl">${t("Your bid")}</span>
-      <div class="bidwrap" style="position:relative">${result || shownSubmitted(home) ? bidCard(home, "lg") : `<div class="slot lg">${G.selected != null ? "" : t("Pick a card")}</div>`}
+      <div class="bidwrap" id="mybid" style="position:relative">${result || shownSubmitted(home) ? bidCard(home, "lg") : `<div class="slot lg">${G.selected != null ? "" : t("Pick a card")}</div>`}
         ${anim && myAward ? `<span class="floatpts ${myAward < 0 ? "neg" : ""}">${awardText(myAward)}</span>` : ""}</div>
       <span class="sub">${awardSpan(home)}</span>
     </div>`;
@@ -975,9 +991,14 @@ function renderGame() {
     const pendingCard = s.phase === "bidding" && pb ? pb.card : null;
     // Held like a real hand: overlapping cards in a gentle arc, numbers peeking out at the top left.
     const cards = s.hands[hs], mid = (cards.length - 1) / 2;
-    handHTML = `<div class="hand" role="group" aria-label="${t("Your cards")}" style="--m:${Math.max(cards.length, 2)}">${cards.map((v, k) =>
+    // A fresh hand is dealt in one card at a time. Timed from G.dealAt so a re-render mid-deal doesn't restart it.
+    if (s.phase === "bidding" && s.round === 0 && cards.length === s.prizes.length && G.dealtFor !== `${s.gameNumber}.${hs}`) {
+      G.dealtFor = `${s.gameNumber}.${hs}`; G.dealAt = Date.now(); Sound.deal(cards.length, DEAL_GAP / 1000);
+    }
+    const dealt = G.dealAt ? Date.now() - G.dealAt : Infinity, dealing = dealt < DEAL_GAP * cards.length + 500;
+    handHTML = `<div class="hand ${dealing ? "dealing" : ""}" role="group" aria-label="${t("Your cards")}" style="--m:${Math.max(cards.length, 2)}">${cards.map((v, k) =>
       cardFace(suit, v, `${G.selected === v ? "sel" : ""} ${pendingCard === v ? "pending" : ""}`, "button",
-        `data-act="select" data-v="${v}" ${canBid ? "" : "disabled"} aria-pressed="${G.selected === v}" style="--o:${k - mid}"`)).join("")}</div>`;
+        `data-act="select" data-v="${v}" ${canBid ? "" : "disabled"} aria-pressed="${G.selected === v}" style="--o:${k - mid}${dealing ? `;animation-delay:${k * DEAL_GAP - dealt}ms` : ""}"`)).join("")}</div>`;
     if (canBid) {
       const pw = c.powers && s.powerAvail[hs] && POWERS[s.seats[hs].char];
       let pwBtn = "";
@@ -1539,11 +1560,29 @@ function render() {
   if (app.screen === "game" && G) {
     root.innerHTML = renderGame() + (app.modal === "exit" ? renderConfirmExit() : renderModal())
       + (G.notice ? `<div class="overlay"><div class="sheet" role="alertdialog" style="max-width:420px"><p style="margin:0">${esc(G.notice)}</p><div class="sheet-foot" style="justify-content:flex-end"><button class="btn primary" data-act="notice-ok">${t("OK")}</button></div></div></div>` : "");
+    flyPlayedCard();
   } else {
     const typing = document.activeElement && document.activeElement.id === "join-code" ? document.activeElement.value : null;
     root.innerHTML = renderHome() + (app.setup ? renderSetup() : "") + renderHomeModal();
     if (typing !== null) { const el = document.getElementById("join-code"); if (el) { el.value = typing; el.focus(); } }
   }
+}
+
+/* The card you bid glides from your hand to the "Your bid" spot. */
+function flyPlayedCard() {
+  const from = G && G.flyFrom;
+  if (!from) return;
+  G.flyFrom = null;
+  const to = document.querySelector("#mybid .card");
+  if (!to || !to.animate || !to.getBoundingClientRect) return;
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const r = to.getBoundingClientRect();
+  const dx = from.left + from.width / 2 - (r.left + r.width / 2), dy = from.top + from.height / 2 - (r.top + r.height / 2);
+  to.animate([
+    { transform: `translate(${dx}px, ${dy}px) scale(${from.width / r.width}) rotate(-8deg)`, boxShadow: "0 4px 10px rgba(0,0,0,.3)" },
+    { transform: `translate(${dx * .35}px, ${dy * .35 - 40}px) scale(1.12) rotate(6deg)`, boxShadow: "0 26px 40px rgba(0,0,0,.45)", offset: .55 },
+    { transform: "none" },
+  ], { duration: 480, easing: "cubic-bezier(.25,.8,.3,1)" });
 }
 
 document.addEventListener("click", e => {
