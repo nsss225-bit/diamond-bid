@@ -9,21 +9,22 @@ const RANK = v => ({ 1: "A", 11: "J", 12: "Q", 13: "K" })[v] || String(v);
 const range = n => Array.from({ length: n }, (_, i) => i);
 const ALL13 = range(13).map(i => i + 1);
 const JACKPOT = 20;
-/* Players pick their suits. With 2 players the middle deck is one of the two suits left over;
-   with 4 players every suit is taken, so the middle uses a fifth suit, Stars or Crowns. */
+/* Each player's suit. The match stores the full deal in config.suits (you choose yours, the others get the
+   remaining suits at random); older games without it fall back to the classic order. */
 function playerSuits(n, c = {}) {
-  if (n === 2) {
-    const p = Array.isArray(c.suits2) && c.suits2.length === 2 && c.suits2[0] !== c.suits2[1] && c.suits2.every(x => SUITS.includes(x)) ? c.suits2 : ["h", "s"];
-    return p;
-  }
-  const mine = SUITS.includes(c.mine4) ? c.mine4 : "h";
-  return [mine, ...["h", "c", "d", "s"].filter(x => x !== mine)];
+  if (Array.isArray(c.suits) && c.suits.length === n && new Set(c.suits).size === n && c.suits.every(x => SUITS.includes(x))) return c.suits;
+  return n === 2 ? ["h", "s"] : ["h", "c", "d", "s"];
 }
 const suitFor = (seat, n, c) => playerSuits(n, c)[seat];
-function middleSuit(n, c = {}) {
-  if (n !== 2) return c.middle4 === "crown" ? "crown" : "star";
-  const free = SUITS.filter(x => !playerSuits(2, c).includes(x));
-  return free.includes(c.middle2) ? c.middle2 : free.includes("d") ? "d" : free[0];
+/** The middle deck is always its own suit, Stars or Crowns, picked at random for each match. */
+const middleSuit = (n, c = {}) => c.middle === "crown" ? "crown" : "star";
+/** Deal suits for a new match: `mine` goes to `seat`, everyone else gets a random remaining suit. */
+function dealSuits(n, mine, seat = 0, rand = Math.random) {
+  const pool = SUITS.filter(x => x !== mine);
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(i === seat ? mine : pool.shift());
+  return out;
 }
 // Gems read like the cards: A for 1, and J, Q and K for 11, 12 and 13 (the jackpot stays 20, curses stay −1 to −3).
 const prizeLabel = v => v < 0 ? "−" + (-v) : v === 1 || (v >= 11 && v <= 13) ? RANK(v) : String(v);
@@ -86,7 +87,7 @@ const POWERS = {
 
 /* ================= Setting up ================= */
 const DEFAULT_CONFIG = {
-  seatCount: 2, teams: false, tieRule: "split", cursed: false, double: false, gamesToWin: 1, botLevel: "normal",
+  seatCount: 2, teams: false, tieRule: "spin", cursed: false, double: false, gamesToWin: 1, botLevel: "normal",
   showNext: false, mystery: false, jackpot: false, powers: false,
 };
 
@@ -223,7 +224,14 @@ function resolve(s) {
   if (octopus >= 0) rivalsOf(octopus).forEach(k => { eff[k] -= 2; });
   r.reverse = used("penguin") >= 0;
   const bully = used("bear");
-  const { winners, cancelled } = pickWinners(prize, eff, c.tieRule, { reverse: r.reverse, bully });
+  let { winners, cancelled } = pickWinners(prize, eff, c.tieRule, { reverse: r.reverse, bully });
+  // A tie for the win is settled by a spin: one of the tied players takes the whole gem. The pick comes from the
+  // round itself (not a random number), so every phone in an online game lands on the same player.
+  if (c.tieRule !== "split" && c.tieRule !== "cancel" && winners.length > 1 && new Set(winners.map(i => sideOf(c, i))).size > 1) {
+    const key = `${s.gameNumber}|${s.round}|${bids.map(b => b.card).join(",")}|${(s.prizes0 || s.prizes).join(",")}`;
+    r.spinAmong = winners.slice();
+    winners = [winners[Math.abs(seedFrom(key)) % winners.length]];
+  }
   r.eff = eff;
   r.winners = winners;
   r.cancelled = cancelled;
@@ -434,47 +442,78 @@ function botChoose(s, seat, level) {
     return { card: hand[hand.length - 1], double: false, power: true };
   }
 
-  if (level === "normal") {
-    if (prize < 0) return { card: at(idx(.3 + .1 * -prize) + jitter()), double: false, power: false };
-    return {
-      card: at(idx(q) + jitter()),
-      double: canDouble && prize >= 9 && q >= .8 && rnd(s) < .5,
-      power: usePower(q >= .85 && ["fox", "bear", "panda", "frog", "dragon", "raccoon", "lion", "octopus", "shark"].includes(char)),
-    };
-  }
-
-  // Hard and Expert
-  if (prize < 0) {
-    const lowestRivalMax = Math.min(...rh.map(h => h[h.length - 1]));
-    const safe = hand.find(c => c > lowestRivalMax);
-    if (safe !== undefined && hand.indexOf(safe) <= Math.floor(hand.length / 2)) return { card: safe, double: false, power: false };
-    return { card: at(idx(.4) + jitter()), double: false, power: false };
-  }
-  const rivalMax = Math.max(...rh.map(h => h[h.length - 1]));
-  if (q >= .7) {
-    const sure = hand.find(c => c > rivalMax);
-    if (sure !== undefined) return { card: sure, double: canDouble && q >= .85, power: usePower(char === "panda") };
-  }
-  if (q <= .25) return { card: hand[0], double: false, power: false };
-
-  let guess;
-  if (level === "expert") {
-    // Predict each rival from how they have bid so far this game.
-    guess = Math.max(...rivals.map((r, k) => { const h = rh[k]; return h[Math.round(rivalHabit(s, r, q) * (h.length - 1))]; }));
-  } else {
-    guess = Math.max(...rh.map(h => h[Math.round(q * (h.length - 1))]));
-  }
-  let i = idx(q);
-  const over = hand.find(c => c > guess);
-  const reach = level === "expert" ? (q >= .6 ? 4 : 2) : 2;
-  if (over !== undefined && over - guess <= reach) i = hand.indexOf(over);
-  if (level !== "expert" && rnd(s) < .2) i += rnd(s) < .5 ? 1 : -1;
+  // Every other choice: weigh each card by simulating what the others are likely to bid.
+  const pick = mcBid(s, seat, level, q, prize, hand);
   const strong = q >= .75;
   return {
-    card: at(i),
-    double: canDouble && q >= .9 && hand.length <= 6,
-    power: usePower(strong && ["fox", "bear", "frog", "dragon", "raccoon", "panda", "lion", "octopus", "shark"].includes(char)),
+    card: pick.card,
+    double: canDouble && prize > 0 && pick.share >= .6 && (q >= .8 || prize >= 11) && (level !== "normal" || rnd(s) < .6),
+    power: usePower(strong && pick.share >= .35 && ["fox", "bear", "frog", "dragon", "raccoon", "panda", "lion", "octopus", "shark"].includes(char)),
   };
+}
+
+/* Bot bidding. For every card in hand the bot plays the round out many times in its head: each rival bids a card
+   from their real remaining hand, around how strongly they value this gem (Expert reads their habits), with some
+   uncertainty. The bot then scores each card as "points I expect to win now" minus "what this card is worth to me
+   later", adds its own personality, and plays the best one. Different bots weigh things differently, so they no
+   longer all play the same card. */
+function mcBid(s, seat, level, q, prize, hand) {
+  const n = s.seats.length, c = s.config;
+  const mySide = sideOf(c, seat);
+  const rivals = range(n).filter(i => sideOf(c, i) !== mySide);
+  const gauss = () => (rnd(s) + rnd(s) + rnd(s) - 1.5) * .8;
+  // Personality: some bots lean bold, some careful (fixed per character, so it feels like a person).
+  const char = s.seats[seat].char || "";
+  const h0 = Math.abs(seedFrom("style:" + char));
+  const bold = ((h0 % 1000) / 1000 - .5) * .08;
+  // Play styles: 0 balanced, 1 aggressive (wants the gem now), 2 thrifty (saves big cards), 3 wildcard (hard to read).
+  const style = (h0 >>> 10) % 4;
+  // Each bot has favourite gems: big ones, middle ones or small cheap ones (only matters with 3+ players,
+  // so four bots don't all chase the same King).
+  const focus = n > 2 ? [q >= .7 ? 1.18 : .92, q > .3 && q < .7 ? 1.2 : .88, q <= .4 ? 1.25 : .9, 1][style] : 1;
+  const want = focus, save = 1;
+  const samples = level === "expert" ? 70 : level === "hard" ? 50 : 24;
+  const spread = level === "expert" ? .12 : level === "hard" ? .16 : .22;
+  const rh = rivals.map(i => s.hands[i].slice().sort((a, b) => a - b));
+  const rq = rivals.map(i => level === "expert" ? rivalHabit(s, i, q) : q);
+  // Rivals think too: often they try to bid just above what they expect from everyone else.
+  const outbid = rh.map((h, r) => {
+    const others = rh.filter((_, k) => k !== r).map((o, k) => o[Math.round(rq[k < r ? k : k + 1] * (o.length - 1))]);
+    others.push(hand[Math.round(q * (hand.length - 1))]);
+    if (prize < 0) return h[Math.round(.4 * (h.length - 1))];
+    const above = h.find(x => x > Math.max(...others));
+    return q >= .45 && above !== undefined ? above : h[Math.round(rq[r] * (h.length - 1))];
+  });
+  // Value of keeping a card: the gem it would most likely buy later, times the chance of actually winning it.
+  const future = s.prizes.slice(s.round + 1).filter(v => v > 0).sort((a, b) => a - b);
+  const winRate = n === 2 ? .55 : usesTeams(c) ? .5 : .32;
+  const keep = card => {
+    if (!future.length || hand.length < 2) return 0;
+    const u = hand.indexOf(card) / (hand.length - 1);
+    return future[Math.round(u * (future.length - 1))] * winRate * (level === "normal" ? .6 : .8);
+  };
+  const cards = [...new Set(hand)];
+  const share = Object.fromEntries(cards.map(x => [x, 0]));
+  for (let k = 0; k < samples; k++) {
+    const bids = rh.map((h, r) => level !== "normal" && rnd(s) < .5 ? outbid[r]
+      : h[Math.max(0, Math.min(h.length - 1, Math.round((rq[r] + gauss() * spread * 2) * (h.length - 1))))]);
+    const top = prize >= 0 ? Math.max(...bids) : Math.min(...bids);
+    const atTop = bids.filter(b => b === top).length;
+    cards.forEach(x => {
+      if (prize >= 0) share[x] += x > top ? 1 : x === top ? 1 / (atTop + 1) : 0;
+      else share[x] += x < top ? 1 : x === top ? 1 / (atTop + 1) : 0; // chance of taking the curse
+    });
+  }
+  const noise = (level === "expert" ? .3 : level === "hard" ? .6 : 1.4) * (style === 3 ? 1.5 : 1) * (n > 2 ? 1.3 : 1);
+  let best = null;
+  cards.forEach(x => {
+    const p = share[x] / samples;
+    const gain = prize >= 0 ? p * prize : -p * -prize;
+    const u = hand.length > 1 ? hand.indexOf(x) / (hand.length - 1) : 0;
+    const score = gain * want - keep(x) * save + bold * u * Math.max(4, Math.abs(prize)) + gauss() * noise;
+    if (!best || score > best.score) best = { card: x, score, share: p };
+  });
+  return best;
 }
 /** Bots use instant powers too (Foresight helps a human more, but a bot still spends it). */
 function botInstant(s, seat) {
@@ -556,7 +595,7 @@ function unpackState(m) {
 
 if (typeof module !== "undefined") {
   module.exports = {
-    PIP, SUIT_NAME, SUITS, RANK, range, ALL13, JACKPOT, suitFor, playerSuits, middleSuit, prizeLabel, prizeName, usesTeams, sideCount, sideOf, seatsOnSide,
+    PIP, SUIT_NAME, SUITS, RANK, range, ALL13, JACKPOT, suitFor, playerSuits, middleSuit, dealSuits, prizeLabel, prizeName, usesTeams, sideCount, sideOf, seatsOnSide,
     TEAM_NAME, fmt, rnd, seedFrom, shuffle, POWERS, DEFAULT_CONFIG, newMatch, deal, prizeNow, prizeNext, isLast, isMystery,
     sideScore, sideName, matchWinners, submit, usePowerNow, pickWinners, resolve, advance, finishGame, awardGame, rematch,
     replaceWithBot, TIEBREAKS, gemsTaken, tieValue, spinTie, applyTiebreak, finishTiebreak, botChoose, botInstant, summary,

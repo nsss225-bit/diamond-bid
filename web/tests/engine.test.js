@@ -14,7 +14,10 @@ const P = [5, 9, 13, 2, 7, 11, 1, 4, 12, 6, 3, 10, 8];
 // --- 1.0 rules still hold
 let s = table({}, ["fox", "owl"], P); let r = play(s, [{ card: 9 }, { card: 4 }]);
 ok(r.winners + "" === "0" && s.scores[0] === 60, "highest wins");
-s = table({}, ["fox", "owl"], P); play(s, [{ card: 9 }, { card: 9 }]); ok(E.fmt(s.scores[0]) === "2½", "split");
+s = table({ tieRule: "split" }, ["fox", "owl"], P); play(s, [{ card: 9 }, { card: 9 }]); ok(E.fmt(s.scores[0]) === "2½", "split");
+s = table({}, ["fox", "owl"], P); r = play(s, [{ card: 9 }, { card: 9 }]);
+ok(r.spinAmong + "" === "0,1" && r.winners.length === 1 && s.scores[r.winners[0]] === 60, "a tie is spun: one player takes the whole gem");
+{ const s2 = table({}, ["fox", "owl"], P); const r2 = play(s2, [{ card: 9 }, { card: 9 }]); ok(r2.winners[0] === r.winners[0], "the spin lands the same way on every phone"); }
 s = table({ tieRule: "cancel" }, ["fox", "owl", "bear", "cat"], P); r = play(s, [{ card: 9 }, { card: 9 }, { card: 5 }, { card: 3 }]);
 ok(r.winners + "" === "2", "cancel");
 
@@ -47,7 +50,7 @@ ok(s.scores[0] === (5 + 3) * 12, "Bamboo bonus +3");
 s = table({ powers: true }, ["penguin", "owl"], P); r = play(s, [{ card: 1, power: true }, { card: 13 }]);
 ok(r.winners + "" === "0" && r.reverse, "Upside down: lowest wins");
 s = table({ powers: true }, ["robot", "owl"], P); r = play(s, [{ card: 1, power: true }, { card: 11 }]);
-ok(r.eff[0] === 11 && r.winners.length === 2, "Copycat copies → tie");
+ok(r.eff[0] === 11 && r.spinAmong && r.spinAmong.length === 2 && r.winners.length === 1, "Copycat copies → tie, settled by the spin");
 s = table({ powers: true }, ["raccoon", "owl"], P); r = play(s, [{ card: 1, power: true }, { card: 11 }]);
 ok(s.scores[1] === 36 && s.scores[0] === 24, "Pickpocket takes 2");
 s = table({ powers: true }, ["dragon", "owl"], P); r = play(s, [{ card: 2, power: true }, { card: 13 }]);

@@ -712,6 +712,18 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 .char.locked .title { display: none; }
 .char.locked .lock span { display: none; }
 @media (max-width: 600px) { .char-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* ---------- Tie spin ---------- */
+.tiespin { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 6; display: grid; justify-items: center; gap: 8px;
+  padding: 14px 18px 16px; border-radius: 22px; background: rgba(6, 20, 16, .92); border: 1.5px solid rgba(217,171,79,.6); box-shadow: 0 20px 50px rgba(0,0,0,.55);
+  animation: tsout .4s ease 2.55s forwards; }
+.tiespin small { font: 800 12px var(--body); letter-spacing: .16em; text-transform: uppercase; color: var(--brass); }
+.tiespin .reel { --h: 84px; width: 84px; height: var(--h); overflow: hidden; border-radius: 50%; box-shadow: 0 0 0 3px var(--brass), 0 0 26px rgba(217,171,79,.45); }
+.tiespin .strip { display: flex; flex-direction: column; animation: reel 1.6s cubic-bezier(.12,.75,.25,1) forwards; }
+.tiespin .strip .avatar { width: 84px; height: 84px; flex: none; box-shadow: none; border-radius: 0; }
+@keyframes reel { from { transform: translateY(0); } to { transform: translateY(calc(var(--stop) * -84px)); } }
+.tiespin b { font: 700 16px var(--display); opacity: 0; animation: tswin .3s ease 1.6s forwards; }
+@keyframes tswin { to { opacity: 1; } }
+@keyframes tsout { to { opacity: 0; visibility: hidden; } }
 /* ---------- Suit choices and middle decks ---------- */
 .suitpick { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
 .suitpick .sp { display: flex; align-items: center; gap: 8px; }

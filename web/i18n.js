@@ -8,6 +8,11 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["Lucky spin", "Giro afortunado", "Roue chanceuse", "الدوران المحظوظ", "幸运转盘"],
+  ["Win {n} gems on the tie spin.", "Gana {n} gemas en el giro de desempate.", "Gagnez {n} gemmes à la roue d'égalité.", "اربح {n} جوهرة في دوران التعادل.", "在平局转盘中赢得 {n} 颗宝石。"],
+  ["Tie! Spinning…", "¡Empate! Girando…", "Égalité ! Ça tourne…", "تعادل! جارٍ الدوران…", "平局！转盘中…"],
+  ["{name} takes it!", "¡{name} se la lleva!", "{name} la remporte !", "{name} يفوز بها!", "{name} 拿下了！"],
+  ["Tie at {card}! The spin picks…", "¡Empate a {card}! El giro decide…", "Égalité à {card} ! La roue décide…", "تعادل عند {card}! الدوران يقرّر…", "{card} 平局！由转盘决定…"],
   ["Settings", "Ajustes", "Réglages", "الإعدادات", "设置"],
   ["Your progress is saved on this device.", "Tu progreso se guarda en este dispositivo.", "Votre progression est enregistrée sur cet appareil.", "تقدّمك محفوظ على هذا الجهاز.", "你的进度保存在此设备上。"],
   ["Suits", "Palos", "Couleurs", "الأنواع", "花色"],

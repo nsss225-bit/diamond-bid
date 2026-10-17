@@ -299,15 +299,16 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   H2.click("close"); H2.click("tab", { tab: "ach" });
   ok(H2.html().includes("0 / 100"), "achievements show progress like 0 / 100");
 
-  // 9f) Suits: pick your suit, the middle deck comes from what's left; 4 players get Stars or Crowns
+  // 9f) Suits: you pick yours, the others get random suits, the middle is Stars or Crowns
   const SU = browser("suits"); await sleep(20); SU.click("close");
   SU.get(`Object.assign(prefs.config, { seatCount: 2 })`); SU.click("open-setup", { kind: "bots" });
-  SU.click("cfg-suit", { slot: "0", suit: "c" }); SU.click("cfg-suit", { slot: "1", suit: "d" }); SU.click("cfg-suit", { slot: "mid", suit: "s" });
-  SU.click("start");
-  ok(SU.get(`suitFor(0, 2, G.s.config) === "c" && suitFor(1, 2, G.s.config) === "d" && middleSuit(2, G.s.config) === "s"`) && SU.html().includes("mid-s"), "2 players: clubs vs diamonds, spades in the middle");
+  ok(!SU.html().includes('data-slot="mid') && !SU.html().includes('data-slot="1"'), "setup only asks for your own suit");
+  SU.click("cfg-suit", { slot: "mine4", suit: "c" }); SU.click("start");
+  ok(SU.get(`suitFor(0, 2, G.s.config) === "c" && suitFor(1, 2, G.s.config) !== "c" && ["star", "crown"].includes(middleSuit(2, G.s.config))`) && /mid-(star|crown)/.test(SU.html()), "2 players: you get clubs, the bot a random other suit, Stars or Crowns in the middle");
   SU.click("home"); SU.get(`Object.assign(prefs.config, { seatCount: 4, teams: false })`); SU.click("open-setup", { kind: "bots" });
-  SU.click("cfg-suit", { slot: "mine4", suit: "s" }); SU.click("cfg-suit", { slot: "mid4", suit: "crown" }); SU.click("start");
-  ok(SU.get(`suitFor(0, 4, G.s.config) === "s" && new Set([0,1,2,3].map(i => suitFor(i, 4, G.s.config))).size === 4 && middleSuit(4, G.s.config) === "crown"`) && SU.html().includes("mid-crown"), "4 players: all four suits taken, Crowns in the middle");
+  SU.click("cfg-suit", { slot: "mine4", suit: "s" }); SU.click("start");
+  ok(SU.get(`suitFor(0, 4, G.s.config) === "s" && new Set([0,1,2,3].map(i => suitFor(i, 4, G.s.config))).size === 4`), "4 players: you get spades, the others the rest");
+  ok(!SU.html().includes('data-key="tieRule"'), "the Ties option is gone");
 
   // 9d) Vibration: picking and playing a card vibrate; the switch turns it off
   const V = browser("vibe"); await sleep(20); V.click("close");
