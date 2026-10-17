@@ -8,6 +8,7 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["Vibration", "Vibración", "Vibration", "الاهتزاز", "振动"],
   ["Account", "Cuenta", "Compte", "الحساب", "账户"],
   ["Sign in", "Iniciar sesión", "Se connecter", "تسجيل الدخول", "登录"],
   ["Signed in as", "Sesión iniciada como", "Connecté en tant que", "مسجّل الدخول باسم", "已登录为"],

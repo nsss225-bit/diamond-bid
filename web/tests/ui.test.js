@@ -290,6 +290,18 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   A1.click("account");
   ok(A1.html().includes("Signed in as") && A1.html().includes("Saved to your account"), "the account sheet shows who is signed in and the save status");
 
+  // 9d) Vibration: picking and playing a card vibrate; the switch turns it off
+  const V = browser("vibe"); await sleep(20); V.click("close");
+  const buzzes = []; V.navigator.vibrate = p => { buzzes.push(p); return true; };
+  V.get(`Object.assign(prefs.config, { seatCount: 2, botLevel: "easy", gamesToWin: 1 })`);
+  V.click("open-setup", { kind: "bots" }); V.click("start");
+  const vv = String(V.get("G.s.hands[0][2]"));
+  V.click("select", { v: vv }); V.click("select", { v: vv });
+  ok(buzzes.includes(8) && buzzes.includes(18), "picking and playing a card vibrate: " + JSON.stringify(buzzes));
+  V.click("haptics"); const before = buzzes.length;
+  V.click("select", { v: String(V.get("G.s.hands[0][0]")) });
+  ok(V.get("prefs.haptics") === false && buzzes.length === before, "the Vibration switch turns it off");
+
   // 10a) Double-tap a card to play it
   const D = browser("doubletap");
   await sleep(20); D.click("close");

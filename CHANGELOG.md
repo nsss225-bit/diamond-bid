@@ -1,5 +1,8 @@
 # Diamond Bid changelog
 
+## Unreleased
+- Vibration: a tap when you pick or play a card and as your hand is dealt, a buzz of success when you win a round (stronger for big gems), a warning when you lose one or take a curse, ticks in the last 3 seconds of your turn, and patterns for winning or losing the game, achievements, coins, purchases and found players. Turn it off with the new Vibration switch in the account screen. Uses real haptics in the store apps, vibration in Android browsers, and a light tap in iPhone Safari where iOS allows it.
+
 ## 1.5
 - The "Cards left" button (▤) is gone from the game screen: no more peeking at the upcoming gems or everyone's hands. Prof. Hoot's Foresight power still shows the next 3 gems.
 - 6 new characters, each with a new power: Pip (Soft landing), Coco (Mimic), Inky (Ink cloud), Stella (Wish), Finn (Bite) and Leo (Royal share). Bots know how to use them.

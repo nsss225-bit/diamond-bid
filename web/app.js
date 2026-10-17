@@ -278,7 +278,65 @@ const Sound = (() => {
     chime() { [1319, 1760, 2093].forEach((f, i) => tone(f, .3, { vol: .08, at: i * .07 })); },
   };
 })();
-function buzz(pattern) { try { if (prefs.sound !== false && navigator.vibrate) navigator.vibrate(pattern); } catch (e) {} }
+/* ================= Vibration ================= */
+/* One set of moments, three ways to feel them:
+   - the App Store / Google Play app: the phone's real haptics (Capacitor Haptics plugin);
+   - Android browsers: vibration patterns;
+   - iPhone Safari (iOS 18+): a light tap from a hidden switch, only on taps you make (Safari allows nothing else). */
+const Haptics = (() => {
+  // [delay ms, kind] steps; L/M/H = light/medium/heavy tap, S/W/E = success/warning/error.
+  const STEPS = {
+    select: [[0, "L"]], tick: [[0, "L"]], land: [[0, "L"]], place: [[0, "M"]],
+    win: [[0, "S"]], big: [[0, "H"], [130, "S"]], lose: [[0, "W"]], curse: [[0, "E"]],
+    timeout: [[0, "E"]], victory: [[0, "H"], [150, "M"], [290, "S"]], defeat: [[0, "W"], [240, "M"]],
+    achieve: [[0, "S"]], coins: [[0, "L"], [90, "L"]], buy: [[0, "H"], [160, "S"]], alert: [[0, "S"]],
+  };
+  const PATTERN = {
+    select: 8, tick: 10, land: 6, place: 18, win: [20, 40, 30], big: [40, 50, 40, 50, 80], lose: 70, curse: [90, 60, 90],
+    timeout: [60, 60, 60], victory: [50, 60, 50, 60, 150], defeat: [120, 80, 200], achieve: [25, 40, 25], coins: [15, 50, 15],
+    buy: [40, 60, 90], alert: [30, 40, 30],
+  };
+  const on = () => prefs.haptics !== false;
+  const native = () => window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
+  const iOS = typeof navigator !== "undefined" && (/iP(hone|ad|od)/.test(navigator.userAgent || "") || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+  let sw = null;
+  function iosTap() {
+    try {
+      if (!sw) {
+        sw = document.createElement("label");
+        sw.setAttribute("aria-hidden", "true");
+        sw.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none";
+        sw.innerHTML = '<input type="checkbox" switch tabindex="-1">';
+        document.body.appendChild(sw);
+      }
+      sw.click();
+    } catch (e) {}
+  }
+  function nativeStep(h, k) {
+    if ("LMH".includes(k)) return h.impact({ style: { L: "LIGHT", M: "MEDIUM", H: "HEAVY" }[k] });
+    return h.notification({ type: { S: "SUCCESS", W: "WARNING", E: "ERROR" }[k] });
+  }
+  function fire(kind) {
+    if (!on()) return;
+    try {
+      const h = native();
+      if (h) { STEPS[kind].forEach(([ms, k]) => setTimeout(() => { try { const p = nativeStep(h, k); p && p.catch && p.catch(() => {}); } catch (e) {} }, ms)); return; }
+      if (navigator.vibrate) { navigator.vibrate(PATTERN[kind]); return; }
+      if (iOS) iosTap();
+    } catch (e) {}
+  }
+  const api = {};
+  Object.keys(STEPS).forEach(k => { api[k] = () => fire(k); });
+  /** A soft tap for each card as the hand is dealt. */
+  api.deal = (n, gap) => {
+    if (!on()) return;
+    try {
+      if (native()) { for (let k = 0; k < n; k++) setTimeout(() => fire("land"), k * gap); return; }
+      if (navigator.vibrate) navigator.vibrate(Array.from({ length: n * 2 - 1 }, (_, k) => k % 2 ? gap - 6 : 6));
+    } catch (e) {}
+  };
+  return api;
+})();
 
 /* ================= Effects ================= */
 function toast(icon, title, sub) {
@@ -317,6 +375,7 @@ function grant(id) {
   if (G) G.newAch.push(a.name);
   toast(a.icon, t(a.name), t("Achievement unlocked"));
   Sound.chime();
+  Haptics.achieve();
   addCoins(ACH_REWARD, t(a.name));
 }
 function addCoins(n, why) {
@@ -725,7 +784,7 @@ function observe() {
   if (ended(s.phase) && !ended(p.phase)) onGameEnd();
   if (s.phase === "matchOver" && p.phase !== "matchOver") onMatchEnd();
   const spinKey = s.tie && s.tie.spin !== null ? `${s.tie.round}.${s.tie.spinTo}` : "";
-  if (spinKey && spinKey !== p.spinKey) { G.localSpinAt = Date.now(); Sound.wheel(SPIN_MS); }
+  if (spinKey && spinKey !== p.spinKey) { G.localSpinAt = Date.now(); Sound.wheel(SPIN_MS); Haptics.place(); }
   if (s.phase === "gameOver" && p.phase === "gameOver" && p.gn !== s.gameNumber) G.newAch = [];
   if (s.phase === "bidding" && p.gn != null && p.gn !== s.gameNumber) { G.newAch = []; G.coinsEarned = 0; G.recorded = false; G.streak = 0; }
   G.prev = { phase: s.phase, hist: histLen, gn: s.gameNumber, round: s.round, spinKey };
@@ -748,9 +807,9 @@ function onReveal(r) {
   Sound.flip();
   const mine = i >= 0 ? r.awards[i] : 0;
   setTimeout(() => {
-    if (mine > 0) { (r.prize >= 11 ? Sound.big : Sound.win)(); buzz([20, 40, 30]); }
-    else if (mine < 0) { Sound.lose(); buzz(80); }
-    else if (i >= 0 && w.length && !w.includes(i)) Sound.lose();
+    if (mine > 0) { (r.prize >= 11 ? Sound.big : Sound.win)(); (r.prize >= 11 || r.prize === JACKPOT ? Haptics.big : Haptics.win)(); }
+    else if (mine < 0) { Sound.lose(); Haptics.curse(); }
+    else if (i >= 0 && w.length && !w.includes(i)) { Sound.lose(); Haptics.lose(); }
   }, 0);
   if (!G.track || i < 0) return;
   if (mine > 0) grant("first_gem");
@@ -771,8 +830,8 @@ function onGameEnd() {
   const s = G.s, i = me();
   const mySide = i >= 0 ? sideOf(s.config, i) : -1;
   const iWon = mySide >= 0 && s.lastGameWinners.includes(mySide);
-  if (iWon) { Sound.fanfare(); confetti(s.phase === "matchOver" ? 180 : 90); }
-  else if (mySide >= 0 && G.kind !== "pass" && s.lastGameWinners.length) Sound.sad();
+  if (iWon) { Sound.fanfare(); Haptics.victory(); confetti(s.phase === "matchOver" ? 180 : 90); }
+  else if (mySide >= 0 && G.kind !== "pass" && s.lastGameWinners.length) { Sound.sad(); Haptics.defeat(); }
   if (G.kind === "pass") { Sound.fanfare(); confetti(120); }
   if (G.track && i >= 0) {
     if (s.config.cursed && !s.history.some(h => h.awards[i] < 0) && s.history.some(h => h.prize < 0)) grant("curse_dodger");
@@ -875,7 +934,7 @@ function placeBid() {
 }
 function afterBidPlaced() {
   G.selected = null; G.useDouble = false; G.usePower = false;
-  Sound.snap(); buzz(12);
+  Sound.snap(); Haptics.place();
 }
 function useInstantPower() {
   const seat = activeSeat();
@@ -958,7 +1017,7 @@ function clockTick() {
     const secs = Math.max(0, Math.ceil((TURN_MS - (Date.now() - G.turnAt)) / 1000));
     if (el.textContent !== String(secs)) {
       el.textContent = secs;
-      if (secs <= 3) { el.parentNode.classList.add("hurry"); if (secs > 0) Sound.tick(); }
+      if (secs <= 3) { el.parentNode.classList.add("hurry"); if (secs > 0) { Sound.tick(); Haptics.tick(); } }
     }
   }
   const away = document.getElementById("away-left");
@@ -973,7 +1032,7 @@ function autoPlay(key) {
     G.away = { at: Date.now() };
     clearTimeout(awayTimer);
     awayTimer = setTimeout(kickForInactivity, AWAY_MS);
-    Sound.lose(); buzz([60, 60, 60]);
+    Sound.lose(); Haptics.timeout();
   }
   G.selected = botChoose(G.s, seat, "normal").card;
   G.useDouble = false; G.usePower = false;
@@ -1041,7 +1100,7 @@ function renderGame() {
     if (s.phase === "bidding" && shownSubmitted(i) && !G.seen[i]) {
       G.seen[i] = true;
       if (i === home && G.flyFrom) return "";
-      Sound.card();
+      Sound.card(); Haptics.land();
       return " drop";
     }
     return "";
@@ -1162,7 +1221,7 @@ function renderGame() {
     const cards = s.hands[hs], mid = (cards.length - 1) / 2;
     // A fresh hand is dealt in one card at a time. Timed from G.dealAt so a re-render mid-deal doesn't restart it.
     if (s.phase === "bidding" && s.round === 0 && cards.length === s.prizes.length && G.dealtFor !== `${s.gameNumber}.${hs}`) {
-      G.dealtFor = `${s.gameNumber}.${hs}`; G.dealAt = Date.now(); Sound.deal(cards.length, DEAL_GAP / 1000);
+      G.dealtFor = `${s.gameNumber}.${hs}`; G.dealAt = Date.now(); Sound.deal(cards.length, DEAL_GAP / 1000); Haptics.deal(cards.length, DEAL_GAP);
     }
     const dealt = G.dealAt ? Date.now() - G.dealAt : Infinity, dealing = dealt < DEAL_GAP * cards.length + 500;
     handHTML = `<div class="hand ${dealing ? "dealing" : ""}" role="group" aria-label="${t("Your cards")}" style="--m:${Math.max(cards.length, 2)}">${cards.map((v, k) =>
@@ -1455,7 +1514,8 @@ function accountButton() {
   return `<button class="icon-btn acctbtn ${Account.id ? "in" : ""}" data-act="account" aria-label="${Account.id ? t("Account") : t("Sign in")}">${pic}</button>`;
 }
 function renderAccount() {
-  const sound = `<button class="switch" data-act="sound" aria-pressed="${prefs.sound}"><span class="track"></span>${t("Sound")}</button>`;
+  const sound = `<div class="acct-toggles"><button class="switch" data-act="sound" aria-pressed="${prefs.sound}"><span class="track"></span>${t("Sound")}</button>
+    <button class="switch" data-act="haptics" aria-pressed="${prefs.haptics !== false}"><span class="track"></span>${t("Vibration")}</button></div>`;
   let body;
   if (Account.id) {
     body = `<div class="acct-me">${Account.avatar ? `<img src="${esc(Account.avatar)}" alt="">` : `<span class="acct-pic">${PERSON_SVG}</span>`}
@@ -1603,7 +1663,7 @@ function hostReadPeers(ch) {
   });
   // Rematch requests from the other players.
   const asks = s.phase === "matchOver" ? ch.peers.filter(p => !p.sameTab && p.presence && p.presence.r === matchKey(s)).map(p => cleanName(p.presence.name) || charName(p.presence.char || "fox")) : [];
-  if (asks.join() !== (G.rematchAsks || []).join()) { G.rematchAsks = asks; if (asks.length) { Sound.chime(); buzz([30, 40, 30]); } changed = true; render(); }
+  if (asks.join() !== (G.rematchAsks || []).join()) { G.rematchAsks = asks; if (asks.length) { Sound.chime(); Haptics.alert(); } changed = true; render(); }
   if (changed) progress();
 }
 function guestReadPeers(ch) {
@@ -1668,13 +1728,14 @@ function onLobby(ch) {
   if (!me) return;
   // Someone already picked me: join their table.
   const invite = ch.peers.find(p => !p.sameTab && p.presence && p.presence.qm && p.presence.with === me.peer && p.presence.pair);
-  if (invite) { Match.paired = { code: invite.presence.pair, host: false }; joinMatched(); return; }
+  if (invite) { Match.paired = { code: invite.presence.pair, host: false }; Haptics.alert(); joinMatched(); return; }
   const waiting = ch.peers.filter(p => p.presence && p.presence.app === "diamondbid" && p.presence.qm && !p.presence.pair)
     .sort((a, b) => (a.presence.t || 0) - (b.presence.t || 0) || (a.peer < b.peer ? -1 : 1));
   const i = waiting.findIndex(p => p.sameTab);
   if (i < 0 || i % 2 || !waiting[i + 1]) return; // the earlier of each pair opens the table
   const code = "qm" + randomCode();
   Match.paired = { code, host: true };
+  Haptics.alert();
   Match.lobby.presence({ pair: code, with: waiting[i + 1].peer }).catch(() => {});
   joinMatched();
 }
@@ -1854,7 +1915,7 @@ function renderHomeModal() {
   if (m === "gift") {
     return wrap(t("Daily gift"), `<div class="gift">${COIN.replace('class="coin"', 'class="coin big"')}<b>${t("+{n} coins", { n: fmtCoins(app.gift || 0) })}</b>
         <p class="muted" style="margin:0">${t("Day {n} in a row. Come back tomorrow for more: the gift grows each day up to day 7.", { n: stats.giftStreak })}</p></div>${ladder()}`,
-      `<button class="btn primary" data-act="close">${t("Collect")}</button>`);
+      `<button class="btn primary" data-act="collect-gift">${t("Collect")}</button>`);
   }
   if (m === "coins") {
     return wrap(`${COIN} ${t("{n} coins", { n: fmtCoins(stats.coins) })}`, `<div class="earn">
@@ -1890,7 +1951,7 @@ function buy(id) {
   if (CHAR[id]) prefs.character = id; else if (DECKS.some(d => d.id === id)) prefs.deck = id; else prefs.table = id;
   saveStats(); savePrefs();
   app.modal = null;
-  Sound.fanfare(); confetti(80);
+  Sound.fanfare(); Haptics.buy(); confetti(80);
   if (stats.owned.filter(x => CHAR[x]).length >= 5) grant("collector");
   if (stats.owned.filter(x => DECKS.some(d => d.id === x)).length >= 3) grant("stylist");
   toast("\u2726", t("{name} is yours", { name: CHAR[id] ? charName(id) : t(item.name) }), t("New " + kindOf(id)));
@@ -1949,6 +2010,7 @@ function dragMove(e) {
   const ok = dropZoneHit(e.clientY);
   const slot = document.querySelector("#mybid .slot");
   if (slot) slot.classList.toggle("dropok", ok);
+  if (ok !== Drag.wasOk) { Drag.wasOk = ok; if (ok) Haptics.select(); }
   Drag.ghost.classList.toggle("ok", ok);
 }
 function dragEnd(e) {
@@ -2017,6 +2079,8 @@ document.addEventListener("click", e => {
     case "pick-table": prefs.table = el.dataset.id; savePrefs(); Sound.select(); render(); break;
     case "four": prefs.fourColor = !prefs.fourColor; savePrefs(); render(); break;
     case "sound": prefs.sound = !prefs.sound; savePrefs(); if (prefs.sound) Sound.chime(); render(); break;
+    case "haptics": prefs.haptics = prefs.haptics === false; savePrefs(); Haptics.alert(); render(); break;
+    case "collect-gift": app.modal = null; Sound.chime(); Haptics.coins(); render(); break;
     case "open-setup": app.setup = el.dataset.kind; render(); break;
     case "open-online": app.setup = "online-menu"; Online.error = ""; render(); break;
     case "online-create": joinTable(randomCode(), true); break;
@@ -2059,7 +2123,7 @@ document.addEventListener("click", e => {
       G.lastTap = { v, at: now };
       G.selected = G.selected === v && now - (G.selectedAt || 0) > 450 ? null : v;
       G.selectedAt = now;
-      Sound.select(); render(); break;
+      Sound.select(); Haptics.select(); render(); break;
     }
     case "double": G.useDouble = !G.useDouble; Sound.select(); render(); break;
     case "power": G.usePower = !G.usePower; Sound.select(); render(); break;
@@ -2078,7 +2142,7 @@ document.addEventListener("click", e => {
     case "coins": app.modal = "coins"; render(); break;
     case "lang": app.modal = "lang"; render(); break;
     case "account": app.modal = "account"; Sound.select(); render(); break;
-    case "tab": app.tab = el.dataset.tab; Sound.select(); window.scrollTo(0, 0); render(); break;
+    case "tab": app.tab = el.dataset.tab; Sound.select(); Haptics.select(); window.scrollTo(0, 0); render(); break;
     case "set-lang": setLang(el.dataset.id); prefs.lang = LANG; savePrefs(); app.modal = null; Sound.select(); render(); break;
     case "buy": app.buyId = el.dataset.id; app.modal = "buy"; Sound.select(); render(); break;
     case "confirm-buy": buy(app.buyId); break;
