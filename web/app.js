@@ -1011,7 +1011,7 @@ function coachTip() {
       t("Only a 2. Save your big cards and throw away a low one."),
       t("Look under the gem: Next shows what's coming. Plan which cards you'll need."),
       t("A 1 gem. A good moment to get rid of your weakest card."),
-      t("11 is big. Tap ▤ at the top to see which cards Lily has left before you bid."),
+      t("11 is big. Think about which big cards Lily has already used before you bid."),
     ][s.round] || t("You've got it. Win the most points by the end of the 13 gems.");
   }
   if (s.phase === "reveal" && last) {
@@ -1234,7 +1234,6 @@ function renderGame() {
       <div class="mid"><b>${t("Gem {n} of {total}", { n: Math.min(s.round + 1, s.prizes.length), total: s.prizes.length })}</b><small>${sub}</small></div>
       <div class="right">
         <button class="icon-btn" data-act="sound" aria-label="${prefs.sound ? t("Turn sound off") : t("Turn sound on")}">${SPEAKER_SVG(prefs.sound)}</button>
-        <button class="icon-btn" data-act="modal" data-m="cards" aria-label="${t("Cards left")}" title="${t("Cards left")}">▤</button>
         <button class="icon-btn" data-act="modal" data-m="rules" aria-label="${t("Rules")}" title="${t("Rules")}">?</button>
       </div>
     </div>
