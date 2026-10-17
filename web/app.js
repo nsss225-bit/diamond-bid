@@ -600,7 +600,7 @@ function renderSetup() {
       <div class="sheet-head"><h2 id="setup-title">${kind === "bots" ? t("Play vs bots") : t("Pass and play")}</h2><button class="icon-btn" data-act="close" aria-label="${t("Close")}">✕</button></div>
       ${rulesFields(kind, hasBots)}
       <div>
-        <div class="opt-label">${t("At the table")}${people > 1 ? " · " + t("tap an avatar to change character") : ""}</div>
+        <div class="opt-label">${t("At the table")}${people > 1 ? `<span class="opt-hint"> · ${t("tap an avatar to change character")}</span>` : ""}</div>
         <div class="seats">${seats}</div>
       </div>
       <div class="sheet-foot">
