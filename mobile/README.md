@@ -30,7 +30,7 @@ Each workflow runs from the repo's **Actions** tab ("Run workflow"), or when a `
    - `APPLE_TEAM_ID`: your 10-character Team ID (Membership page).
    - `ASC_KEY_ID`: the key's ID.
    - `ASC_ISSUER_ID`: the Issuer ID shown above the keys.
-   - `ASC_KEY_P8_BASE64`: the `.p8` file's contents, base64-encoded.
+   - `ASC_KEY_P8`: the `.p8` file's text, pasted exactly as it is (from `-----BEGIN PRIVATE KEY-----` to `-----END PRIVATE KEY-----`). On an iPhone: in the Files app, rename the file from `.p8` to `.txt`, open it, select all, copy, and paste it into the secret. (`ASC_KEY_P8_BASE64` with the base64-encoded file also works.)
 5. Run **iOS build**. About 15 minutes later the build appears in TestFlight. Install the TestFlight app on your iPhone to try it, then submit it for review from App Store Connect.
 
 ### Android → Google Play
