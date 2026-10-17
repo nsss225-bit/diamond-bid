@@ -1,6 +1,6 @@
 # Diamond Bid changelog
 
-## Unreleased
+## 1.4
 - Quick match: Play online → Find a player pairs you with someone else searching right now (1 vs 1). If nobody turns up in 20 seconds, you play a bot instead. Tables with a code for friends still work as before.
 - Rematch: online, anyone at the table can ask for a rematch (the host sees who asked and starts it for everyone). On the home screen, "↻ Play again" restarts your last game vs bots or pass and play with the same rules.
 - Game setup (vs bots and pass and play) fits one phone screen: each label sits beside its choices, the extras are compact tiles, and the seats are one row of avatars.
