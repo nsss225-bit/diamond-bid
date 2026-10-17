@@ -4,44 +4,86 @@ const APP_VERSION = "1.5";
 
 /* ================= Content ================= */
 const CHARACTERS = [
-  { id: "fox", name: "Fennec", title: "The Sly Fox", line: "Saves big cards for the moments that matter.", ring: "#e8732f" },
-  { id: "owl", name: "Prof. Hoot", title: "The Card Counter", line: "Knows exactly what you have left.", ring: "#c79a6b" },
-  { id: "bear", name: "Bruno", title: "The Big Bettor", line: "Never met a King he would not play.", ring: "#a8693a" },
-  { id: "cat", name: "Duchess", title: "The Cool Cat", line: "Unbothered. Unpredictable.", ring: "#b9a3d6" },
-  { id: "frog", name: "Lily", title: "The Lucky Frog", line: "Swears that ties bring good luck.", ring: "#5fae4e" },
-  { id: "panda", name: "Bao", title: "The Gentle Giant", line: "Slow, steady and hard to read.", ring: "#e9e6dc" },
-  { id: "penguin", name: "Tux", title: "The Gentleman", line: "Bows politely, then takes your gem.", ring: "#6f8fb3" },
-  { id: "robot", name: "Unit 13", title: "The Machine", line: "Thirteen cards. Zero emotions.", ring: "#5ef0ff" },
-  { id: "raccoon", name: "Rosa", title: "The Pickpocket", line: "Your points look better in her pocket.", ring: "#8f8b86" },
-  { id: "dragon", name: "Ember", title: "The Hoarder", line: "Guards every gem she takes.", ring: "#e0583f" },
-  { id: "bunny", name: "Pip", title: "The Lucky Charm", line: "Always lands on her feet.", ring: "#f2a7bd" },
-  { id: "monkey", name: "Coco", title: "The Trickster", line: "Copies whatever is worth copying.", ring: "#b5793f" },
-  { id: "octopus", name: "Inky", title: "The Inkmaster", line: "Eight arms, zero tells.", ring: "#a874e0" },
-  { id: "unicorn", name: "Stella", title: "The Dreamer", line: "Wishes on small cards and big gems.", ring: "#f49ac1" },
-  { id: "shark", name: "Finn", title: "The Closer", line: "Smells a lead from across the table.", ring: "#5f90b2" },
-  { id: "lion", name: "Leo", title: "The Proud King", line: "Every gem he wins, he wins twice.", ring: "#e8a93a" },
+  { id: "fox", name: "Amara", title: "The Strategist", line: "Saves her big cards for the moments that matter.", ring: "#e8732f" },
+  { id: "owl", name: "Hiroshi", title: "The Card Counter", line: "Knows exactly what you have left.", ring: "#4f6d8f" },
+  { id: "bear", name: "Mateo", title: "The Big Bettor", line: "Never met a King he would not play.", ring: "#a8693a" },
+  { id: "cat", name: "Leila", title: "The Cool Head", line: "Unbothered. Unpredictable.", ring: "#7d68a8" },
+  { id: "frog", name: "Priya", title: "The Lucky One", line: "Swears that ties bring good luck.", ring: "#3f9a6a" },
+  { id: "panda", name: "Wei", title: "The Calm One", line: "Slow, steady and hard to read.", ring: "#9aa0ab" },
+  { id: "penguin", name: "Olivier", title: "The Gentleman", line: "Bows politely, then takes your gem.", ring: "#c8283c" },
+  { id: "robot", name: "Dmitri", title: "The Analyst", line: "Thirteen cards. Zero emotions.", ring: "#8fa3b0" },
+  { id: "raccoon", name: "Sofia", title: "The Hustler", line: "Your points look better in her pocket.", ring: "#c95a7e" },
+  { id: "dragon", name: "Ingrid", title: "The Collector", line: "Guards every gem she takes.", ring: "#c8402c" },
+  { id: "bunny", name: "Nia", title: "The Lucky Charm", line: "Always lands on her feet.", ring: "#f08aa8" },
+  { id: "monkey", name: "Tane", title: "The Trickster", line: "Copies whatever is worth copying.", ring: "#2f6f78" },
+  { id: "octopus", name: "Fatima", title: "The Mystery", line: "Never shows her hand.", ring: "#8a5cc8" },
+  { id: "unicorn", name: "Aiyana", title: "The Dreamer", line: "Wishes on small cards and big gems.", ring: "#3fb8b0" },
+  { id: "shark", name: "Salim", title: "The Closer", line: "Smells a lead from across the table.", ring: "#2f6f9c" },
+  { id: "lion", name: "Kwame", title: "The King", line: "Every gem he wins, he wins twice.", ring: "#e8a93a" },
 ];
 const CHAR = Object.fromEntries(CHARACTERS.map(c => [c.id, c]));
 const CHAR_IDS = CHARACTERS.map(c => c.id);
 
-const AVATAR_SVG = {
-  fox: `<rect width="100" height="100" fill="#f4dcbc"/><path d="M18 16 L42 44 L24 54Z" fill="#d9622b"/><path d="M82 16 L58 44 L76 54Z" fill="#d9622b"/><path d="M24 26 L37 42 L27 47Z" fill="#5a2a14"/><path d="M76 26 L63 42 L73 47Z" fill="#5a2a14"/><path d="M16 46 Q50 18 84 46 Q80 72 50 90 Q20 72 16 46Z" fill="#e8732f"/><path d="M24 58 Q40 60 50 90 Q28 78 24 58Z" fill="#fff6ea"/><path d="M76 58 Q60 60 50 90 Q72 78 76 58Z" fill="#fff6ea"/><ellipse cx="37" cy="54" rx="4.2" ry="5.4" fill="#2b1a10"/><ellipse cx="63" cy="54" rx="4.2" ry="5.4" fill="#2b1a10"/><circle cx="38.6" cy="52.2" r="1.4" fill="#fff"/><circle cx="64.6" cy="52.2" r="1.4" fill="#fff"/><ellipse cx="50" cy="80" rx="5.5" ry="3.8" fill="#2b1a10"/>`,
-  owl: `<rect width="100" height="100" fill="#d6e2ef"/><path d="M16 26 L34 40 L20 50Z" fill="#6e4429"/><path d="M84 26 L66 40 L80 50Z" fill="#6e4429"/><ellipse cx="50" cy="62" rx="36" ry="40" fill="#8a5a3b"/><ellipse cx="50" cy="58" rx="29" ry="24" fill="#c79a6b"/><circle cx="37" cy="54" r="11" fill="#fff"/><circle cx="63" cy="54" r="11" fill="#fff"/><circle cx="38" cy="55" r="5" fill="#1f1a17"/><circle cx="62" cy="55" r="5" fill="#1f1a17"/><circle cx="39.5" cy="53.5" r="1.5" fill="#fff"/><circle cx="63.5" cy="53.5" r="1.5" fill="#fff"/><circle cx="37" cy="54" r="13" fill="none" stroke="#2a2420" stroke-width="3"/><circle cx="63" cy="54" r="13" fill="none" stroke="#2a2420" stroke-width="3"/><path d="M48 54 Q50 51 52 54" fill="none" stroke="#2a2420" stroke-width="3"/><path d="M45 66 L55 66 L50 75Z" fill="#f0a830"/><path d="M30 86 Q36 82 42 86 M44 88 Q50 84 56 88 M58 86 Q64 82 70 86" fill="none" stroke="#6e4429" stroke-width="2.5"/>`,
-  bear: `<rect width="100" height="100" fill="#f1e2c8"/><circle cx="24" cy="28" r="13" fill="#7a4a2a"/><circle cx="76" cy="28" r="13" fill="#7a4a2a"/><circle cx="24" cy="28" r="6.5" fill="#c68b5e"/><circle cx="76" cy="28" r="6.5" fill="#c68b5e"/><circle cx="50" cy="57" r="36" fill="#8b5a34"/><ellipse cx="50" cy="69" rx="17" ry="13" fill="#d9b48a"/><ellipse cx="50" cy="62" rx="6.5" ry="4.8" fill="#2b1a10"/><circle cx="36" cy="49" r="4.2" fill="#2b1a10"/><circle cx="64" cy="49" r="4.2" fill="#2b1a10"/><circle cx="37.3" cy="47.6" r="1.3" fill="#fff"/><circle cx="65.3" cy="47.6" r="1.3" fill="#fff"/><path d="M50 66 Q50 74 43 74 M50 66 Q50 74 57 74" fill="none" stroke="#2b1a10" stroke-width="2.4" stroke-linecap="round"/>`,
-  cat: `<rect width="100" height="100" fill="#e6dcf2"/><path d="M18 44 L24 12 L46 30Z" fill="#6d6f7d"/><path d="M82 44 L76 12 L54 30Z" fill="#6d6f7d"/><path d="M24 36 L27 20 L38 30Z" fill="#f2a7bd"/><path d="M76 36 L73 20 L62 30Z" fill="#f2a7bd"/><ellipse cx="50" cy="60" rx="34" ry="30" fill="#7b7e8d"/><path d="M36 28 L40 14 L46 22 L50 9 L54 22 L60 14 L64 28Z" fill="#e8c050" stroke="#b8902a" stroke-width="1.5" stroke-linejoin="round"/><ellipse cx="37" cy="56" rx="6.5" ry="7.5" fill="#9be07a"/><ellipse cx="63" cy="56" rx="6.5" ry="7.5" fill="#9be07a"/><ellipse cx="37" cy="56" rx="1.8" ry="6" fill="#1d1f24"/><ellipse cx="63" cy="56" rx="1.8" ry="6" fill="#1d1f24"/><path d="M46.5 66 L53.5 66 L50 70.5Z" fill="#f2a7bd"/><path d="M50 70.5 Q46 76 42 73 M50 70.5 Q54 76 58 73" fill="none" stroke="#3a3c46" stroke-width="2" stroke-linecap="round"/><path d="M42 68 L20 64 M42 71 L21 73 M58 68 L80 64 M58 71 L79 73" stroke="#dcdde4" stroke-width="1.5" stroke-linecap="round"/>`,
-  frog: `<rect width="100" height="100" fill="#d6efe1"/><circle cx="31" cy="40" r="15" fill="#5fae4e"/><circle cx="69" cy="40" r="15" fill="#5fae4e"/><ellipse cx="50" cy="64" rx="40" ry="28" fill="#5fae4e"/><circle cx="31" cy="39" r="10" fill="#fff"/><circle cx="69" cy="39" r="10" fill="#fff"/><circle cx="32" cy="40" r="5" fill="#1d2a18"/><circle cx="68" cy="40" r="5" fill="#1d2a18"/><circle cx="33.5" cy="38.5" r="1.6" fill="#fff"/><circle cx="69.5" cy="38.5" r="1.6" fill="#fff"/><path d="M26 66 Q50 84 74 66" fill="none" stroke="#2d5a24" stroke-width="3.2" stroke-linecap="round"/><ellipse cx="22" cy="68" rx="6.5" ry="4" fill="#f29a9a" opacity=".85"/><ellipse cx="78" cy="68" rx="6.5" ry="4" fill="#f29a9a" opacity=".85"/><circle cx="44" cy="58" r="1.5" fill="#2d5a24"/><circle cx="56" cy="58" r="1.5" fill="#2d5a24"/>`,
-  panda: `<rect width="100" height="100" fill="#f4e6dc"/><circle cx="24" cy="28" r="13" fill="#1f1f24"/><circle cx="76" cy="28" r="13" fill="#1f1f24"/><circle cx="50" cy="57" r="36" fill="#fbfaf6"/><ellipse cx="36" cy="53" rx="9" ry="12" transform="rotate(28 36 53)" fill="#1f1f24"/><ellipse cx="64" cy="53" rx="9" ry="12" transform="rotate(-28 64 53)" fill="#1f1f24"/><circle cx="37" cy="52" r="3.6" fill="#fff"/><circle cx="63" cy="52" r="3.6" fill="#fff"/><circle cx="37.6" cy="52.4" r="1.8" fill="#1f1f24"/><circle cx="62.4" cy="52.4" r="1.8" fill="#1f1f24"/><ellipse cx="50" cy="66" rx="5.5" ry="3.8" fill="#1f1f24"/><path d="M50 69 Q50 75 44 75 M50 69 Q50 75 56 75" fill="none" stroke="#1f1f24" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="27" cy="68" rx="5" ry="3" fill="#f5b5b5" opacity=".7"/><ellipse cx="73" cy="68" rx="5" ry="3" fill="#f5b5b5" opacity=".7"/>`,
-  penguin: `<rect width="100" height="100" fill="#d9e6f4"/><circle cx="50" cy="54" r="40" fill="#23262e"/><path d="M50 40 C38 24 14 36 24 60 C29 74 42 82 50 84 C58 82 71 74 76 60 C86 36 62 24 50 40Z" fill="#f7f5ef"/><circle cx="40" cy="53" r="4.2" fill="#23262e"/><circle cx="60" cy="53" r="4.2" fill="#23262e"/><circle cx="41.4" cy="51.6" r="1.3" fill="#fff"/><circle cx="61.4" cy="51.6" r="1.3" fill="#fff"/><circle cx="60" cy="53" r="8.5" fill="none" stroke="#d9ab4f" stroke-width="2"/><path d="M68 57 Q74 66 70 76" fill="none" stroke="#d9ab4f" stroke-width="1.4"/><path d="M43 61 L57 61 L50 70Z" fill="#f0a030"/><path d="M36 88 L47 92.5 L36 97Z M64 88 L53 92.5 L64 97Z" fill="#c42a3c"/><rect x="46" y="89.5" width="8" height="6" rx="2" fill="#a51f30"/>`,
-  robot: `<rect width="100" height="100" fill="#dfe6ea"/><line x1="50" y1="10" x2="50" y2="24" stroke="#5b6770" stroke-width="3"/><circle cx="50" cy="10" r="4.5" fill="#ff4f5e"/><circle cx="16" cy="54" r="6" fill="#5b6770"/><circle cx="84" cy="54" r="6" fill="#5b6770"/><rect x="18" y="24" width="64" height="58" rx="15" fill="#9aa7b0"/><rect x="26" y="34" width="48" height="32" rx="9" fill="#1d2a33"/><rect x="33" y="42" width="11" height="9" rx="2.5" fill="#5ef0ff"/><rect x="56" y="42" width="11" height="9" rx="2.5" fill="#5ef0ff"/><rect x="37" y="57" width="4" height="3" fill="#5ef0ff"/><rect x="44" y="57" width="4" height="3" fill="#5ef0ff"/><rect x="51" y="57" width="4" height="3" fill="#5ef0ff"/><rect x="58" y="57" width="4" height="3" fill="#5ef0ff"/><text x="50" y="77" text-anchor="middle" font-family="Figtree, sans-serif" font-size="9" font-weight="700" fill="#4a565e">13</text>`,
-  raccoon: `<rect width="100" height="100" fill="#e3dfd7"/><path d="M16 34 L26 8 L42 28Z" fill="#6f6c69"/><path d="M84 34 L74 8 L58 28Z" fill="#6f6c69"/><path d="M23 28 L28 15 L35 26Z" fill="#f0e9e0"/><path d="M77 28 L72 15 L65 26Z" fill="#f0e9e0"/><ellipse cx="50" cy="58" rx="36" ry="32" fill="#8f8b86"/><path d="M15 54 Q50 34 85 54 Q78 67 63 62 Q50 57 37 62 Q22 67 15 54Z" fill="#26231f"/><circle cx="37" cy="54" r="5.2" fill="#fff"/><circle cx="63" cy="54" r="5.2" fill="#fff"/><circle cx="37.6" cy="54.6" r="2.7" fill="#1a1714"/><circle cx="62.4" cy="54.6" r="2.7" fill="#1a1714"/><path d="M33 70 Q50 94 67 70 Q50 63 33 70Z" fill="#f4efe8"/><ellipse cx="50" cy="70" rx="5.2" ry="3.7" fill="#1a1714"/><path d="M50 74 Q50 80 45 80 M50 74 Q50 80 55 80" fill="none" stroke="#1a1714" stroke-width="2" stroke-linecap="round"/>`,
-  dragon: `<rect width="100" height="100" fill="#f6dccf"/><path d="M28 32 L18 6 L42 24Z" fill="#e8c050"/><path d="M72 32 L82 6 L58 24Z" fill="#e8c050"/><ellipse cx="50" cy="57" rx="35" ry="33" fill="#c8402c"/><path d="M30 26 Q50 16 70 26 L64 34 Q50 28 36 34Z" fill="#a83220"/><ellipse cx="50" cy="73" rx="21" ry="14" fill="#e8735b"/><circle cx="43" cy="71" r="2.2" fill="#5a1a10"/><circle cx="57" cy="71" r="2.2" fill="#5a1a10"/><ellipse cx="35" cy="51" rx="7.5" ry="6.5" fill="#ffe27a"/><ellipse cx="65" cy="51" rx="7.5" ry="6.5" fill="#ffe27a"/><ellipse cx="35" cy="51" rx="2.2" ry="5.5" fill="#2a120c"/><ellipse cx="65" cy="51" rx="2.2" ry="5.5" fill="#2a120c"/><path d="M27 41 L42 45 M73 41 L58 45" stroke="#7a2014" stroke-width="3" stroke-linecap="round"/><path d="M40 84 L43 90 L46 84 M54 84 L57 90 L60 84" fill="#fff"/>`,
-  monkey: `<rect width="100" height="100" fill="#f3e3c9"/><circle cx="16" cy="54" r="12" fill="#7b4b2a"/><circle cx="84" cy="54" r="12" fill="#7b4b2a"/><circle cx="16" cy="54" r="6" fill="#e3b98d"/><circle cx="84" cy="54" r="6" fill="#e3b98d"/><circle cx="50" cy="52" r="34" fill="#7b4b2a"/><path d="M50 40 C40 30 24 36 28 52 C24 68 36 82 50 82 C64 82 76 68 72 52 C76 36 60 30 50 40Z" fill="#e8c399"/><circle cx="37" cy="50" r="4.4" fill="#2b1a10"/><circle cx="63" cy="50" r="4.4" fill="#2b1a10"/><circle cx="38.4" cy="48.5" r="1.4" fill="#fff"/><circle cx="64.4" cy="48.5" r="1.4" fill="#fff"/><ellipse cx="46" cy="63" rx="1.8" ry="1.4" fill="#2b1a10"/><ellipse cx="54" cy="63" rx="1.8" ry="1.4" fill="#2b1a10"/><path d="M40 70 Q50 78 60 70" fill="none" stroke="#2b1a10" stroke-width="2.4" stroke-linecap="round"/>`,
-  bunny: `<rect width="100" height="100" fill="#f6e1ea"/><ellipse cx="36" cy="22" rx="9" ry="24" fill="#f2f0ee"/><ellipse cx="64" cy="22" rx="9" ry="24" fill="#f2f0ee"/><ellipse cx="36" cy="22" rx="4.5" ry="17" fill="#f2a7bd"/><ellipse cx="64" cy="22" rx="4.5" ry="17" fill="#f2a7bd"/><circle cx="50" cy="62" r="32" fill="#f2f0ee"/><circle cx="37" cy="56" r="4.4" fill="#2b1a10"/><circle cx="63" cy="56" r="4.4" fill="#2b1a10"/><circle cx="38.4" cy="54.5" r="1.4" fill="#fff"/><circle cx="64.4" cy="54.5" r="1.4" fill="#fff"/><circle cx="30" cy="68" r="5" fill="#f6b7c8" opacity=".7"/><circle cx="70" cy="68" r="5" fill="#f6b7c8" opacity=".7"/><path d="M46 65 L54 65 L50 70Z" fill="#e87d99"/><path d="M50 70 Q50 76 44 76 M50 70 Q50 76 56 76" fill="none" stroke="#2b1a10" stroke-width="2" stroke-linecap="round"/>`,
-  lion: `<rect width="100" height="100" fill="#f5e4c3"/><circle cx="50" cy="54" r="44" fill="#c86f24"/><g fill="#a9551a"><circle cx="18" cy="40" r="10"/><circle cx="82" cy="40" r="10"/><circle cx="16" cy="66" r="10"/><circle cx="84" cy="66" r="10"/><circle cx="30" cy="88" r="10"/><circle cx="70" cy="88" r="10"/><circle cx="32" cy="18" r="10"/><circle cx="68" cy="18" r="10"/></g><circle cx="50" cy="56" r="29" fill="#f1b553"/><circle cx="29" cy="34" r="7" fill="#f1b553"/><circle cx="71" cy="34" r="7" fill="#f1b553"/><circle cx="37" cy="52" r="4.4" fill="#2b1a10"/><circle cx="63" cy="52" r="4.4" fill="#2b1a10"/><circle cx="38.4" cy="50.5" r="1.4" fill="#fff"/><circle cx="64.4" cy="50.5" r="1.4" fill="#fff"/><ellipse cx="50" cy="68" rx="12" ry="9" fill="#fbe0a6"/><path d="M45 63 L55 63 L50 68Z" fill="#6b3a1a"/><path d="M50 68 Q50 74 44 74 M50 68 Q50 74 56 74" fill="none" stroke="#2b1a10" stroke-width="2.2" stroke-linecap="round"/><path d="M38 8 L42 20 L50 12 L58 20 L62 8 L64 22 L36 22Z" fill="#e8c050" stroke="#a87b1c" stroke-width="1.2"/>`,
-  octopus: `<rect width="100" height="100" fill="#e4dcf3"/><g fill="#8f5cc8"><path d="M18 70 C10 88 22 96 28 84 C30 92 40 92 38 80Z"/><path d="M38 76 C34 94 46 98 50 86 C54 98 66 94 62 76Z"/><path d="M62 80 C60 92 70 92 72 84 C78 96 90 88 82 70Z"/></g><ellipse cx="50" cy="48" rx="34" ry="32" fill="#a874e0"/><circle cx="34" cy="34" r="4" fill="#c9a2f2"/><circle cx="64" cy="28" r="3" fill="#c9a2f2"/><circle cx="70" cy="40" r="2.5" fill="#c9a2f2"/><circle cx="37" cy="52" r="4.4" fill="#24123a"/><circle cx="63" cy="52" r="4.4" fill="#24123a"/><circle cx="38.4" cy="50.5" r="1.4" fill="#fff"/><circle cx="64.4" cy="50.5" r="1.4" fill="#fff"/><path d="M42 64 Q50 70 58 64" fill="none" stroke="#24123a" stroke-width="2.4" stroke-linecap="round"/><circle cx="30" cy="60" r="4.5" fill="#f2a7bd" opacity=".7"/><circle cx="70" cy="60" r="4.5" fill="#f2a7bd" opacity=".7"/>`,
-  unicorn: `<rect width="100" height="100" fill="#efe3f7"/><path d="M50 4 L57 30 L43 30Z" fill="#f2cf63" stroke="#c99a2a" stroke-width="1"/><path d="M45 12 L55 16 M44 20 L56 24" stroke="#c99a2a" stroke-width="1.4"/><path d="M22 36 L28 14 L40 32Z" fill="#fbfaf6"/><path d="M78 36 L72 14 L60 32Z" fill="#fbfaf6"/><circle cx="50" cy="58" r="33" fill="#fbfaf6"/><path d="M24 40 C14 56 18 76 28 86 C22 70 26 54 34 44Z" fill="#f49ac1"/><path d="M76 40 C88 52 86 72 76 84 C80 68 76 54 66 44Z" fill="#9fc8f5"/><path d="M34 30 C42 24 58 24 66 30 C58 34 42 34 34 30Z" fill="#c7a6f2"/><circle cx="37" cy="56" r="4.4" fill="#2b1a10"/><circle cx="63" cy="56" r="4.4" fill="#2b1a10"/><circle cx="38.4" cy="54.5" r="1.4" fill="#fff"/><circle cx="64.4" cy="54.5" r="1.4" fill="#fff"/><circle cx="32" cy="68" r="5" fill="#f6b7c8" opacity=".7"/><circle cx="68" cy="68" r="5" fill="#f6b7c8" opacity=".7"/><path d="M42 72 Q50 78 58 72" fill="none" stroke="#2b1a10" stroke-width="2.2" stroke-linecap="round"/>`,
-  shark: `<rect width="100" height="100" fill="#d6e8f2"/><path d="M50 6 L64 30 L38 30Z" fill="#4f7d9c"/><ellipse cx="50" cy="58" rx="40" ry="34" fill="#5f90b2"/><path d="M14 64 C24 92 76 92 86 64 C70 72 30 72 14 64Z" fill="#eef4f7"/><circle cx="37" cy="48" r="4.4" fill="#14212b"/><circle cx="63" cy="48" r="4.4" fill="#14212b"/><circle cx="38.4" cy="46.5" r="1.4" fill="#fff"/><circle cx="64.4" cy="46.5" r="1.4" fill="#fff"/><path d="M30 40 L42 44 M70 40 L58 44" stroke="#14212b" stroke-width="2.6" stroke-linecap="round"/><path d="M26 66 L32 74 L38 67 L44 75 L50 68 L56 75 L62 67 L68 74 L74 66" fill="#fff" stroke="#14212b" stroke-width="2" stroke-linejoin="round"/>`,
+/* Character faces: one small illustrator, sixteen people. Draw order: background, back hair, shoulders, neck, ears, face, front hair, features, extras. */
+function face(o) {
+  const H = o.hair, S = o.skin, D = o.shade;
+  const back = {
+    long: `<path d="M22 52 C20 26 36 17 50 17 C66 17 80 26 78 52 L80 84 C70 90 30 90 20 84Z" fill="${H}"/>`,
+    wavy: `<path d="M21 52 C19 25 36 16 50 16 C66 16 81 25 79 52 C83 62 77 68 81 78 C74 88 62 86 50 88 C38 86 26 88 19 78 C23 68 17 62 21 52Z" fill="${H}"/>`,
+    afro: `<circle cx="50" cy="40" r="30" fill="${H}"/><circle cx="26" cy="50" r="12" fill="${H}"/><circle cx="74" cy="50" r="12" fill="${H}"/>`,
+    braids2: `<path d="M24 50 C22 70 26 84 22 92 L30 92 C32 80 30 66 30 52Z M76 50 C78 70 74 84 78 92 L70 92 C68 80 70 66 70 52Z" fill="${H}"/>`,
+    braid: `<path d="M68 44 C80 56 74 70 78 84 C80 90 72 94 70 88 C66 74 72 62 64 50Z" fill="${H}"/>`,
+    hijab: `<path d="M50 15 C73 15 84 34 84 57 C84 76 74 92 50 96 C26 92 16 76 16 57 C16 34 27 15 50 15Z" fill="${H}"/>`,
+  }[o.back] || "";
+  const front = {
+    short: `<path d="M26 50 C23 27 39 20 52 21 C67 22 79 31 74 50 C71 39 62 33 51 33 C40 33 30 39 26 50Z" fill="${H}"/>`,
+    side: `<path d="M26 50 C23 27 39 20 52 21 C67 22 79 31 74 50 C72 40 66 34 56 32 C48 36 36 38 26 50Z" fill="${H}"/><path d="M56 32 C62 26 70 28 74 36" fill="none" stroke="${o.hairHi || H}" stroke-width="2" stroke-linecap="round" opacity=".5"/>`,
+    buzz: `<path d="M27 46 C28 28 41 23 50 23 C60 23 72 28 73 46 C66 37 58 34 50 34 C42 34 34 37 27 46Z" fill="${H}"/>`,
+    fringe: `<path d="M25 50 C24 28 38 21 52 21 C66 21 78 30 75 50 C71 40 66 35 60 33 C54 38 40 40 25 50Z" fill="${H}"/>`,
+    parted: `<path d="M26 54 C22 28 38 20 50 20 C62 20 78 28 74 54 C72 40 62 30 50 28 C38 30 28 40 26 54Z" fill="${H}"/>`,
+    afro: `<path d="M27 48 C24 34 34 24 50 24 C66 24 76 34 73 48 C68 40 60 37 50 37 C40 37 32 40 27 48Z" fill="${H}"/>`,
+    puff: `<circle cx="50" cy="19" r="12" fill="${H}"/><path d="M27 47 C26 30 38 25 50 25 C62 25 74 30 73 47 C67 38 59 35 50 35 C41 35 33 38 27 47Z" fill="${H}"/>`,
+    bun: `<circle cx="50" cy="18" r="8" fill="${H}"/><path d="M27 47 C26 30 38 24 50 24 C62 24 74 30 73 47 C67 38 59 35 50 35 C41 35 33 38 27 47Z" fill="${H}"/>`,
+    hijab: `<path d="M27 46 C28 30 38 24 50 24 C62 24 72 30 73 46 C67 37 59 33 50 33 C41 33 33 37 27 46Z" fill="${H}"/><path d="M27 46 C33 37 41 33 50 33 C59 33 67 37 73 46" fill="none" stroke="${o.trim || "#fff"}" stroke-width="1.6" opacity=".55"/>`,
+    kumma: `<path d="M26 40 C27 25 39 20 50 20 C61 20 73 25 74 40Z" fill="${H}"/><path d="M27 37 L73 37" stroke="${o.trim}" stroke-width="3"/><g fill="${o.trim}"><circle cx="38" cy="29" r="1.6"/><circle cx="46" cy="25" r="1.6"/><circle cx="54" cy="25" r="1.6"/><circle cx="62" cy="29" r="1.6"/><circle cx="50" cy="31" r="1.6"/><circle cx="42" cy="32" r="1.4"/><circle cx="58" cy="32" r="1.4"/></g>`,
+  }[o.front] || "";
+  const beard = o.beard ? `<path d="M27 56 C28 76 39 86 50 86 C61 86 72 76 73 56 C70 66 64 71 50 73 C36 71 30 66 27 56Z" fill="${o.beardColor || H}"/>` : "";
+  const stache = o.stache || o.beard ? `<path d="M41 67 C45 63 55 63 59 67 C55 66 45 66 41 67Z" fill="${o.beardColor || H}" stroke="${o.beardColor || H}" stroke-width="2.4" stroke-linejoin="round"/>` : "";
+  const glasses = o.glasses ? `<g fill="none" stroke="${o.glasses}" stroke-width="2"><circle cx="40.5" cy="54" r="6.5"/><circle cx="59.5" cy="54" r="6.5"/><path d="M47 53.5 Q50 51.5 53 53.5 M34 53 L27 51 M66 53 L73 51"/></g>` : "";
+  const ear = o.back === "hijab" ? "" : `<circle cx="27" cy="56" r="5" fill="${S}"/><circle cx="73" cy="56" r="5" fill="${S}"/>`;
+  const rings = o.earrings ? `<circle cx="27" cy="63" r="2.6" fill="none" stroke="${o.earrings}" stroke-width="1.6"/><circle cx="73" cy="63" r="2.6" fill="none" stroke="${o.earrings}" stroke-width="1.6"/>` : "";
+  const band = o.band ? `<path d="M27 40 C33 30 42 27 50 27 C58 27 67 30 73 40" fill="none" stroke="${o.band}" stroke-width="4" stroke-linecap="round"/>` : "";
+  const bow = o.bow ? `<path d="M50 84 L41 79 L41 89Z M50 84 L59 79 L59 89Z" fill="${o.bow}"/><circle cx="50" cy="84" r="2.2" fill="${o.bow}"/>` : "";
+  const collar = o.collar ? `<path d="M36 82 L50 92 L64 82" fill="none" stroke="${o.collar}" stroke-width="3"/>` : "";
+  const mouth = o.beard ? `<path d="M44 70 Q50 75 56 70 Q50 72 44 70Z" fill="#d98b7a" stroke="#d98b7a" stroke-width="1.6" stroke-linejoin="round"/>` : `<path d="M43 68 Q50 74 57 68" fill="none" stroke="#7a2e2e" stroke-width="2.2" stroke-linecap="round"/>`;
+  return `<rect width="100" height="100" fill="${o.bg}"/>${back}
+<path d="M12 100 C15 85 30 79 50 79 C70 79 85 85 88 100Z" fill="${o.shirt}"/>${collar}
+<path d="M43 70 L43 82 C46 85 54 85 57 82 L57 70Z" fill="${D}"/>${ear}
+<ellipse cx="50" cy="54" rx="23" ry="27" fill="${S}"/>${front}${band}
+<path d="M36 47 Q41 44.5 45 46.5 M55 46.5 Q59 44.5 64 47" fill="none" stroke="${o.brow || H}" stroke-width="2.2" stroke-linecap="round"/>
+<circle cx="41" cy="54" r="3.1" fill="#24170f"/><circle cx="59" cy="54" r="3.1" fill="#24170f"/><circle cx="42" cy="53" r="1" fill="#fff"/><circle cx="60" cy="53" r="1" fill="#fff"/>
+<path d="M50 56 Q47.5 62 51 63" fill="none" stroke="${D}" stroke-width="1.8" stroke-linecap="round"/>
+<circle cx="35" cy="63" r="4" fill="#f08a8a" opacity=".22"/><circle cx="65" cy="63" r="4" fill="#f08a8a" opacity=".22"/>${beard}${stache}${mouth}${glasses}${rings}${bow}`;
+}
+const PEOPLE = {
+  fox:     { bg: "#f6dcc4", skin: "#7a4a2c", shade: "#5e3720", hair: "#1c120d", back: "afro", front: "puff", earrings: "#e8c050", shirt: "#e8732f" },
+  owl:     { bg: "#d8e3ef", skin: "#f1cfa8", shade: "#d9ad85", hair: "#18181c", front: "side", glasses: "#2b2b33", shirt: "#4f6d8f" },
+  bear:    { bg: "#efe0c8", skin: "#c68b5e", shade: "#a8704a", hair: "#2a1a12", front: "short", beard: true, shirt: "#a8693a" },
+  cat:     { bg: "#e7ddf2", skin: "#e8bf9a", shade: "#cc9f7a", hair: "#2a1a16", back: "wavy", front: "fringe", earrings: "#d9ab4f", shirt: "#7d68a8" },
+  frog:    { bg: "#d9eedf", skin: "#a8724c", shade: "#8a5a38", hair: "#141012", back: "braid", front: "parted", earrings: "#e8c050", shirt: "#3f9a6a" },
+  panda:   { bg: "#f2e6dc", skin: "#f3d6b4", shade: "#dbb894", hair: "#15151a", front: "buzz", shirt: "#3a3a44", collar: "#e9e6dc" },
+  penguin: { bg: "#d9e6f4", skin: "#f6d7c3", shade: "#e0b8a0", hair: "#6a4a32", front: "side", stache: true, shirt: "#23262e", bow: "#c8283c" },
+  robot:   { bg: "#dfe6ea", skin: "#f4d9c6", shade: "#dcbca6", hair: "#d8b46a", brow: "#b8924a", front: "buzz", shirt: "#5b6770" },
+  raccoon: { bg: "#f2e2d2", skin: "#cf9a70", shade: "#b07c52", hair: "#4a2c1a", back: "long", front: "parted", band: "#e05c7c", shirt: "#c95a7e" },
+  dragon:  { bg: "#f6e6cf", skin: "#f7dccb", shade: "#e2bca6", hair: "#e8c070", brow: "#c8a050", back: "braids2", front: "parted", shirt: "#c8402c" },
+  bunny:   { bg: "#f6e1ea", skin: "#5c3a26", shade: "#45291a", hair: "#120c0a", front: "afro", earrings: "#f2a7bd", shirt: "#f08aa8" },
+  monkey:  { bg: "#e9e0d0", skin: "#9c6844", shade: "#7e5032", hair: "#16100c", front: "bun", beard: true, shirt: "#2f6f78" },
+  octopus: { bg: "#e6dcf3", skin: "#d9a982", shade: "#bd8c66", hair: "#5a3a8c", back: "hijab", front: "hijab", trim: "#d9c3f2", shirt: "#5a3a8c" },
+  unicorn: { bg: "#f1e3f4", skin: "#b9805a", shade: "#9a6440", hair: "#121014", back: "long", front: "parted", earrings: "#3fb8b0", shirt: "#3fb8b0" },
+  shark:   { bg: "#dbe9f2", skin: "#b07650", shade: "#925c3a", hair: "#f4f1ea", trim: "#2f6f9c", front: "kumma", beard: true, beardColor: "#1a120e", brow: "#1a120e", shirt: "#f4f1ea", collar: "#d9c08a" },
+  lion:    { bg: "#f5e4c3", skin: "#4e301e", shade: "#3a2214", hair: "#100a08", front: "buzz", beard: true, shirt: "#e8a93a", collar: "#2f8a4a" },
 };
+const AVATAR_SVG = Object.fromEntries(Object.entries(PEOPLE).map(([id, o]) => [id, face(o)]));
 
 const DECKS = [
   { id: "classic", name: "Classic", note: "Ivory and oxblood" },
@@ -1075,18 +1117,18 @@ function coachTip() {
   const s = G.s, last = s.history[s.history.length - 1];
   if (s.phase === "bidding") {
     return [
-      t("Welcome! The 5 gem is up for grabs. Double-tap a card in your hand to bid it, or drag it up to the table. Lily bids at the same time, face down."),
+      t("Welcome! The 5 gem is up for grabs. Double-tap a card in your hand to bid it, or drag it up to the table. Priya bids at the same time, face down."),
       t("This is the 13, the biggest gem. A King is worth spending here."),
       t("Only a 2. Save your big cards and throw away a low one."),
       t("Look under the gem: Next shows what's coming. Plan which cards you'll need."),
       t("A 1 gem. A good moment to get rid of your weakest card."),
-      t("11 is big. Think about which big cards Lily has already used before you bid."),
+      t("11 is big. Think about which big cards Priya has already used before you bid."),
     ][s.round] || t("You've got it. Win the most points by the end of the 13 gems.");
   }
   if (s.phase === "reveal" && last) {
     if (last.winners.length === 1 && last.winners[0] === 0) return t("You won that one! The gem's points go to your score. Press Next gem when you're ready.");
     if (last.winners.length > 1) return t("A tie: you split the gem, so each of you gets half.");
-    return t("Lily won this one. Cards you play are gone for good, so think about which ones you still need.");
+    return t("Priya won this one. Cards you play are gone for good, so think about which ones you still need.");
   }
   return "";
 }

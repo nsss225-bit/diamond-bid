@@ -53,18 +53,18 @@ const POWERS = {
   owl: { name: "Foresight", timing: "now", text: "See the next 3 gems for the rest of the game." },
   bear: { name: "Bully", timing: "bid", text: "You win every tie this round." },
   cat: { name: "Swap", timing: "bid", text: "At the reveal, this gem trades places with the next one, so the next gem is played for now." },
-  frog: { name: "Lucky leap", timing: "bid", text: "If you don't win this round, your card jumps back to your hand." },
-  panda: { name: "Bamboo bonus", timing: "bid", text: "If you win this round, you get 3 extra points." },
+  frog: { name: "Second chance", timing: "bid", text: "If you don't win this round, your card comes back to your hand." },
+  panda: { name: "Golden bonus", timing: "bid", text: "If you win this round, you get 3 extra points." },
   penguin: { name: "Upside down", timing: "bid", text: "This round the lowest card wins (curses go to the highest)." },
   robot: { name: "Copycat", timing: "bid", text: "Your card copies the highest card an opponent played." },
   raccoon: { name: "Pickpocket", timing: "bid", text: "If someone else wins this round, you take 2 of their points." },
-  dragon: { name: "Fire breath", timing: "bid", text: "The highest card an opponent played counts as 0 this round." },
+  dragon: { name: "Wipeout", timing: "bid", text: "The highest card an opponent played counts as 0 this round." },
   monkey: { name: "Mimic", timing: "bid", text: "Your card counts as the gem's number this round." },
   bunny: { name: "Soft landing", timing: "bid", text: "If you don't win this round, you still get 1 point." },
   lion: { name: "Royal share", timing: "bid", text: "If you win this round, the gem counts double." },
-  octopus: { name: "Ink cloud", timing: "bid", text: "Every opponent's card counts 2 lower this round." },
+  octopus: { name: "Smoke screen", timing: "bid", text: "Every opponent's card counts 2 lower this round." },
   unicorn: { name: "Wish", timing: "bid", text: "If you win this round with a 5 or lower, you get 5 extra points." },
-  shark: { name: "Bite", timing: "bid", text: "Take 1 point from each opponent this round." },
+  shark: { name: "Toll", timing: "bid", text: "Take 1 point from each opponent this round." },
 };
 
 /* ================= Setting up ================= */

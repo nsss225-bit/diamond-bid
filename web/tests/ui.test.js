@@ -104,7 +104,7 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   let home = "";
   for (const tab of ["play", "daily", "style", "ach", "how"]) { b.click("tab", { tab }); home += b.html(); }
   b.click("tab", { tab: "play" });
-  ok(["Daily challenge", "Choose your character", "Achievements", "Card design", "Rosa", "Ember", "Gold Leaf", "Galaxy", "Version 1.5", "tutorial"].every(t => home.includes(t)), "tabs show daily, characters, achievements, unlockables, version");
+  ok(["Daily challenge", "Choose your character", "Achievements", "Card design", "Sofia", "Ingrid", "Gold Leaf", "Galaxy", "Version 1.5", "tutorial"].every(t => home.includes(t)), "tabs show daily, characters, achievements, unlockables, version");
   ok(home.includes("Tap to buy"), "items for sale shown with prices");
 
   // 2) Every extra on, vs Expert bots, 4 players
@@ -141,7 +141,7 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
 
   // 5) Tutorial
   b.click("tutorial");
-  ok(b.html().includes("Prof. Hoot") && b.html().includes("Welcome!"), "tutorial coach appears");
+  ok(b.html().includes("Hiroshi") && b.html().includes("Welcome!"), "tutorial coach appears");
   ok(b.get("G.s.prizes.join()") === "5,13,2,9,1,11,7,3,12,6,10,4,8", "tutorial uses its fixed gems");
   end = await playOut(b);
   ok(end === "matchOver" && b.get("!!stats.ach.learner"), "tutorial finishes and grants Quick learner");
