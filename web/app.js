@@ -452,12 +452,10 @@ function renderHome() {
       <div class="char-grid">
         ${CHARACTERS.map(ch => {
           const open = isUnlocked(ch), p = POWERS[ch.id];
-          return `<button class="char ${open ? "" : "locked"}" data-act="${open ? "pick-char" : "buy"}" data-id="${ch.id}" aria-pressed="${ch.id === prefs.character}" aria-label="${esc(charName(ch.id))}${open ? "" : `, ${t("{n} coins", { n: priceOf(ch) })}`}">
+          return `<button class="char ${open ? "" : "locked"}" data-act="${open ? "pick-char" : "buy"}" data-id="${ch.id}" aria-pressed="${ch.id === prefs.character}" title="${esc(powerName(ch.id))}: ${esc(powerText(ch.id))}" aria-label="${esc(charName(ch.id))}, ${esc(powerName(ch.id))}: ${esc(powerText(ch.id))}${open ? "" : `, ${t("{n} coins", { n: priceOf(ch) })}`}">
             ${avatar(ch.id, "lg")}
             <b>${esc(charName(ch.id))}</b>
             <span class="title">${esc(t(ch.title))}</span>
-            <span class="line">${esc(t(ch.line))}</span>
-            <span class="power"><b>${esc(powerName(ch.id))}:</b> ${esc(powerText(ch.id))}</span>
             ${open ? "" : lockOverlay(ch)}
           </button>`;
         }).join("")}
@@ -1894,7 +1892,12 @@ document.addEventListener("click", e => {
   if (act === "close-bg" && e.target !== el) return;
   Sound.unlock();
   switch (act) {
-    case "pick-char": prefs.character = el.dataset.id; savePrefs(); Sound.select(); render(); break;
+    case "pick-char": {
+      const id = el.dataset.id, changed = id !== prefs.character;
+      prefs.character = id; savePrefs(); Sound.select(); render();
+      if (changed) toast("★", `${powerName(id)}: ${powerText(id)}`, charName(id));
+      break;
+    }
     case "pick-deck": prefs.deck = el.dataset.id; savePrefs(); Sound.select(); render(); break;
     case "pick-table": prefs.table = el.dataset.id; savePrefs(); Sound.select(); render(); break;
     case "four": prefs.fourColor = !prefs.fourColor; savePrefs(); render(); break;

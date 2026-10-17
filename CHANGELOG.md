@@ -1,5 +1,8 @@
 # Diamond Bid changelog
 
+## Unreleased
+- Character picker: small tiles, 3 per row on phones (picture, name and nickname only). Picking a character shows its power in a short pop-up; locked ones show just their price.
+
 ## 1.4
 - Quick match: Play online → Find a player pairs you with someone else searching right now (1 vs 1). If nobody turns up in 20 seconds, you play a bot instead. Tables with a code for friends still work as before.
 - Rematch: online, anyone at the table can ask for a rematch (the host sees who asked and starts it for everyone). On the home screen, "↻ Play again" restarts your last game vs bots or pass and play with the same rules.
