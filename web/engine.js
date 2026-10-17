@@ -9,8 +9,8 @@ const range = n => Array.from({ length: n }, (_, i) => i);
 const ALL13 = range(13).map(i => i + 1);
 const JACKPOT = 20;
 const suitFor = (seat, n) => n === 2 ? ["h", "s"][seat] : ["h", "c", "d", "s"][seat];
-// Gems read like the cards: J, Q and K for 11, 12 and 13 (the jackpot stays 20, curses stay −1 to −3).
-const prizeLabel = v => v < 0 ? "−" + (-v) : v >= 11 && v <= 13 ? RANK(v) : String(v);
+// Gems read like the cards: A for 1, and J, Q and K for 11, 12 and 13 (the jackpot stays 20, curses stay −1 to −3).
+const prizeLabel = v => v < 0 ? "−" + (-v) : v === 1 || (v >= 11 && v <= 13) ? RANK(v) : String(v);
 const prizeName = v => v === JACKPOT ? "20 jackpot" : v < 0 ? `${prizeLabel(v)} curse` : `${prizeLabel(v)} gem`;
 const usesTeams = c => !!c.teams && c.seatCount === 4;
 const sideCount = c => usesTeams(c) ? 2 : c.seatCount;

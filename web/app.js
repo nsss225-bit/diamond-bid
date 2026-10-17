@@ -478,7 +478,7 @@ const cardBack = (cls = "") => `<div class="card back ${cls}" aria-label="${t("F
 function prizeCard(v, cls = "", hidden = false) {
   if (hidden) return `<div class="card prize mystery ${cls}" aria-label="${t("Mystery gem")}"><b>?</b></div>`;
   if (v === JACKPOT) return `<div class="card prize jackpot ${cls}" aria-label="${t("20 jackpot")}">${JACKPOT_SVG}<b>20</b></div>`;
-  return `<div class="card prize ${v < 0 ? "curse" : ""} ${cls}" aria-label="${pName(v)}">${v < 0 ? CURSE_SVG : GEM_SVG}<b>${prizeLabel(v)}</b>${v >= 11 && v <= 13 ? `<small class="pv">${t("{n} pts", { n: v })}</small>` : ""}</div>`;
+  return `<div class="card prize ${v < 0 ? "curse" : ""} ${cls}" aria-label="${pName(v)}">${v < 0 ? CURSE_SVG : GEM_SVG}<b>${prizeLabel(v)}</b>${v === 1 || (v >= 11 && v <= 13) ? `<small class="pv">${v === 1 ? t("1 pt") : t("{n} pts", { n: v })}</small>` : ""}</div>`;
 }
 const thinking = () => `<span class="thinking" aria-label="${t("choosing")}"><span></span><span></span><span></span></span>`;
 const feltPip = suit => {

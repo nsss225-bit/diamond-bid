@@ -8,6 +8,7 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["1 pt", "1 pt", "1 pt", "نقطة واحدة", "1 分"],
   ["{n} pts", "{n} pts", "{n} pts", "{n} نقطة", "{n} 分"],
   ["Amara", "Amara", "Amara", "أمارا", "阿玛拉"],
   ["Hiroshi", "Hiroshi", "Hiroshi", "هيروشي", "浩"],
