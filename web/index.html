@@ -522,6 +522,10 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 .ach.got .ai { background: var(--brass); color: #1c1608; }
 .ach b { display: block; font-size: 14px; }
 .ach small { color: var(--muted); font-size: 12.5px; }
+.ach > div { flex: 1; min-width: 0; }
+.ach .achbar { display: block; height: 5px; border-radius: 5px; background: rgba(255,255,255,.1); margin-top: 6px; overflow: hidden; }
+.ach .achbar span { display: block; height: 100%; background: var(--brass); border-radius: 5px; }
+.ach .achn { display: block; font-size: 11px; font-weight: 700; color: var(--brass); margin-top: 3px; }
 .ach:not(.got) b { color: var(--muted); }
 .progress { height: 6px; border-radius: 6px; background: rgba(255,255,255,.1); overflow: hidden; width: 200px; max-width: 100%; }
 .progress span { display: block; height: 100%; background: var(--brass); }

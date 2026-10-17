@@ -75,37 +75,37 @@ const COIN = `<span class="coin" aria-hidden="true"></span>`;
 const fmtCoins = n => Number(n).toLocaleString("en-US");
 
 const ACHIEVEMENTS = [
-  { id: "first_gem", icon: "◆", name: "First sparkle", desc: "Win your first gem." },
-  { id: "first_win", icon: "★", name: "Winner", desc: "Win a match." },
-  { id: "steal", icon: "↯", name: "Steal!", desc: "Win a round by exactly one." },
-  { id: "giant_slayer", icon: "⚔", name: "Giant slayer", desc: "Take the 13 gem or the jackpot with a 7 or lower." },
-  { id: "hat_trick", icon: "∴", name: "Hat trick", desc: "Win three rounds in a row." },
-  { id: "double_trouble", icon: "×", name: "Double trouble", desc: "Score 20 or more points in one round." },
-  { id: "jackpot", icon: "☀", name: "Jackpot!", desc: "Take the 20 jackpot gem." },
-  { id: "curse_dodger", icon: "☂", name: "Curse dodger", desc: "Finish a game with cursed gems and take no curse." },
-  { id: "power_play", icon: "⚡", name: "Power play", desc: "Win a round with your character's power." },
-  { id: "wheel", icon: "☸", name: "Wheel of fortune", desc: "Win a game on the tie-breaker wheel." },
-  { id: "hard_win", icon: "♜", name: "Tough cookie", desc: "Beat a Hard bot in a match." },
-  { id: "expert_win", icon: "♛", name: "Mind reader", desc: "Beat an Expert bot in a match." },
-  { id: "full_table", icon: "♣", name: "Last one standing", desc: "Win a 4-player free-for-all." },
-  { id: "teamwork", icon: "♡", name: "Teamwork", desc: "Win a 2 vs 2 match." },
-  { id: "daily", icon: "☼", name: "Daily player", desc: "Finish a daily challenge." },
-  { id: "online", icon: "☁", name: "Good game", desc: "Finish an online game with friends." },
+  { id: "first_gem", icon: "◆", name: "First sparkle", desc: "Win 25 gems.", goal: 25 },
+  { id: "first_win", icon: "★", name: "Winner", desc: "Win 5 matches.", goal: 5 },
+  { id: "steal", icon: "↯", name: "Steal!", desc: "Win 5 rounds by exactly one.", goal: 5 },
+  { id: "giant_slayer", icon: "⚔", name: "Giant slayer", desc: "Take the 13 gem or the jackpot with a 7 or lower, 3 times.", goal: 3 },
+  { id: "hat_trick", icon: "∴", name: "Hat trick", desc: "Win three rounds in a row, 3 times.", goal: 3 },
+  { id: "double_trouble", icon: "×", name: "Double trouble", desc: "Score 20 or more points in one round, 3 times.", goal: 3 },
+  { id: "jackpot", icon: "☀", name: "Jackpot!", desc: "Take the 20 jackpot gem 3 times.", goal: 3 },
+  { id: "curse_dodger", icon: "☂", name: "Curse dodger", desc: "Finish 3 games with cursed gems and take no curse.", goal: 3 },
+  { id: "power_play", icon: "⚡", name: "Power play", desc: "Win 5 rounds with your character's power.", goal: 5 },
+  { id: "wheel", icon: "☸", name: "Wheel of fortune", desc: "Win 3 games on the tie-breaker wheel.", goal: 3 },
+  { id: "hard_win", icon: "♜", name: "Tough cookie", desc: "Beat a Hard bot in 3 matches.", goal: 3 },
+  { id: "expert_win", icon: "♛", name: "Mind reader", desc: "Beat an Expert bot in 3 matches.", goal: 3 },
+  { id: "full_table", icon: "♣", name: "Last one standing", desc: "Win 3 four-player free-for-alls.", goal: 3 },
+  { id: "teamwork", icon: "♡", name: "Teamwork", desc: "Win 3 matches 2 vs 2.", goal: 3 },
+  { id: "daily", icon: "☼", name: "Daily player", desc: "Finish 5 daily challenges.", goal: 5 },
+  { id: "online", icon: "☁", name: "Good game", desc: "Finish 3 online games with friends.", goal: 3 },
   { id: "learner", icon: "✑", name: "Quick learner", desc: "Finish the tutorial." },
-  { id: "ace", icon: "A", name: "Ace in the hole", desc: "Win a gem with an Ace." },
-  { id: "fair_share", icon: "½", name: "Fair share", desc: "Share a gem in a tie." },
-  { id: "big_haul", icon: "♦", name: "Big haul", desc: "Score 60 or more points in one game." },
-  { id: "sweep", icon: "≡", name: "Clean sweep", desc: "Take 10 or more gems in one game." },
-  { id: "comeback", icon: "↺", name: "Comeback kid", desc: "Win a game you were losing at the halfway point." },
-  { id: "nail_biter", icon: "≈", name: "Nail-biter", desc: "Win a game by 1 point or less." },
-  { id: "rematch", icon: "↻", name: "Again!", desc: "Play a rematch." },
+  { id: "ace", icon: "A", name: "Ace in the hole", desc: "Win 3 gems with an Ace.", goal: 3 },
+  { id: "fair_share", icon: "½", name: "Fair share", desc: "Share 5 gems in ties.", goal: 5 },
+  { id: "big_haul", icon: "♦", name: "Big haul", desc: "Score 60 or more points in 3 games.", goal: 3 },
+  { id: "sweep", icon: "≡", name: "Clean sweep", desc: "Take 10 or more gems in one game, twice.", goal: 2 },
+  { id: "comeback", icon: "↺", name: "Comeback kid", desc: "Win 3 games you were losing at the halfway point.", goal: 3 },
+  { id: "nail_biter", icon: "≈", name: "Nail-biter", desc: "Win 3 games by 1 point or less.", goal: 3 },
+  { id: "rematch", icon: "↻", name: "Again!", desc: "Play 5 rematches.", goal: 5 },
   { id: "regular", icon: "⌂", name: "Regular", desc: "Finish 25 matches." },
   { id: "champion", icon: "♚", name: "Champion", desc: "Win 50 matches." },
   { id: "collector", icon: "☺", name: "Collector", desc: "Buy 5 characters." },
   { id: "stylist", icon: "▦", name: "Stylist", desc: "Buy 3 card designs." },
   { id: "saver", icon: "◎", name: "Big saver", desc: "Have 5,000 coins at once." },
   { id: "loyal", icon: "♥", name: "Loyal player", desc: "Collect the daily gift 7 days in a row." },
-  { id: "polyglot", icon: "✈", name: "Globetrotter", desc: "Play in another language." },
+  { id: "polyglot", icon: "✈", name: "Globetrotter", desc: "Finish 3 matches in another language.", goal: 3 },
 ];
 
 const GEM_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 L36 20 L20 37 L4 20Z" style="fill:var(--gem)"/><path d="M20 3 L36 20 L20 20Z" style="fill:var(--gem-hi)"/><path d="M20 20 L4 20 L20 37Z" style="fill:var(--gem-lo)"/><path d="M20 3 L36 20 L20 37 L4 20Z" style="fill:none;stroke:var(--brass)" stroke-width="2" stroke-linejoin="round"/></svg>`;
@@ -366,10 +366,15 @@ function confetti(amount = 140) {
 }
 
 /* ================= Achievements ================= */
+/** Count one more step towards an achievement; it unlocks when the count reaches its goal. */
 function grant(id) {
   if (stats.ach[id]) return;
   const a = ACHIEVEMENTS.find(x => x.id === id);
   if (!a) return;
+  stats.achProg = stats.achProg || {};
+  const n = (stats.achProg[id] || 0) + 1;
+  stats.achProg[id] = n;
+  if (n < (a.goal || 1)) { saveStats(); return; }
   stats.ach[id] = Date.now();
   saveStats();
   if (G) G.newAch.push(a.name);
@@ -583,7 +588,11 @@ function renderHome() {
         <div class="progress" aria-hidden="true"><span style="width:${Math.round(100 * got / ACHIEVEMENTS.length)}%"></span></div>
       </div>
       <div class="ach-grid">
-        ${ACHIEVEMENTS.map(a => `<div class="ach ${stats.ach[a.id] ? "got" : ""}"><span class="ai">${a.icon}</span><div><b>${t(a.name)}</b><small>${t(a.desc)}</small></div></div>`).join("")}
+        ${ACHIEVEMENTS.map(a => {
+          const goal = a.goal || 1, got = !!stats.ach[a.id], n = got ? goal : Math.min(goal, (stats.achProg || {})[a.id] || 0);
+          return `<div class="ach ${got ? "got" : ""}"><span class="ai">${a.icon}</span><div><b>${t(a.name)}</b><small>${t(a.desc)}</small>
+            ${goal > 1 && !got ? `<span class="achbar" aria-label="${n} / ${goal}"><span style="width:${Math.round(100 * n / goal)}%"></span></span><span class="achn">${n} / ${goal}</span>` : ""}</div></div>`;
+        }).join("")}
       </div>
     </section>`;
 
@@ -823,7 +832,7 @@ function onReveal(r) {
   if (w.length > 1 && w.includes(i) && mine > 0) grant("fair_share");
   if (r.powers.includes(i) && w.includes(i) && mine > 0) grant("power_play");
   G.streak = w.includes(i) && mine > 0 ? G.streak + 1 : 0;
-  if (G.streak >= 3) grant("hat_trick");
+  if (G.streak === 3) grant("hat_trick");
 }
 
 function onGameEnd() {
@@ -1293,6 +1302,7 @@ function renderGame() {
       <div class="mid"><b>${t("Gem {n} of {total}", { n: Math.min(s.round + 1, s.prizes.length), total: s.prizes.length })}</b><small>${sub}</small></div>
       <div class="right">
         <button class="icon-btn" data-act="sound" aria-label="${prefs.sound ? t("Turn sound off") : t("Turn sound on")}">${SPEAKER_SVG(prefs.sound)}</button>
+        <button class="icon-btn" data-act="haptics" aria-pressed="${prefs.haptics !== false}" aria-label="${prefs.haptics !== false ? t("Turn vibration off") : t("Turn vibration on")}">${VIBE_SVG(prefs.haptics !== false)}</button>
         <button class="icon-btn" data-act="modal" data-m="rules" aria-label="${t("Rules")}" title="${t("Rules")}">?</button>
       </div>
     </div>
@@ -1460,6 +1470,8 @@ function mergeProgress(cloud) {
   const c = cloud.stats || {}, firstSync = !stats.syncedAt;
   stats.owned = [...new Set(stats.owned.concat(c.owned || []))];
   Object.entries(c.ach || {}).forEach(([k, v]) => { stats.ach[k] = Math.min(stats.ach[k] || v, v); });
+  stats.achProg = stats.achProg || {};
+  Object.entries(c.achProg || {}).forEach(([k, v]) => { stats.achProg[k] = Math.max(stats.achProg[k] || 0, v); });
   stats.dailyDays = [...new Set(stats.dailyDays.concat(c.dailyDays || []))];
   Object.entries(c.dailyBest || {}).forEach(([d, v]) => { stats.dailyBest[d] = Math.max(stats.dailyBest[d] ?? v, v); });
   stats.played = Math.max(stats.played, c.played || 0);
@@ -1508,6 +1520,7 @@ async function cloudSave() {
   if (el) el.textContent = saveStateText();
 }
 const saveStateText = () => Account.state === "saving" ? t("Saving…") : Account.state === "error" ? t("Couldn't save to your account. Your progress is still on this device.") : Account.savedAt ? t("Saved to your account") : "";
+const VIBE_SVG = on => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="8" y="4" width="8" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>${on ? `<path d="M4.5 9v6M2 10.5v3M19.5 9v6M22 10.5v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>` : `<path d="M3 3l18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`}</svg>`;
 const PERSON_SVG = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="8.5" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 20.5c1.4-4 4.4-6 8-6s6.6 2 8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
 function accountButton() {
   const pic = Account.id && Account.avatar ? `<img src="${esc(Account.avatar)}" alt="">` : PERSON_SVG;

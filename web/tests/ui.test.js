@@ -117,7 +117,7 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   ok(end === "matchOver", "4-player match with every extra finishes");
   ok(!b.html().includes("Your game") && b.html().includes('data-act="rematch"'), "results are short: scores and buttons, no recap");
   ok(b.get("stats.played") === 1, "match counted in stats");
-  ok(b.get("Object.keys(stats.ach).length") >= 1, "achievements earned: " + b.get("Object.keys(stats.ach).join(', ')"));
+  ok(b.get("Object.keys(stats.achProg || {}).length") >= 1, "achievement progress counted: " + b.get("JSON.stringify(stats.achProg)"));
   b.click("home");
 
   // 3) Pass and play, 2v2 teams, 3 people
@@ -289,6 +289,15 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   ok(A2.get(`stats.owned.includes("lion") && !!stats.ach.ace && stats.won === 7 && stats.coins >= 4321`), "another device picks up the saved progress");
   A1.click("account");
   ok(A1.html().includes("Signed in as") && A1.html().includes("Saved to your account"), "the account sheet shows who is signed in and the save status");
+
+  // 9e) Achievements need several completions
+  const H2 = browser("ach"); await sleep(20);
+  H2.get("grant('ace'); grant('ace')");
+  ok(!H2.get("stats.ach.ace") && H2.get("stats.achProg.ace") === 2, "an achievement isn't granted before its goal");
+  H2.get("grant('ace')");
+  ok(!!H2.get("stats.ach.ace"), "it is granted on the 3rd time");
+  H2.click("close"); H2.click("tab", { tab: "ach" });
+  ok(H2.html().includes("0 / 25"), "achievements show progress like 0 / 25");
 
   // 9d) Vibration: picking and playing a card vibrate; the switch turns it off
   const V = browser("vibe"); await sleep(20); V.click("close");
