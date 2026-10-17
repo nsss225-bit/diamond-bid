@@ -2,13 +2,29 @@
  * Pure game logic: no DOM. Loaded by index.html as a plain script, and by Node for tests. */
 
 /* ================= Basics ================= */
-const PIP = { h: "♥︎", c: "♣︎", d: "♦︎", s: "♠︎" };
-const SUIT_NAME = { h: "Hearts", c: "Clubs", d: "Diamonds", s: "Spades" };
+const PIP = { h: "♥︎", c: "♣︎", d: "♦︎", s: "♠︎", star: "★", crown: "♛" };
+const SUIT_NAME = { h: "Hearts", c: "Clubs", d: "Diamonds", s: "Spades", star: "Stars", crown: "Crowns" };
+const SUITS = ["h", "s", "d", "c"];
 const RANK = v => ({ 1: "A", 11: "J", 12: "Q", 13: "K" })[v] || String(v);
 const range = n => Array.from({ length: n }, (_, i) => i);
 const ALL13 = range(13).map(i => i + 1);
 const JACKPOT = 20;
-const suitFor = (seat, n) => n === 2 ? ["h", "s"][seat] : ["h", "c", "d", "s"][seat];
+/* Players pick their suits. With 2 players the middle deck is one of the two suits left over;
+   with 4 players every suit is taken, so the middle uses a fifth suit, Stars or Crowns. */
+function playerSuits(n, c = {}) {
+  if (n === 2) {
+    const p = Array.isArray(c.suits2) && c.suits2.length === 2 && c.suits2[0] !== c.suits2[1] && c.suits2.every(x => SUITS.includes(x)) ? c.suits2 : ["h", "s"];
+    return p;
+  }
+  const mine = SUITS.includes(c.mine4) ? c.mine4 : "h";
+  return [mine, ...["h", "c", "d", "s"].filter(x => x !== mine)];
+}
+const suitFor = (seat, n, c) => playerSuits(n, c)[seat];
+function middleSuit(n, c = {}) {
+  if (n !== 2) return c.middle4 === "crown" ? "crown" : "star";
+  const free = SUITS.filter(x => !playerSuits(2, c).includes(x));
+  return free.includes(c.middle2) ? c.middle2 : free.includes("d") ? "d" : free[0];
+}
 // Gems read like the cards: A for 1, and J, Q and K for 11, 12 and 13 (the jackpot stays 20, curses stay −1 to −3).
 const prizeLabel = v => v < 0 ? "−" + (-v) : v === 1 || (v >= 11 && v <= 13) ? RANK(v) : String(v);
 const prizeName = v => v === JACKPOT ? "20 jackpot" : v < 0 ? `${prizeLabel(v)} curse` : `${prizeLabel(v)} gem`;
@@ -540,7 +556,7 @@ function unpackState(m) {
 
 if (typeof module !== "undefined") {
   module.exports = {
-    PIP, SUIT_NAME, RANK, range, ALL13, JACKPOT, suitFor, prizeLabel, prizeName, usesTeams, sideCount, sideOf, seatsOnSide,
+    PIP, SUIT_NAME, SUITS, RANK, range, ALL13, JACKPOT, suitFor, playerSuits, middleSuit, prizeLabel, prizeName, usesTeams, sideCount, sideOf, seatsOnSide,
     TEAM_NAME, fmt, rnd, seedFrom, shuffle, POWERS, DEFAULT_CONFIG, newMatch, deal, prizeNow, prizeNext, isLast, isMystery,
     sideScore, sideName, matchWinners, submit, usePowerNow, pickWinners, resolve, advance, finishGame, awardGame, rematch,
     replaceWithBot, TIEBREAKS, gemsTaken, tieValue, spinTie, applyTiebreak, finishTiebreak, botChoose, botInstant, summary,

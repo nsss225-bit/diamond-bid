@@ -8,6 +8,11 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["Suits", "Palos", "Couleurs", "الأنواع", "花色"],
+  ["Your suit", "Tu palo", "Votre couleur", "نوعك", "你的花色"],
+  ["Middle cards", "Cartas del centro", "Cartes du milieu", "أوراق الوسط", "中间的牌"],
+  ["Stars", "Estrellas", "Étoiles", "النجوم", "星星"],
+  ["Crowns", "Coronas", "Couronnes", "التيجان", "皇冠"],
   ["1 pt", "1 pt", "1 pt", "نقطة واحدة", "1 分"],
   ["{n} pts", "{n} pts", "{n} pts", "{n} نقطة", "{n} 分"],
   ["Amara", "Amara", "Amara", "أمارا", "阿玛拉"],

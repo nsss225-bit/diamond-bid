@@ -711,6 +711,19 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 .char.locked .title { display: none; }
 .char.locked .lock span { display: none; }
 @media (max-width: 600px) { .char-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* ---------- Suit choices and middle decks ---------- */
+.suitpick { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.suitpick .sp { display: flex; align-items: center; gap: 8px; }
+.suitpick small { color: var(--muted); font-size: 12px; }
+.suitopt { font-size: 19px; line-height: 1; min-width: 38px; }
+.suitopt.suit-h, .suitopt.suit-d { color: #ef6b7c !important; } .suitopt.suit-s, .suitopt.suit-c { color: var(--ink) !important; }
+.suitopt.suit-star, .suitopt.suit-crown { color: #f6d88f !important; font-size: 14px; }
+.seg .suitopt[aria-pressed="true"] { background: var(--brass); color: #1c1608 !important; }
+.card.prize .mpip { font-size: calc(var(--w) * .38); line-height: 1; }
+.card.prize.mid-h, .card.prize.mid-d { color: var(--c-red); }
+.card.prize.mid-c { color: var(--c-club); } .card.prize.mid-s { color: var(--c-ink); }
+.card.prize.mid-star, .card.prize.mid-crown { color: #b8861f; }
+.card.prize.curse { color: var(--curse-ink); }
 /* ---------- Scoreboard (1.6) ---------- */
 .board { position: relative; display: grid; align-items: center; gap: 8px 10px; padding: 10px 12px 12px; border-radius: 18px;
   background: linear-gradient(180deg, rgba(0,0,0,.34), rgba(0,0,0,.22)); border: 1px solid rgba(255,255,255,.08); box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 8px 22px rgba(0,0,0,.25); }
@@ -732,6 +745,8 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 .bside.lead .bpts, .board.duo .bpts.lead { color: #f6d88f; }
 .bvs { width: 18px; height: 18px; opacity: .85; }
 .bvs svg { width: 100%; height: 100%; display: block; }
+.bvs .mpip { font-size: 18px; line-height: 18px; display: block; text-align: center; }
+.bvs.mid-h .mpip { color: #ef6b7c; } .bvs.mid-s .mpip, .bvs.mid-c .mpip { color: var(--ink); }
 .bpts .plus { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); font: 800 12px var(--body); font-style: normal; color: #7ef0a6; white-space: nowrap; animation: plusup 1.6s ease forwards; }
 .bside.loss .bpts .plus, .bpts .plus:where([data-neg]) { color: #ff8f9c; }
 @keyframes plusup { 0% { opacity: 0; transform: translate(-50%, 6px); } 20% { opacity: 1; transform: translate(-50%, -6px); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -14px); } }

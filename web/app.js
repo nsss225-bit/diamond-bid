@@ -475,10 +475,16 @@ function cardFace(suit, v, cls = "", tag = "div", attrs = "") {
   return `<${tag} class="card suit-${suit} ${cls}" ${attrs} aria-label="${RANK(v)} · ${t(SUIT_NAME[suit])}"><span class="ix"><b>${RANK(v)}</b><i>${PIP[suit]}</i></span><span class="pip">${PIP[suit]}</span><span class="ix b"><b>${RANK(v)}</b><i>${PIP[suit]}</i></span></${tag}>`;
 }
 const cardBack = (cls = "") => `<div class="card back ${cls}" aria-label="${t("Face-down card")}"></div>`;
+const STAR_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 L25 15 L38 15.5 L28 24 L31.5 37 L20 29.5 L8.5 37 L12 24 L2 15.5 L15 15Z" fill="#e8b33a" stroke="#a87b1c" stroke-width="1.6" stroke-linejoin="round"/><path d="M20 3 L25 15 L20 20Z" fill="#f6d88f"/></svg>`;
+const CROWN_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M4 13 L12 21 L20 8 L28 21 L36 13 L33 32 L7 32Z" fill="#e8b33a" stroke="#a87b1c" stroke-width="1.6" stroke-linejoin="round"/><circle cx="4" cy="12" r="2.6" fill="#c8283c"/><circle cx="20" cy="7" r="2.6" fill="#1f5fbf"/><circle cx="36" cy="12" r="2.6" fill="#23804a"/><rect x="7" y="29" width="26" height="4" fill="#a87b1c"/></svg>`;
+/** The middle deck's suit for the game on screen (diamonds when no game is running). */
+const midSuit = () => G && G.s ? middleSuit(G.s.seats.length, G.s.config) : "d";
+const midIcon = suit => suit === "d" ? GEM_SVG : suit === "star" ? STAR_SVG : suit === "crown" ? CROWN_SVG : `<span class="mpip">${PIP[suit]}</span>`;
 function prizeCard(v, cls = "", hidden = false) {
   if (hidden) return `<div class="card prize mystery ${cls}" aria-label="${t("Mystery gem")}"><b>?</b></div>`;
   if (v === JACKPOT) return `<div class="card prize jackpot ${cls}" aria-label="${t("20 jackpot")}">${JACKPOT_SVG}<b>20</b></div>`;
-  return `<div class="card prize ${v < 0 ? "curse" : ""} ${cls}" aria-label="${pName(v)}">${v < 0 ? CURSE_SVG : GEM_SVG}<b>${prizeLabel(v)}</b>${v === 1 || (v >= 11 && v <= 13) ? `<small class="pv">${v === 1 ? t("1 pt") : t("{n} pts", { n: v })}</small>` : ""}</div>`;
+  const ms = midSuit();
+  return `<div class="card prize mid-${ms} ${v < 0 ? "curse" : ""} ${cls}" aria-label="${pName(v)}">${v < 0 ? CURSE_SVG : midIcon(ms)}<b>${prizeLabel(v)}</b>${v === 1 || (v >= 11 && v <= 13) ? `<small class="pv">${v === 1 ? t("1 pt") : t("{n} pts", { n: v })}</small>` : ""}</div>`;
 }
 const thinking = () => `<span class="thinking" aria-label="${t("choosing")}"><span></span><span></span><span></span></span>`;
 const feltPip = suit => {
@@ -698,8 +704,19 @@ function rulesFields(kind, hasBots) {
   const seg = (key, options, value = c[key]) => `<div class="seg" role="group">${options.map(([val, label]) =>
     `<button type="button" data-act="cfg" data-key="${key}" data-val='${JSON.stringify(val)}' aria-pressed="${value === val}">${t(label)}</button>`).join("")}</div>`;
   const toggle = (key, label) => `<button type="button" class="switch" data-act="cfg" data-key="${key}" data-val='${JSON.stringify(!c[key])}' aria-pressed="${!!c[key]}"><span class="track"></span>${t(label)}</button>`;
+  const suitBtn = (slot, suit, on, label) => `<button type="button" class="suitopt suit-${suit}" data-act="cfg-suit" data-slot="${slot}" data-suit="${suit}" aria-pressed="${on}" aria-label="${t(label || SUIT_NAME[suit])}">${suit === "star" || suit === "crown" ? `${PIP[suit]} ${t(SUIT_NAME[suit])}` : PIP[suit]}</button>`;
+  const ps = playerSuits(c.seatCount, c), mid = middleSuit(c.seatCount, c);
+  const who = i => kind === "pass" ? t("Player {n}", { n: i + 1 }) : i === 0 ? t("You") : kind === "online" ? t("Player {n}", { n: 2 }) : t("Bot");
+  const suitRows = c.seatCount === 2
+    ? `<div class="field"><span>${t("Suits")}</span><div class="suitpick">
+        <span class="sp"><small>${esc(who(0))}</small><span class="seg">${SUITS.map(x => suitBtn(0, x, ps[0] === x)).join("")}</span></span>
+        <span class="sp"><small>${esc(who(1))}</small><span class="seg">${SUITS.filter(x => x !== ps[0]).map(x => suitBtn(1, x, ps[1] === x)).join("")}</span></span></div></div>
+      <div class="field"><span>${t("Middle cards")}</span><span class="seg">${SUITS.filter(x => !ps.includes(x)).map(x => suitBtn("mid", x, mid === x)).join("")}</span></div>`
+    : `<div class="field"><span>${t("Your suit")}</span><span class="seg">${SUITS.map(x => suitBtn("mine4", x, ps[0] === x)).join("")}</span></div>
+      <div class="field"><span>${t("Middle cards")}</span><span class="seg">${suitBtn("mid4", "star", mid === "star")}${suitBtn("mid4", "crown", mid === "crown")}</span></div>`;
   return `
     <div class="field"><span>${t("Players")}</span>${seg("seatCount", [[2, "2 players"], [4, "4 players"]])}</div>
+    ${suitRows}
     ${c.seatCount === 4 ? `<div class="field"><span>${t("Mode")}</span>${seg("teams", [[false, "Free-for-all"], [true, "2 vs 2 teams"]])}</div>` : ""}
     ${kind === "pass" ? `<div class="field"><span>${t("People here")}</span>${seg("localPlayers", range(c.seatCount - 1).map(k => [k + 2, String(k + 2)]), Math.min(prefs.localPlayers, c.seatCount))}</div>` : ""}
     ${hasBots ? `<div class="field"><span>${t("Bots")}</span>${seg("botLevel", [["easy", "Easy"], ["normal", "Normal"], ["hard", "Hard"], ["expert", "Expert"]])}
@@ -723,7 +740,7 @@ function renderSetup() {
   const people = plan.filter(p => !p.bot).length;
   const hasBots = plan.some(p => p.bot);
   const seats = plan.map((p, i) => {
-    const suit = suitFor(i, c.seatCount);
+    const suit = suitFor(i, c.seatCount, c);
     const role = p.bot ? `${t("Bot")} · ${levelName(c.botLevel)}` : (kind === "bots" ? t("You") : t("Player {n}", { n: i + 1 }));
     const team = usesTeams(c) ? `<span class="team-dot" style="background:${TEAM_COLOR[sideOf(c, i)]}"></span>` : "";
     return `<div class="seat-row">
@@ -1160,7 +1177,7 @@ function renderGame() {
   const drops = range(n).map(dropClass);
   const awardSpan = (i, suffix = "") => result && result.awards[i] ? `<span class="award ${result.awards[i] < 0 ? "neg" : ""}">${awardText(result.awards[i])}${suffix}</span>` : "";
   const bidCard = (i, size) => {
-    const suit = suitFor(i, n);
+    const suit = suitFor(i, n, c);
     if (result) {
       const cx = result.cancelled.includes(i), burned = result.burned === i;
       let html = cardFace(suit, result.bids[i].card, size + (anim ? " flip" : "") + (cx || burned ? " cancelled" : "")) + (cx || burned ? `<span class="cancel-x">${burned ? "0" : "✕"}</span>` : "");
@@ -1180,7 +1197,7 @@ function renderGame() {
 
   // Pass and play tiles
   const tile = i => {
-    const p = s.seats[i], suit = suitFor(i, n);
+    const p = s.seats[i], suit = suitFor(i, n, c);
     const win = result && result.winners.includes(i);
     const stripe = usesTeams(c) ? `<span class="stripe" style="background:${TEAM_COLOR[sideOf(c, i)]}"></span>` : "";
     return `<div class="tile ${win ? "win" : ""}">${stripe}
@@ -1265,7 +1282,7 @@ function renderGame() {
   let handHTML = "", controls = "";
   const hs = handSeat();
   if (hs !== undefined) {
-    const suit = suitFor(hs, n);
+    const suit = suitFor(hs, n, c);
     const canBid = activeSeat() === hs && !needsHandoff();
     const pb = shownBid(hs);
     const pendingCard = s.phase === "bidding" && pb ? pb.card : null;
@@ -1324,7 +1341,7 @@ function renderGame() {
   const gainOf = side => anim && result ? seatsOnSide(c, side).reduce((a, i) => a + result.awards[i], 0) : 0;
   const duoScore = side => `<b class="bpts ${gainOf(side) ? "bump" : ""} ${scores[side] === top && top > 0 && scores[0] !== scores[1] ? "lead" : ""}" style="--sc:${SIDE_COLOR[side]}">${fmt(scores[side])}${gainOf(side) ? `<i class="plus">${awardText(gainOf(side))}</i>` : ""}</b>`;
   const teamBar = duo
-    ? `<div class="board duo" role="group" aria-label="${t("Score")}">${sideHTML(0)}<div class="bscore">${duoScore(0)}<span class="bvs">${GEM_SVG}</span>${duoScore(1)}</div>${sideHTML(1, "r")}${meter}</div>`
+    ? `<div class="board duo" role="group" aria-label="${t("Score")}">${sideHTML(0)}<div class="bscore">${duoScore(0)}<span class="bvs mid-${midSuit()}">${midIcon(midSuit())}</span>${duoScore(1)}</div>${sideHTML(1, "r")}${meter}</div>`
     : `<div class="board multi" role="group" aria-label="${t("Score")}" style="--n:${sides}">${range(sides).map(sideHTML).join("")}${meter}</div>`;
 
   let overlay = "";
@@ -1455,7 +1472,7 @@ function renderTiebreak() {
       if (r.id === "gems") return t(v === 1 ? "1 gem" : "{n} gems", { n: v });
       if (r.id === "biggest") return v ? t("{v} gem", { v }) : t("no gems");
       if (r.id === "recent") return v ? t("gem {n}", { n: v }) : t("no gems");
-      if (r.id === "draw") return cardFace(suitFor(seatsOnSide(c, side)[0], n), v, "sm flip");
+      if (r.id === "draw") return cardFace(suitFor(seatsOnSide(c, side)[0], n, c), v, "sm flip");
       return t("Wins");
     };
     const rows = tb.sides.map(side => `<div class="res ${r.winners.includes(side) ? "first" : ""}">${faces(side)}<span class="nm">${esc(sideLabel(s, side))}</span><span class="tie-val">${valueText(side)}</span></div>`).join("");
@@ -1493,7 +1510,7 @@ function renderModal() {
     body = `<div><div class="opt-label">${t("Gems still to come")}</div>
         <div style="display:flex;flex-wrap:wrap;gap:4px">${upcoming.length ? upcoming.map(v => prizeCard(v, "xs", v === null)).join("") : `<span class="muted">${t("None. This is the last one.")}</span>`}</div></div>
       <div class="hand-list"><div class="opt-label" style="margin:0">${t("Cards in each hand")}</div>
-        ${range(n).map(i => `<div class="hrow">${avatar(s.seats[i].char, "sm")}<div class="cards">${s.hands[i].map(v => cardFace(suitFor(i, n), v, "xs")).join("")}</div></div>`).join("")}</div>
+        ${range(n).map(i => `<div class="hrow">${avatar(s.seats[i].char, "sm")}<div class="cards">${s.hands[i].map(v => cardFace(suitFor(i, n, c), v, "xs")).join("")}</div></div>`).join("")}</div>
       ${s.history.length ? `<div><div class="opt-label">${t("History")}</div>
         <div class="ledger-wrap"><table class="ledger"><thead><tr><th>${t("Gem")}</th>${range(n).map(i => `<th>${esc(sn(s, i))}</th>`).join("")}</tr></thead>
         <tbody>${s.history.map(h => `<tr><td>${prizeLabel(h.prize)}</td>${range(n).map(i => `<td class="${h.winners.includes(i) ? "w" : ""}">${RANK(h.bids[i].card)}${h.bids[i].double ? "×2" : ""}${h.bids[i].power ? "★" : ""}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>` : ""}`;
@@ -2159,6 +2176,20 @@ document.addEventListener("click", e => {
       if (Online.named) Online.named.presence({ host: true, t: Online.hostSince }).catch(() => {});
       render(); break;
     case "close": case "close-bg": if (app.setup && app.setup.startsWith("online")) break; app.setup = null; app.modal = null; render(); break;
+    case "cfg-suit": {
+      const c = prefs.config, slot = el.dataset.slot, suit = el.dataset.suit;
+      if (slot === "0" || slot === "1") {
+        const ps = playerSuits(2, c).slice();
+        const k = +slot;
+        if (ps[1 - k] === suit) ps[1 - k] = ps[k];
+        ps[k] = suit;
+        c.suits2 = ps;
+        if (ps.includes(c.middle2)) c.middle2 = middleSuit(2, Object.assign({}, c, { middle2: null }));
+      } else if (slot === "mid") c.middle2 = suit;
+      else if (slot === "mine4") c.mine4 = suit;
+      else if (slot === "mid4") c.middle4 = suit;
+      Sound.select(); Haptics.select(); savePrefs(); render(); break;
+    }
     case "cfg": {
       const key = el.dataset.key, val = JSON.parse(el.dataset.val);
       if (key === "localPlayers") prefs.localPlayers = val; else prefs.config[key] = val;

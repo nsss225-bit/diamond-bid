@@ -1,6 +1,7 @@
 # Diamond Bid changelog
 
 ## Unreleased
+- Choose your suits: with 2 players each player picks Hearts, Spades, Diamonds or Clubs, and the middle cards are one of the two suits left over. With 4 players you pick your own suit (the others take the rest), and the middle uses a new suit: Stars or Crowns.
 - Diamonds read like the playing cards: A for 1, and J, Q and K for 11, 12 and 13 (the big gem card also shows "1 pt", "11 pts" etc. underneath). Messages say "the Q gem" too.
 - Characters are now illustrated people from around the world: Amara (Nigeria), Hiroshi (Japan), Mateo (Mexico), Leila (Iran), Priya (India), Wei (China), Olivier (France), Dmitri (Russia), Sofia (Brazil), Ingrid (Norway), Nia (Kenya), Tane (Aotearoa New Zealand), Fatima (Oman), Aiyana (Navajo Nation), Salim (Oman) and Kwame (Ghana). Prices, powers and everything you own stay the same. Animal-themed power names were renamed: Second chance, Golden bonus, Wipeout, Smoke screen and Toll.
 - Achievements are much harder: for example win 100 gems, 25 matches, 30 daily challenges, beat an Expert bot 10 times, finish 100 matches, win 250, buy 10 characters, save 20,000 coins, or collect the daily gift 30 days in a row. Achievements already earned stay earned.
