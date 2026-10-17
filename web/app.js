@@ -368,6 +368,15 @@ function gemPile(s, seat) {
 }
 
 /* ================= Home ================= */
+/* Home screen tabs (a tab bar along the bottom, like most phone games). */
+const TAB_ICON = d => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const HOME_TABS = [
+  { id: "play", label: "Play", icon: TAB_ICON("M7 4h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM16.5 6.5l2.6.9a2 2 0 0 1 1.2 2.5l-3.3 9.4M10.5 9.5l2 2.5-2 2.5-2-2.5z") },
+  { id: "daily", label: "Daily", icon: TAB_ICON("M5 6h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM4 10h16M8 3.5v4M16 3.5v4M12 13.2l1.1 2.1 2.3.3-1.7 1.6.4 2.3-2.1-1.1-2.1 1.1.4-2.3-1.7-1.6 2.3-.3z") },
+  { id: "style", label: "Customize", icon: TAB_ICON("M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.8 1.8-1.7 0-1.3-1.1-1.6-1.1-2.7 0-1 .8-1.6 1.8-1.6H17a3.5 3.5 0 0 0 3.5-3.5c0-4.2-3.8-7.5-8.5-7.5zM7.8 11.5h.01M10 7.8h.01M14.5 7.8h.01") },
+  { id: "ach", label: "Achievements", icon: TAB_ICON("M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v3M8.5 20h7M10 16h4l.5 4h-5z") },
+  { id: "how", label: "How to play", icon: TAB_ICON("M12 20.5a8.5 8.5 0 1 0 0-17 8.5 8.5 0 0 0 0 17zM9.6 9.4a2.5 2.5 0 0 1 4.8 1c0 1.7-2.4 2-2.4 3.6M12 17h.01") },
+];
 function renderHome() {
   const c = CHAR[prefs.character];
   const intro = app.introDone ? "" : "intro";
@@ -379,20 +388,18 @@ function renderHome() {
   const onlineReady = Online.checked && Online.room;
   const got = achCount();
 
-  return `
-  <div class="wrap">
+  const tab = HOME_TABS.some(x => x.id === app.tab) ? app.tab : "play";
+  const header = `
     <header class="topbar">
       <div class="brand">${GEM_SVG}Diamond Bid</div>
-      <nav class="topnav" aria-label="${t("Sections")}">
-        <a href="#daily">${t("Daily")}</a><a href="#characters">${t("Characters")}</a><a href="#designs">${t("Designs")}</a><a href="#achievements">${t("Achievements")}</a><a href="#how">${t("How to play")}</a>
-      </nav>
       <div style="display:flex;gap:8px;align-items:center">
         <button class="langbtn" data-act="lang" aria-label="${t("Language")}">${GLOBE_SVG}<b>${LANG.toUpperCase()}</b></button>
         <button class="coinbtn" data-act="coins" aria-label="${t("{n} coins. How to earn more", { n: fmtCoins(stats.coins) })}">${COIN}<b id="coin-count">${fmtCoins(stats.coins)}</b></button>
         <button class="icon-btn" data-act="sound" aria-label="${prefs.sound ? t("Turn sound off") : t("Turn sound on")}" aria-pressed="${prefs.sound}">${SPEAKER_SVG(prefs.sound)}</button>
       </div>
-    </header>
+    </header>`;
 
+  const playTab = `
     <section class="hero">
       <div class="hero-copy">
         <p class="eyebrow">${t("A card game of secret bids · 2 or 4 players")}</p>
@@ -410,12 +417,13 @@ function renderHome() {
         <div class="playing-as">
           ${avatar(c.id)}
           <div><small>${t("Playing as")}</small><b id="playing-name">${esc(myName())}</b></div>
-          <a href="#characters">${t("Change")}</a>
+          <button class="link" data-act="tab" data-tab="style">${t("Change")}</button>
         </div>
       </div>
       <div class="hero-art"><div class="fan ${intro}">${fanCards}</div></div>
-    </section>
+    </section>`;
 
+  const dailyTab = `
     <section class="block" id="daily">
       <div class="block-head"><div><h2>${t("Daily challenge")}</h2><p>${t("Everyone gets the same gems today, against the same Hard bot. Beat your friends' scores.")}</p></div></div>
       <div class="daily">
@@ -430,8 +438,9 @@ function renderHome() {
           <div id="daily-lb">${renderLeaderboard()}</div>
         </div>
       </div>
-    </section>
+    </section>`;
 
+  const styleTab = `
     <section class="block" id="characters">
       <div class="block-head">
         <div><h2>${t("Choose your character")}</h2><p>${t("{a}, {b} and {c} are free; buy the others with coins. Each has a power you can use once per game when \"Character powers\" is on.", { a: charName("fox"), b: charName("owl"), c: charName("bear") })}</p></div>
@@ -481,8 +490,9 @@ function renderHome() {
           <div class="swatch-label" style="text-align:start;margin-top:8px">${t("Gives Clubs and Diamonds their own colors. Handy with 4 players.")}</div>
         </div>
       </div>
-    </section>
+    </section>`;
 
+  const achTab = `
     <section class="block" id="achievements">
       <div class="block-head">
         <div><h2>${t("Achievements")}</h2><p>${t("{got} of {all} earned. Each one gives you {n} coins.", { got, all: ACHIEVEMENTS.length, n: ACH_REWARD })}</p></div>
@@ -491,8 +501,9 @@ function renderHome() {
       <div class="ach-grid">
         ${ACHIEVEMENTS.map(a => `<div class="ach ${stats.ach[a.id] ? "got" : ""}"><span class="ai">${a.icon}</span><div><b>${t(a.name)}</b><small>${t(a.desc)}</small></div></div>`).join("")}
       </div>
-    </section>
+    </section>`;
 
+  const howTab = `
     <section class="block" id="how">
       <div class="block-head"><div><h2>${t("How to play")}</h2><p>${t("One round per gem. A game is 13 rounds.")}</p></div></div>
       <div class="steps">
@@ -509,13 +520,25 @@ function renderHome() {
         <div class="variant"><h3>${t("Jackpot")}</h3><p>${t("A golden 20-point gem replaces the 1 and turns up in the last four rounds.")}</p></div>
         <div class="variant"><h3>${t("Cursed gems and Double")}</h3><p>${t("Curses (−1 to −3) go to the lowest bid. The Double token doubles one round, curses too.")}</p></div>
       </div>
-    </section>
+      <div><button class="btn ghost" data-act="tutorial">${t("New here? Play the 2-minute tutorial")}</button></div>
+    </section>`;
 
-    <footer class="foot">
+  const foot = `<footer class="foot">
       <span>${t("Matches won: {won} of {played}", { won: stats.won, played: stats.played })}</span>
       <span>Diamond Bid · ${t("Version {v}", { v: APP_VERSION })}</span>
-    </footer>
-  </div>`;
+    </footer>`;
+  const body = { play: playTab, daily: dailyTab, style: styleTab, ach: achTab, how: howTab + foot }[tab];
+  const dailyDot = stats.dailyBest[todayKey()] == null;
+  return `
+  <div class="wrap home tab-${tab}">
+    ${header}
+    <main class="tabpage" role="tabpanel" aria-label="${t(HOME_TABS.find(x => x.id === tab).label)}">${body}</main>
+  </div>
+  <nav class="tabbar" role="tablist" aria-label="${t("Sections")}">
+    ${HOME_TABS.map(x => `<button role="tab" data-act="tab" data-tab="${x.id}" aria-selected="${x.id === tab}">
+      <span class="ti">${x.icon}${x.id === "daily" && dailyDot ? `<i class="dot" aria-hidden="true"></i>` : ""}${x.id === "ach" && got ? `<i class="count">${got}</i>` : ""}</span>
+      <span class="tl">${t(x.label)}</span></button>`).join("")}
+  </nav>`;
 }
 
 /* ================= Setup (bots and pass and play) ================= */
@@ -1836,6 +1859,7 @@ document.addEventListener("click", e => {
     case "come-back": comeBack(); break;
     case "coins": app.modal = "coins"; render(); break;
     case "lang": app.modal = "lang"; render(); break;
+    case "tab": app.tab = el.dataset.tab; Sound.select(); window.scrollTo(0, 0); render(); break;
     case "set-lang": setLang(el.dataset.id); prefs.lang = LANG; savePrefs(); app.modal = null; Sound.select(); render(); break;
     case "buy": app.buyId = el.dataset.id; app.modal = "buy"; Sound.select(); render(); break;
     case "confirm-buy": buy(app.buyId); break;

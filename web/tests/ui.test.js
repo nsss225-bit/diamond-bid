@@ -100,8 +100,11 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   // 1) Home renders with all sections
   const b = browser("solo");
   await sleep(20);
-  const home = b.html();
-  ok(["Daily challenge", "Choose your character", "Achievements", "Card design", "Rosa", "Ember", "Gold Leaf", "Galaxy", "Version 1.3", "tutorial"].every(t => home.includes(t)), "home shows daily, characters, achievements, unlockables, version");
+  ok(b.html().includes('role="tablist"') && b.html().includes("Play vs bots"), "home opens on the Play tab with a tab bar");
+  let home = "";
+  for (const tab of ["play", "daily", "style", "ach", "how"]) { b.click("tab", { tab }); home += b.html(); }
+  b.click("tab", { tab: "play" });
+  ok(["Daily challenge", "Choose your character", "Achievements", "Card design", "Rosa", "Ember", "Gold Leaf", "Galaxy", "Version 1.3", "tutorial"].every(t => home.includes(t)), "tabs show daily, characters, achievements, unlockables, version");
   ok(home.includes("Tap to buy"), "items for sale shown with prices");
 
   // 2) Every extra on, vs Expert bots, 4 players
