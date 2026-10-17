@@ -8,6 +8,14 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["Quick match", "Partida rápida", "Partie rapide", "مباراة سريعة", "快速匹配"],
+  ["Find a player", "Buscar jugador", "Trouver un joueur", "ابحث عن لاعب", "寻找玩家"],
+  ["Play someone who's online now. If nobody turns up in 20 seconds, you'll play a bot instead.", "Juega con alguien que esté conectado ahora. Si nadie aparece en 20 segundos, jugarás contra un bot.", "Jouez contre quelqu'un en ligne maintenant. Si personne n'arrive en 20 secondes, vous jouerez contre un bot.", "العب ضد شخص متصل الآن. إذا لم يظهر أحد خلال 20 ثانية، ستلعب ضد روبوت.", "与现在在线的玩家对战。如果 20 秒内没人加入，你将改为与机器人对战。"],
+  ["Play with friends", "Jugar con amigos", "Jouer avec des amis", "العب مع الأصدقاء", "与好友一起玩"],
+  ["Playing a bot in {n} seconds if nobody joins.", "Jugarás contra un bot en {n} segundos si nadie se une.", "Partie contre un bot dans {n} secondes si personne ne rejoint.", "ستلعب ضد روبوت خلال {n} ثانية إذا لم ينضم أحد.", "如果没人加入，{n} 秒后将与机器人对战。"],
+  ["Player found! Dealing the cards…", "¡Jugador encontrado! Repartiendo las cartas…", "Joueur trouvé ! Distribution des cartes…", "تم العثور على لاعب! جارٍ توزيع الأوراق…", "找到玩家了！正在发牌…"],
+  ["Nobody else was online, so you're playing a bot.", "No había nadie más conectado, así que juegas contra un bot.", "Personne d'autre n'était en ligne, vous jouez donc contre un bot.", "لم يكن أحد آخر متصلاً، لذلك ستلعب ضد روبوت.", "目前没有其他玩家在线，你将与机器人对战。"],
+  ["Cancel", "Cancelar", "Annuler", "إلغاء", "取消"],
   ["Play again", "Jugar otra vez", "Rejouer", "العب مجدداً", "再玩一次"],
   ["Rematch requested. Waiting for the host…", "Revancha pedida. Esperando al anfitrión…", "Revanche demandée. En attente de l'hôte…", "تم طلب مباراة جديدة. بانتظار المضيف…", "已请求再战，等待房主…"],
   ["Rematch requested by {names}", "{names} pide la revancha", "{names} demande une revanche", "{names} يطلب مباراة جديدة", "{names} 请求再战"],

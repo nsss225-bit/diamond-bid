@@ -260,6 +260,22 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   T.get("G.turnKey && autoPlay(G.turnKey)"); T.get("G.away = G.away || { at: Date.now() }"); T.get("kickForInactivity()");
   ok(T.get("app.screen") === "home" && !T.get("G"), "not coming back removes you from the game");
 
+  // 9b) Quick match: two strangers searching get paired; someone alone plays a bot
+  const qbus = makeBus();
+  const q1 = browser("q1", qbus), q2 = browser("q2", qbus);
+  await sleep(30); q1.click("close"); q2.click("close");
+  q1.click("open-online"); q1.click("quick-match"); await sleep(30);
+  ok(q1.html().includes("Looking for players"), "quick match shows the search screen");
+  q2.click("open-online"); q2.click("quick-match");
+  await sleep(250);
+  ok(q1.get("G && G.kind === 'online'") && q2.get("G && G.kind === 'online'"), "two players searching are paired into one game");
+  ok(q1.get("G.s.seats.filter(x => !x.bot).length") === 2 && q1.get("G.s.config.seatCount") === 2, "a quick match is 1 vs 1");
+  ok(q1.get("Online.role") !== q2.get("Online.role"), "one of them hosts, the other joins");
+  const q3 = browser("q3", makeBus());
+  await sleep(30); q3.click("close"); q3.click("open-online"); q3.click("quick-match"); await sleep(30);
+  q3.get("noOneFound()"); await sleep(20);
+  ok(q3.get("G && G.kind === 'bots'") && q3.get("app.screen") === "game", "nobody online: you play a bot");
+
   // 10a) Double-tap a card to play it
   const D = browser("doubletap");
   await sleep(20); D.click("close");

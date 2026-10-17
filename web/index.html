@@ -688,6 +688,19 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
   .extras .switch .track { transform: scale(.72); margin-block: -3px; }
   .sheet .seat-row small { display: none; }
 }
+/* ---------- Quick match ---------- */
+.quick { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 16px; background: var(--brass-soft); border: 1px solid rgba(217,171,79,.45); flex-wrap: wrap; }
+.quick > div { flex: 1 1 200px; }
+.quick h3 { margin: 0 0 4px; font-size: 19px; }
+@media (max-width: 600px) {
+  .quick { padding: 12px; gap: 10px; }
+  .quick p { font-size: 13.5px; }
+  .friends-note { display: none; }
+  .sheet .choice > div { padding: 12px; gap: 8px; }
+  .sheet .choice h3 { font-size: 17px; }
+  .sheet .choice p { font-size: 13px; }
+  .sheet .code-input { font-size: 26px; padding: 6px; }
+}
 /* ---------- Rematch ---------- */
 .rematch-ask { flex-basis: 100%; margin: 0 0 4px; text-align: center; color: var(--brass); font-weight: 700; }
 .btn.pulse { animation: pulse 1.2s ease-in-out infinite; }

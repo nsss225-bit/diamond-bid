@@ -583,7 +583,7 @@ function rulesFields(kind, hasBots) {
 
 function renderSetup() {
   const kind = app.setup, c = prefs.config;
-  if (kind === "online-menu" || kind === "online-lobby") return renderOnlineSheet();
+  if (kind === "online-menu" || kind === "online-lobby" || kind === "online-quick") return renderOnlineSheet();
   const plan = seatPlan(kind);
   const people = plan.filter(p => !p.bot).length;
   const hasBots = plan.some(p => p.bot);
@@ -615,6 +615,7 @@ function renderSetup() {
 /* ================= Starting games ================= */
 function beginGame(g) {
   stopTimers();
+  cancelQuick();
   G = g;
   app.setup = null;
   app.modal = null;
@@ -1446,10 +1447,12 @@ async function joinTable(code, host) {
   Online.code = code; Online.role = host ? "host" : "guest"; Online.error = ""; Online.lastG = null; Online.hostSince = host ? Date.now() : 0;
   try { await Online.named.presence({ app: "diamondbid", v: 11, name: myName(), char: prefs.character, host: !!host, t: Online.hostSince || Date.now() }); } catch (e) {}
   Online.unsub = Online.named.onPeers(onPeersChange, () => { Online.error = t("The connection to the table was lost."); render(); });
-  app.setup = "online-lobby";
+  app.setup = Online.quick ? "online-quick" : "online-lobby";
   render();
 }
 function leaveOnline() {
+  cancelQuick();
+  Online.quick = false;
   if (Online.named) { try { Online.named.leave(); } catch (e) {} }
   Object.assign(Online, { named: null, code: "", role: null, peers: [], myPeer: null, error: "", lastG: null, unsub: null });
 }
@@ -1469,6 +1472,8 @@ function onPeersChange(ch) {
   else guestReadPeers(ch);
 }
 function hostReadPeers(ch) {
+  // Quick match: deal as soon as the other player sits down.
+  if (!G && Online.quick && tablePeople().length >= 2) { cancelQuick(); hostStart(QUICK_RULES); return; }
   if (!G || G.kind !== "online") { if (app.setup === "online-lobby") render(); return; }
   const s = G.s;
   let changed = false;
@@ -1523,9 +1528,69 @@ function publish() {
   if (!G || G.kind !== "online" || G.role !== "host" || !Online.named) return;
   Online.named.presence({ g: packState(G.s) }).catch(() => {});
 }
-function hostStart() {
+/* ================= Quick match ================= */
+/* Everyone searching waits in one shared lobby. The two who have waited longest pair up: the earlier one
+   opens a private table and invites the other. If nobody turns up in time, you play a bot instead. */
+const QM_ROOM = "quickmatch-v1", QM_WAIT_MS = 20000;
+const QUICK_RULES = { seatCount: 2, teams: false, gamesToWin: 1 };
+const Match = { lobby: null, start: 0, timer: null, tick: null, paired: null };
+async function quickMatch() {
+  if (!Online.room) return;
+  cancelQuick();
+  Object.assign(Match, { start: Date.now(), paired: null });
+  Online.error = ""; Online.quick = true;
+  app.setup = "online-quick"; render();
+  let lobby;
+  try { lobby = await Online.room.join("db-" + QM_ROOM); }
+  catch (e) { Online.quick = false; Online.error = t("Couldn't open that table. Check your connection and try again."); app.setup = "online-menu"; render(); return; }
+  if (app.setup !== "online-quick") { try { lobby.leave(); } catch (e) {} return; } // cancelled while connecting
+  Match.lobby = lobby;
+  try { await lobby.presence({ app: "diamondbid", qm: 1, name: myName(), char: prefs.character, t: Match.start }); } catch (e) {}
+  lobby.onPeers(onLobby, () => {});
+  Match.timer = setTimeout(noOneFound, QM_WAIT_MS);
+  Match.tick = setInterval(() => {
+    const el = document.getElementById("qm-left");
+    if (el) el.textContent = Math.max(0, Math.ceil((QM_WAIT_MS - (Date.now() - Match.start)) / 1000));
+  }, 250);
+}
+function onLobby(ch) {
+  if (Match.paired || !Match.lobby) return;
+  const me = ch.peers.find(p => p.sameTab);
+  if (!me) return;
+  // Someone already picked me: join their table.
+  const invite = ch.peers.find(p => !p.sameTab && p.presence && p.presence.qm && p.presence.with === me.peer && p.presence.pair);
+  if (invite) { Match.paired = { code: invite.presence.pair, host: false }; joinMatched(); return; }
+  const waiting = ch.peers.filter(p => p.presence && p.presence.app === "diamondbid" && p.presence.qm && !p.presence.pair)
+    .sort((a, b) => (a.presence.t || 0) - (b.presence.t || 0) || (a.peer < b.peer ? -1 : 1));
+  const i = waiting.findIndex(p => p.sameTab);
+  if (i < 0 || i % 2 || !waiting[i + 1]) return; // the earlier of each pair opens the table
+  const code = "qm" + randomCode();
+  Match.paired = { code, host: true };
+  Match.lobby.presence({ pair: code, with: waiting[i + 1].peer }).catch(() => {});
+  joinMatched();
+}
+async function joinMatched() {
+  clearTimeout(Match.timer);
+  // If the game hasn't started a little later (the other player vanished), fall back to a bot.
+  Match.timer = setTimeout(() => { if (!G && Online.quick) noOneFound(); }, 12000);
+  render();
+  await joinTable(Match.paired.code, Match.paired.host);
+  if (!Match.paired.host && Match.lobby) { try { Match.lobby.leave(); } catch (e) {} Match.lobby = null; }
+}
+function cancelQuick() {
+  clearTimeout(Match.timer); clearInterval(Match.tick);
+  if (Match.lobby) { try { Match.lobby.leave(); } catch (e) {} }
+  Object.assign(Match, { lobby: null, timer: null, tick: null, paired: null });
+}
+function noOneFound() {
+  leaveOnline();
+  app.setup = null;
+  startLocal("bots");
+  toast("◆", t("Nobody else was online, so you're playing a bot."), t("Quick match"));
+}
+function hostStart(over = {}) {
   const people = tablePeople();
-  const c = Object.assign({}, prefs.config);
+  const c = Object.assign({}, prefs.config, over);
   if (people.length > 4) { Online.error = t("A table holds up to 4 players."); render(); return; }
   if (people.length > c.seatCount) c.seatCount = 4;
   const used = new Set();
@@ -1562,10 +1627,25 @@ function renderOnlineSheet() {
       <div class="sheet-foot" style="justify-content:flex-end"><button class="btn primary" data-act="online-close">${t("OK")}</button></div>
     </div></div>`;
   }
+  if (app.setup === "online-quick") {
+    const left = Math.max(0, Math.ceil((QM_WAIT_MS - (Date.now() - Match.start)) / 1000));
+    return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true" style="max-width:420px">
+      ${head(t("Quick match"))}
+      ${Match.paired ? searching(t("Player found! Dealing the cards…"))
+        : `${searching(t("Looking for players…"))}<p class="muted" style="margin:0;text-align:center">${t("Playing a bot in {n} seconds if nobody joins.", { n: `<b id="qm-left" style="color:var(--ink)">${left}</b>` })}</p>`}
+      ${err}
+      <div class="sheet-foot" style="justify-content:center"><button class="btn ghost" data-act="online-close">${t("Cancel")}</button></div>
+    </div></div>`;
+  }
   if (app.setup === "online-menu") {
     return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true">
       ${head(t("Play online"))}
-      <p class="muted" style="margin:0">${t("Play with friends on their own phones. Everyone opens this same page. Your friends need to be able to open it too: share it from the page's Share menu.")}</p>
+      <div class="quick">
+        <div><h3>${t("Quick match")}</h3><p class="muted" style="margin:0">${t("Play someone who's online now. If nobody turns up in 20 seconds, you'll play a bot instead.")}</p></div>
+        <button class="btn primary" data-act="quick-match">${t("Find a player")}</button>
+      </div>
+      <div class="opt-label" style="margin:0">${t("Play with friends")}</div>
+      <p class="muted friends-note" style="margin:0">${t("Play with friends on their own phones. Everyone opens this same page. Your friends need to be able to open it too: share it from the page's Share menu.")}</p>
       <div class="choice">
         <div><h3>${t("Start a table")}</h3><p class="muted" style="margin:0">${t("You'll get a code to send your friends. You pick the rules.")}</p><button class="btn primary" data-act="online-create">${t("Start a table")}</button></div>
         <div><h3>${t("Join a table")}</h3><label class="muted" for="join-code" style="font-size:13px">${t("Table code")}</label><input id="join-code" class="code-input" maxlength="4" autocomplete="off" autocapitalize="characters" placeholder="ABCD" dir="ltr"><button class="btn ghost" data-act="online-join">${t("Join")}</button></div>
@@ -1822,6 +1902,7 @@ document.addEventListener("click", e => {
     case "open-setup": app.setup = el.dataset.kind; render(); break;
     case "open-online": app.setup = "online-menu"; Online.error = ""; render(); break;
     case "online-create": joinTable(randomCode(), true); break;
+    case "quick-match": quickMatch(); break;
     case "online-join": joinTable((document.getElementById("join-code") || {}).value, false); break;
     case "online-close": leaveOnline(); app.setup = null; render(); break;
     case "online-start": hostStart(); break;
