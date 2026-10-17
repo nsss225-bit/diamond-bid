@@ -795,8 +795,10 @@ function placeBid() {
   const seat = activeSeat();
   if (seat === undefined || G.selected == null) return;
   const bid = { card: G.selected, double: G.useDouble, power: G.usePower };
-  const from = document.querySelector && document.querySelector(".hand .card.sel");
-  G.flyFrom = from && from.getBoundingClientRect ? from.getBoundingClientRect() : null;
+  if (!G.flyFrom) { // a dragged card already set where it flies from
+    const from = document.querySelector && document.querySelector(".hand .card.sel");
+    G.flyFrom = from && from.getBoundingClientRect ? from.getBoundingClientRect() : null;
+  }
   if (G.kind === "online" && G.role === "guest") {
     G.myBid = { seat, key: roundKey(G.s), bid };
     Online.named && Online.named.presence({ b: { k: roundKey(G.s), c: bid.card, d: bid.double ? 1 : 0, p: bid.power ? 1 : 0 } }).catch(() => {});
@@ -1089,7 +1091,7 @@ function renderGame() {
     }
     const dealt = G.dealAt ? Date.now() - G.dealAt : Infinity, dealing = dealt < DEAL_GAP * cards.length + 500;
     handHTML = `<div class="hand ${dealing ? "dealing" : ""}" role="group" aria-label="${t("Your cards")}" style="--m:${Math.max(cards.length, 2)}">${cards.map((v, k) =>
-      cardFace(suit, v, `${G.selected === v ? "sel" : ""} ${pendingCard === v ? "pending" : ""}`, "button",
+      cardFace(suit, v, `${G.selected === v ? "sel" : ""} ${pendingCard === v ? "pending" : ""} ${G.dragging === v ? "lifted" : ""}`, "button",
         `data-act="select" data-v="${v}" ${canBid ? "" : "disabled"} aria-pressed="${G.selected === v}" style="--o:${k - mid}${dealing ? `;animation-delay:${k * DEAL_GAP - dealt}ms` : ""}"`)).join("")}</div>`;
     if (canBid) {
       const pw = c.powers && s.powerAvail[hs] && POWERS[s.seats[hs].char];
@@ -1103,6 +1105,7 @@ function renderGame() {
       const timed = TIMED_KINDS.includes(G.kind) && !G.away;
       const used = timed && G.turnKey === `${roundKey(s)}.${hs}` && G.turnAt ? Math.min(TURN_MS, Date.now() - G.turnAt) : 0;
       const secsLeft = Math.max(0, Math.ceil((TURN_MS - used) / 1000));
+      if (s.round < 2 && G.kind !== "tutorial") controls += `<p class="playhint">${t("Drag a card up to the table, or double-tap it, to play it")}</p>`;
       if (timed) controls += `<div class="turnclock ${secsLeft <= 3 ? "hurry" : ""}" role="timer" aria-label="${t("Time left")}"><b id="turn-left">${secsLeft}</b><span class="turnbar"><span style="animation-delay:-${used}ms"></span></span></div>`;
       controls += `<div class="bidbar">
         ${c.double && s.doubleAvail[hs] ? `<button class="dbl" data-act="double" aria-pressed="${G.useDouble}">×2 ${t("Double")}${G.useDouble ? " · " + t("on") : ""}</button>` : ""}
@@ -1681,6 +1684,74 @@ function render() {
   }
 }
 
+/* ================= Drag a card to play it ================= */
+/* Press a card in your hand and drag it up onto the table; let go above your hand to bid it.
+   A copy of the card follows your finger, and the "Your bid" spot lights up when you're in range. */
+const Drag = { v: null, start: null, ghost: null, origin: null, moved: false, justDropped: false };
+function dropZoneHit(y) {
+  const hand = document.querySelector(".hand");
+  return hand && hand.getBoundingClientRect ? y < hand.getBoundingClientRect().top + 10 : false;
+}
+function dragMove(e) {
+  if (Drag.v === null) return;
+  const dx = e.clientX - Drag.start.x, dy = e.clientY - Drag.start.y;
+  if (!Drag.moved) {
+    if (Math.hypot(dx, dy) < 10) return;
+    Drag.moved = true;
+    const src = document.querySelector(`.hand .card[data-v="${Drag.v}"]`);
+    if (!src) { Drag.v = null; return; }
+    const r = src.getBoundingClientRect();
+    Drag.origin = r;
+    const g = src.cloneNode(true);
+    g.removeAttribute("style"); g.removeAttribute("data-act");
+    g.classList.add("drag-ghost");
+    Object.assign(g.style, { left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px", "--w": r.width + "px" });
+    g.style.setProperty("--w", r.width + "px");
+    document.body.appendChild(g);
+    Drag.ghost = g;
+    G.selected = Drag.v; G.dragging = Drag.v;
+    Sound.select();
+    render();
+  }
+  e.preventDefault();
+  Drag.ghost.style.transform = `translate(${dx}px, ${dy}px) rotate(${Math.max(-12, Math.min(12, dx / 12))}deg) scale(1.1)`;
+  const ok = dropZoneHit(e.clientY);
+  const slot = document.querySelector("#mybid .slot");
+  if (slot) slot.classList.toggle("dropok", ok);
+  Drag.ghost.classList.toggle("ok", ok);
+}
+function dragEnd(e) {
+  if (Drag.v === null) return;
+  const v = Drag.v, g = Drag.ghost, moved = Drag.moved;
+  Drag.v = null;
+  if (!moved) return;
+  Drag.justDropped = true; setTimeout(() => { Drag.justDropped = false; }, 60);
+  G.dragging = null;
+  const ok = e.type !== "pointercancel" && dropZoneHit(e.clientY) && activeSeat() !== undefined;
+  if (ok) {
+    G.selected = v;
+    G.flyFrom = g.getBoundingClientRect();
+    g.remove();
+    placeBid();
+  } else {
+    // Not far enough: the card slides back into your hand.
+    g.style.transition = "transform .25s ease";
+    g.style.transform = "none";
+    setTimeout(() => g.remove(), 260);
+    render();
+  }
+}
+if (typeof document !== "undefined" && document.addEventListener) {
+  document.addEventListener("pointerdown", e => {
+    const el = e.target && e.target.closest && e.target.closest(".hand button.card");
+    if (!el || el.disabled || !G || activeSeat() === undefined) return;
+    Drag.v = +el.dataset.v; Drag.start = { x: e.clientX, y: e.clientY }; Drag.moved = false;
+  });
+  document.addEventListener("pointermove", dragMove, { passive: false });
+  document.addEventListener("pointerup", dragEnd);
+  document.addEventListener("pointercancel", dragEnd);
+}
+
 /* The card you bid glides from your hand to the "Your bid" spot. */
 function flyPlayedCard() {
   const from = G && G.flyFrom;
@@ -1741,7 +1812,16 @@ document.addEventListener("click", e => {
     case "daily": startDaily(); break;
     case "tutorial": startTutorial(); break;
     case "tutorial-done": stopTimers(); G = null; app.screen = "home"; app.setup = "bots"; render(); break;
-    case "select": G.selected = G.selected === +el.dataset.v ? null : +el.dataset.v; Sound.select(); render(); break;
+    case "select": {
+      const v = +el.dataset.v, now = Date.now();
+      if (Drag.justDropped) break; // the click that ends a drag
+      // Double-tap a card to play it straight away.
+      if (G.selected === v && G.lastTap && G.lastTap.v === v && now - G.lastTap.at < 450) { G.lastTap = null; placeBid(); break; }
+      G.lastTap = { v, at: now };
+      G.selected = G.selected === v && now - (G.selectedAt || 0) > 450 ? null : v;
+      G.selectedAt = now;
+      Sound.select(); render(); break;
+    }
     case "double": G.useDouble = !G.useDouble; Sound.select(); render(); break;
     case "power": G.usePower = !G.usePower; Sound.select(); render(); break;
     case "power-now": useInstantPower(); break;

@@ -8,6 +8,7 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["Drag a card up to the table, or double-tap it, to play it", "Arrastra una carta a la mesa o tócala dos veces para jugarla", "Faites glisser une carte vers la table, ou touchez-la deux fois, pour la jouer", "اسحب الورقة إلى الطاولة أو انقر عليها مرتين للعبها", "将牌拖到桌上，或双击它来出牌"],
   ["Online play with friends is coming soon to the app. For now, play vs bots, pass and play, or the daily challenge.", "El juego en línea con amigos llegará pronto a la app. Por ahora, juega contra bots, en el mismo dispositivo o el reto diario.", "Le jeu en ligne entre amis arrive bientôt dans l'app. En attendant, jouez contre les bots, à plusieurs sur un appareil ou au défi du jour.", "اللعب عبر الإنترنت مع الأصدقاء قادم قريباً إلى التطبيق. حالياً، العب ضد الروبوتات أو على جهاز واحد أو التحدي اليومي.", "与好友在线对战即将登陆应用。目前可以与机器人对战、同屏轮流玩或参加每日挑战。"],
   ["The shared leaderboard is coming soon to the app. Your own best score is saved.", "La clasificación compartida llegará pronto a la app. Tu mejor puntuación se guarda.", "Le classement partagé arrive bientôt dans l'app. Votre meilleur score est enregistré.", "لوحة الصدارة المشتركة قادمة قريباً إلى التطبيق. أفضل نتيجة لك محفوظة.", "共享排行榜即将登陆应用。你的最佳成绩已保存。"],
   ["Turn your phone upright to play", "Pon el teléfono en vertical para jugar", "Tenez votre téléphone à la verticale pour jouer", "أدر هاتفك للوضع العمودي للعب", "请竖屏握持手机进行游戏"],

@@ -1,6 +1,7 @@
 # Diamond Bid changelog
 
 ## Unreleased
+- Two quick ways to play a card: drag it up from your hand onto the table, or double-tap it. Tapping once and pressing "Place bid face down" still works.
 - Phones: the whole table fits one screen with no scrolling, clear of the notch and the home bar (checked on iPhone SE, iPhone 15 and a 360-wide Android). Pop-up messages moved to the top so they never cover your cards.
 - Phones held sideways show "Turn your phone upright to play"; the store apps lock phones to portrait.
 - Tablets and computers in landscape: scores and controls in a side panel, and in 4-player games everyone sits around the table.

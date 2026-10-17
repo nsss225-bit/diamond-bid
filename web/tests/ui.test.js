@@ -250,6 +250,17 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   T.get("G.turnKey && autoPlay(G.turnKey)"); T.get("G.away = G.away || { at: Date.now() }"); T.get("kickForInactivity()");
   ok(T.get("app.screen") === "home" && !T.get("G"), "not coming back removes you from the game");
 
+  // 10a) Double-tap a card to play it
+  const D = browser("doubletap");
+  await sleep(20); D.click("close");
+  D.get(`Object.assign(prefs.config, { seatCount: 2, botLevel: "easy", gamesToWin: 1 })`);
+  D.click("open-setup", { kind: "bots" }); D.click("start");
+  const dv = D.get("G.s.hands[0][3]");
+  D.click("select", { v: String(dv) });
+  ok(D.get("G.selected") === dv && !D.get("G.s.submitted[0]"), "one tap only picks the card");
+  D.click("select", { v: String(dv) });
+  ok(D.get("G.s.submitted[0] || G.s.history.length > 0"), "a quick second tap plays it");
+
   // 10b) Languages: picker, RTL Arabic, translated game, back to English
   const L = browser("lang");
   await sleep(20); L.click("close");

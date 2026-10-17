@@ -604,6 +604,13 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
   .avatar { width: 34px; height: 34px; }
   .sheet { padding: 18px; }
 }
+/* ---------- Drag or double-tap to play ---------- */
+.hand button.card { touch-action: none; }
+.hand .card.lifted { opacity: .2; }
+.drag-ghost { position: fixed; z-index: 60; margin: 0; pointer-events: none; transform-origin: 50% 50%; box-shadow: 0 22px 40px rgba(0,0,0,.5); transition: box-shadow .15s; }
+.drag-ghost.ok { box-shadow: 0 0 0 3px var(--brass), 0 26px 46px rgba(0,0,0,.55); }
+.slot.dropok { border-color: var(--brass); border-style: solid; background: rgba(217,171,79,.14); box-shadow: 0 0 24px rgba(217,171,79,.35); }
+.playhint { margin: 0; text-align: center; font-size: 12.5px; color: var(--muted); }
 /* ---------- Logo, splash and loaders ---------- */
 .logo { display: block; width: 100%; height: auto; overflow: visible; }
 .logo .lg-cl { transform-origin: 120px 178px; transform: translateX(-16px) rotate(-20deg); }
