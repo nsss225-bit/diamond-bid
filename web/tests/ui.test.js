@@ -109,7 +109,7 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   b.click("open-setup", { kind: "bots" });
   ok(b.html().includes("Expert") && b.html().includes("Character powers"), "setup has Expert bots and extras");
   b.click("start");
-  ok(b.html().includes("Your score") && b.html().includes("Gem 1 of 13"), "table renders");
+  ok(b.html().includes("class=\"scorebar") && b.html().includes("Gem 1 of 13"), "table renders");
   let end = await playOut(b);
   ok(end === "matchOver", "4-player match with every extra finishes");
   ok(b.html().includes("Your game") && b.html().includes("Gems taken"), "results show the recap");

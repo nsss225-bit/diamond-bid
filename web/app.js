@@ -895,23 +895,6 @@ function renderGame() {
   };
 
   // Score bars (single-human games)
-  const playerBar = (i, you) => {
-    const p = s.seats[i], suit = suitFor(i, n);
-    const sorted = range(n).map(k => s.scores[k]).sort((a, b) => b - a);
-    const place = sorted.indexOf(s.scores[i]) + 1;
-    const tied = sorted.filter(v => v === s.scores[i]).length > 1;
-    const standing = s.scores.every(v => v === 0) ? "" : t(tied ? "Tied {place} of {n}" : "{place} of {n}", { place: t(["", "1st", "2nd", "3rd", "4th"][place]), n });
-    const team = usesTeams(c) ? `<span class="team-dot" style="background:${TEAM_COLOR[sideOf(c, i)]}"></span>` : "";
-    const win = result && result.winners.includes(i);
-    const tag = you ? t("(you)") : p.bot ? (p.left ? t("(left, bot playing)") : t("(bot)")) : "";
-    return `<div class="mebar ${you ? "you" : ""} ${win ? "win" : ""}">
-      ${avatar(p.char)}
-      <div class="me-who"><b>${esc(sn(s, i))} <small>${tag}</small></b><small>${team}${feltPip(suit)} ${t(SUIT_NAME[suit])} · ${t("{n} cards", { n: s.hands[i].length })}${standing ? " · " + standing : ""}</small>${gemPile(s, i)}</div>
-      <div class="me-score"><span class="lbl">${you ? t("Your score") : t("Score")}</span><b>${fmt(s.scores[i])}</b>${awardSpan(i, " " + t("this round"))}</div>
-      ${tokensFor(i) ? `<div class="tokens">${tokensFor(i)}</div>` : ""}
-    </div>`;
-  };
-
   // Middle of the table
   let theirs = "", mine = "";
   if (home !== undefined) {
@@ -1022,10 +1005,15 @@ function renderGame() {
   // Scoreboard across the top: red vs blue, the two scores meeting in the middle.
   const sides = sideCount(c), top = Math.max(...range(sides).map(side => sideScore(s, side)));
   const mySide = home !== undefined ? sideOf(c, home) : -1;
-  const teamBar = `<div class="scorebar ${sides === 2 ? "duo" : ""}">${range(sides).map(side => {
+  const teamBar = `<div class="scorebar ${sides === 2 && !usesTeams(c) ? "duo" : ""}">${range(sides).map(side => {
     const pts = sideScore(s, side);
-    return `<div class="sb ${pts === top && pts > 0 ? "lead" : ""}" style="--sc:${SIDE_COLOR[side]}">
-      <span class="nm">${esc(sideLabel(s, side))}${side === mySide ? ` <small>${t("(you)")}</small>` : ""}${c.gamesToWin > 1 ? `<small>${t("{n} won", { n: s.gameWins[side] })}</small>` : ""}</span>
+    const seats = seatsOnSide(c, side);
+    const won = anim && result && seats.some(i => result.winners.includes(i));
+    const tag = side === mySide ? t("(you)") : seats.length === 1 && s.seats[seats[0]].bot ? t("(bot)") : "";
+    const toks = seats.map(tokensFor).join("");
+    return `<div class="sb ${pts === top && pts > 0 ? "lead" : ""} ${won ? "win" : ""}" style="--sc:${SIDE_COLOR[side]}">
+      <span class="avs">${seats.map(i => avatar(s.seats[i].char, "sm")).join("")}</span>
+      <span class="nm">${esc(sideLabel(s, side))}${tag ? `<small>${tag}</small>` : ""}${c.gamesToWin > 1 ? `<small>${t("{n} won", { n: s.gameWins[side] })}</small>` : ""}${toks ? `<span class="tokens">${toks}</span>` : ""}</span>
       <b>${fmt(pts)}</b></div>`;
   }).join("")}</div>`;
 
@@ -1054,13 +1042,10 @@ function renderGame() {
       </div>
     </div>
     ${teamBar}
-    ${home !== undefined
-      ? `<div class="bars ${tileSeats.length > 1 ? "compact" : ""}">${tileSeats.map(i => playerBar(i, false)).join("")}</div>`
-      : `<div class="tiles" style="grid-template-columns:repeat(${cols}, minmax(0, 1fr))">${tileSeats.map(tile).join("")}</div>`}
+    ${home !== undefined ? "" : `<div class="tiles" style="grid-template-columns:repeat(${cols}, minmax(0, 1fr))">${tileSeats.map(tile).join("")}</div>`}
     ${center}
     ${coach}
     ${status ? `<div class="status" aria-live="polite"><p>${status}</p><div class="acts">${acts}</div></div>` : ""}
-    ${home !== undefined ? playerBar(home, true) : ""}
     ${handHTML}
   </div></div>${overlay}`;
 }
