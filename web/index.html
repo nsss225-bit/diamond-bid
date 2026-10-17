@@ -709,6 +709,53 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 .char.locked .title { display: none; }
 .char.locked .lock span { display: none; }
 @media (max-width: 600px) { .char-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* ---------- Scoreboard (1.6) ---------- */
+.board { position: relative; display: grid; align-items: center; gap: 8px 10px; padding: 10px 12px 12px; border-radius: 18px;
+  background: linear-gradient(180deg, rgba(0,0,0,.34), rgba(0,0,0,.22)); border: 1px solid rgba(255,255,255,.08); box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 8px 22px rgba(0,0,0,.25); }
+.board.duo { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+.board.multi { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); }
+.bside { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.board.duo .bside.r { flex-direction: row-reverse; text-align: end; }
+.bav { position: relative; display: flex; flex: none; }
+.bav .avatar { width: 40px; height: 40px; box-shadow: 0 0 0 2.5px var(--sc), 0 0 14px color-mix(in srgb, var(--sc) 45%, transparent); }
+.bav .avatar + .avatar { margin-inline-start: -12px; }
+.bav .crown { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); font-style: normal; font-size: 15px; color: #f6d88f; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.bname { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.bname b { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bname small { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bname .tokens { display: flex; gap: 4px; margin-top: 3px; }
+.board.duo .bside.r .bname { align-items: flex-end; }
+.bscore { display: flex; align-items: center; gap: 8px; }
+.bpts { position: relative; font: 800 30px/1 var(--display); font-variant-numeric: tabular-nums; min-width: 1.2em; text-align: center; color: var(--ink); }
+.bside.lead .bpts, .board.duo .bpts.lead { color: #f6d88f; }
+.bvs { width: 18px; height: 18px; opacity: .85; }
+.bvs svg { width: 100%; height: 100%; display: block; }
+.bpts .plus { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); font: 800 12px var(--body); font-style: normal; color: #7ef0a6; white-space: nowrap; animation: plusup 1.6s ease forwards; }
+.bside.loss .bpts .plus, .bpts .plus:where([data-neg]) { color: #ff8f9c; }
+@keyframes plusup { 0% { opacity: 0; transform: translate(-50%, 6px); } 20% { opacity: 1; transform: translate(-50%, -6px); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -14px); } }
+.bpts.bump, .bside.gain .bpts { animation: bump .5s cubic-bezier(.3,1.6,.5,1); }
+@keyframes bump { 40% { transform: scale(1.3); color: #f6d88f; } }
+.bmeter { grid-column: 1 / -1; display: flex; height: 6px; border-radius: 6px; overflow: hidden; gap: 2px; background: rgba(255,255,255,.06); }
+.bmeter span { transition: flex-grow .6s cubic-bezier(.3,.8,.3,1); min-width: 4px; opacity: .9; }
+.board.multi .bside { flex-direction: column; text-align: center; gap: 5px; }
+.board.multi .bname { align-items: center; max-width: 100%; }
+.board.multi .bpts { font-size: 22px; }
+.board.multi .bav .avatar { width: 34px; height: 34px; }
+@media (max-width: 380px) { .bav .avatar { width: 34px; height: 34px; } .bpts { font-size: 26px; } .board { padding: 9px 10px 10px; } }
+.board .tok .tn { display: none; }
+.board .tok i { width: 16px; height: 16px; font-size: 9px; }
+.bside.team .bav .avatar { width: 32px; height: 32px; }
+.bside.team .bav .avatar + .avatar { margin-inline-start: -10px; }
+.bside.team .bname b { white-space: normal; font-size: 12.5px; line-height: 1.1; }
+@media (max-width: 600px) { .bside.team .tokens { display: none; } .board.multi .bname small { display: none; } .bside.team { gap: 6px; } }
+/* Tablet side panel: stack the sides vertically */
+@media (orientation: landscape) and (min-width: 900px) and (min-height: 600px) {
+  .table .side .board.duo { grid-template-columns: minmax(0, 1fr) auto; }
+  .table .side .board.duo .bscore { grid-column: 2; grid-row: 1 / span 2; flex-direction: column; }
+  .table .side .board.duo .bside { grid-column: 1; flex-direction: row; text-align: start; }
+  .table .side .board.duo .bside.r .bname { align-items: flex-start; }
+  .table .side .board { margin-bottom: auto; }
+}
 /* ---------- Account ---------- */
 .acctbtn { overflow: hidden; padding: 0; }
 .acctbtn img { width: 100%; height: 100%; object-fit: cover; display: block; }

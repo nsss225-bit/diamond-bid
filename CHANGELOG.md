@@ -1,6 +1,7 @@
 # Diamond Bid changelog
 
 ## Unreleased
+- New scoreboard: a dark glass panel with each player's picture ringed in their color, a crown on the leader, big scores facing each other around a gem, "+5" pops when points land, and a tug-of-war bar showing who is ahead and by how much.
 - Achievements now have goals: most must be done several times (for example win 25 gems, win 5 rounds by exactly one, beat an Expert bot in 3 matches). Each one shows a progress bar like 12 / 25. Achievements already earned stay earned.
 - Vibration on/off button next to the sound button during a game.
 - Vibration: a tap when you pick or play a card and as your hand is dealt, a buzz of success when you win a round (stronger for big gems), a warning when you lose one or take a curse, ticks in the last 3 seconds of your turn, and patterns for winning or losing the game, achievements, coins, purchases and found players. Turn it off with the new Vibration switch in the account screen. Uses real haptics in the store apps, vibration in Android browsers, and a light tap in iPhone Safari where iOS allows it.

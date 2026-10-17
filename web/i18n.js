@@ -8,6 +8,7 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["In the lead", "En cabeza", "En tête", "في المقدمة", "领先"],
   ["Win 25 gems.", "Gana 25 gemas.", "Gagnez 25 gemmes.", "اربح 25 جوهرة.", "赢得 25 颗宝石。"],
   ["Win 5 matches.", "Gana 5 partidas.", "Gagnez 5 matchs.", "اربح 5 مباريات.", "赢得 5 场比赛。"],
   ["Win 5 rounds by exactly one.", "Gana 5 rondas por exactamente uno.", "Gagnez 5 manches avec exactement un d'écart.", "اربح 5 جولات بفارق واحد بالضبط.", "以刚好 1 点之差赢下 5 轮。"],

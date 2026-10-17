@@ -1131,7 +1131,7 @@ function renderGame() {
   const tokensFor = i => {
     let out = "";
     if (c.double) out += `<span class="tok ${s.doubleAvail[i] ? "" : "used"}" title="${s.doubleAvail[i] ? t("Double token ready") : t("Double token used")}"><i>×2</i></span>`;
-    if (c.powers && POWERS[s.seats[i].char]) out += `<span class="tok pw ${s.powerAvail[i] ? "" : "used"}" title="${esc(powerName(s.seats[i].char))}: ${s.powerAvail[i] ? t("ready") : t("used")}"><i>★</i>${esc(powerName(s.seats[i].char))}</span>`;
+    if (c.powers && POWERS[s.seats[i].char]) out += `<span class="tok pw ${s.powerAvail[i] ? "" : "used"}" title="${esc(powerName(s.seats[i].char))}: ${s.powerAvail[i] ? t("ready") : t("used")}"><i>★</i><span class="tn">${esc(powerName(s.seats[i].char))}</span></span>`;
     return out;
   };
 
@@ -1259,20 +1259,30 @@ function renderGame() {
     handHTML = `<p class="muted" style="text-align:center">${t("The table is full, so you're watching this game.")}</p>`;
   }
 
-  // Scoreboard across the top: red vs blue, the two scores meeting in the middle.
-  const sides = sideCount(c), top = Math.max(...range(sides).map(side => sideScore(s, side)));
+  // Scoreboard: a dark glass panel. Each side has its picture (ringed in its color), name and score;
+  // a tug-of-war meter underneath shows who is ahead and by how much.
+  const sides = sideCount(c), scores = range(sides).map(side => sideScore(s, side)), top = Math.max(...scores);
   const mySide = home !== undefined ? sideOf(c, home) : -1;
-  const teamBar = `<div class="scorebar ${sides === 2 && !usesTeams(c) ? "duo" : ""}">${range(sides).map(side => {
-    const pts = sideScore(s, side);
-    const seats = seatsOnSide(c, side);
-    const won = anim && result && seats.some(i => result.winners.includes(i));
-    const tag = side === mySide ? t("(you)") : seats.length === 1 && s.seats[seats[0]].bot ? t("(bot)") : "";
+  const duo = sides === 2;
+  const sideHTML = (side, cls = "") => {
+    const pts = scores[side], seats = seatsOnSide(c, side);
+    const gain = anim && result ? seats.reduce((a, i) => a + result.awards[i], 0) : 0;
+    const lead = pts === top && pts > 0 && scores.filter(v => v === top).length === 1;
+    const tag = side === mySide ? t("You") : seats.length === 1 && s.seats[seats[0]].bot ? t("Bot") : "";
     const toks = seats.map(tokensFor).join("");
-    return `<div class="sb ${pts === top && pts > 0 ? "lead" : ""} ${won ? "win" : ""}" style="--sc:${SIDE_COLOR[side]}">
-      <span class="avs">${seats.map(i => avatar(s.seats[i].char, "sm")).join("")}</span>
-      <span class="nm">${esc(sideLabel(s, side))}${tag ? `<small>${tag}</small>` : ""}${c.gamesToWin > 1 ? `<small>${t("{n} won", { n: s.gameWins[side] })}</small>` : ""}${toks ? `<span class="tokens">${toks}</span>` : ""}</span>
-      <b>${fmt(pts)}</b></div>`;
-  }).join("")}</div>`;
+    return `<div class="bside ${cls} ${seats.length > 1 ? "team" : ""} ${lead ? "lead" : ""} ${gain > 0 ? "gain" : gain < 0 ? "loss" : ""}" style="--sc:${SIDE_COLOR[side]}">
+      <span class="bav">${seats.map(i => avatar(s.seats[i].char, "sm")).join("")}${lead ? `<i class="crown" aria-label="${t("In the lead")}">♛</i>` : ""}</span>
+      <span class="bname"><b>${esc(sideLabel(s, side))}</b><small>${[tag, c.gamesToWin > 1 ? t("{n} won", { n: s.gameWins[side] }) : ""].filter(Boolean).join(" · ")}</small>${toks ? `<span class="tokens">${toks}</span>` : ""}</span>
+      ${duo ? "" : `<b class="bpts">${fmt(pts)}${gain ? `<i class="plus">${awardText(gain)}</i>` : ""}</b>`}
+    </div>`;
+  };
+  const sum = scores.reduce((a, v) => a + Math.max(0, v), 0);
+  const meter = `<div class="bmeter" aria-hidden="true">${range(sides).map(side => `<span style="flex:${sum ? Math.max(0, scores[side]) || 0.0001 : 1};background:${SIDE_COLOR[side]}"></span>`).join("")}</div>`;
+  const gainOf = side => anim && result ? seatsOnSide(c, side).reduce((a, i) => a + result.awards[i], 0) : 0;
+  const duoScore = side => `<b class="bpts ${gainOf(side) ? "bump" : ""} ${scores[side] === top && top > 0 && scores[0] !== scores[1] ? "lead" : ""}" style="--sc:${SIDE_COLOR[side]}">${fmt(scores[side])}${gainOf(side) ? `<i class="plus">${awardText(gainOf(side))}</i>` : ""}</b>`;
+  const teamBar = duo
+    ? `<div class="board duo" role="group" aria-label="${t("Score")}">${sideHTML(0)}<div class="bscore">${duoScore(0)}<span class="bvs">${GEM_SVG}</span>${duoScore(1)}</div>${sideHTML(1, "r")}${meter}</div>`
+    : `<div class="board multi" role="group" aria-label="${t("Score")}" style="--n:${sides}">${range(sides).map(sideHTML).join("")}${meter}</div>`;
 
   let overlay = "";
   if (needsHandoff()) {
