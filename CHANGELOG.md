@@ -1,6 +1,6 @@
 # Diamond Bid changelog
 
-## Unreleased
+## 1.5
 - The "Cards left" button (▤) is gone from the game screen: no more peeking at the upcoming gems or everyone's hands. Prof. Hoot's Foresight power still shows the next 3 gems.
 - 6 new characters, each with a new power: Pip (Soft landing), Coco (Mimic), Inky (Ink cloud), Stella (Wish), Finn (Bite) and Leo (Royal share). Bots know how to use them.
 - 14 new achievements (31 in all), from Ace in the hole to Champion.

@@ -104,7 +104,7 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   let home = "";
   for (const tab of ["play", "daily", "style", "ach", "how"]) { b.click("tab", { tab }); home += b.html(); }
   b.click("tab", { tab: "play" });
-  ok(["Daily challenge", "Choose your character", "Achievements", "Card design", "Rosa", "Ember", "Gold Leaf", "Galaxy", "Version 1.4", "tutorial"].every(t => home.includes(t)), "tabs show daily, characters, achievements, unlockables, version");
+  ok(["Daily challenge", "Choose your character", "Achievements", "Card design", "Rosa", "Ember", "Gold Leaf", "Galaxy", "Version 1.5", "tutorial"].every(t => home.includes(t)), "tabs show daily, characters, achievements, unlockables, version");
   ok(home.includes("Tap to buy"), "items for sale shown with prices");
 
   // 2) Every extra on, vs Expert bots, 4 players
