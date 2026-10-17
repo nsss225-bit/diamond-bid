@@ -971,9 +971,11 @@ function renderGame() {
     const canBid = activeSeat() === hs && !needsHandoff();
     const pb = shownBid(hs);
     const pendingCard = s.phase === "bidding" && pb ? pb.card : null;
-    handHTML = `<div class="hand" role="group" aria-label="${t("Your cards")}">${s.hands[hs].map(v =>
-      cardFace(suit, v, `md ${G.selected === v ? "sel" : ""} ${pendingCard === v ? "pending" : ""}`, "button",
-        `data-act="select" data-v="${v}" ${canBid ? "" : "disabled"} aria-pressed="${G.selected === v}"`)).join("")}</div>`;
+    // Held like a real hand: overlapping cards in a gentle arc, numbers peeking out at the top left.
+    const cards = s.hands[hs], mid = (cards.length - 1) / 2;
+    handHTML = `<div class="hand" role="group" aria-label="${t("Your cards")}" style="--m:${Math.max(cards.length, 2)}">${cards.map((v, k) =>
+      cardFace(suit, v, `${G.selected === v ? "sel" : ""} ${pendingCard === v ? "pending" : ""}`, "button",
+        `data-act="select" data-v="${v}" ${canBid ? "" : "disabled"} aria-pressed="${G.selected === v}" style="--o:${k - mid}"`)).join("")}</div>`;
     if (canBid) {
       const pw = c.powers && s.powerAvail[hs] && POWERS[s.seats[hs].char];
       let pwBtn = "";
