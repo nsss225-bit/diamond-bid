@@ -2,7 +2,7 @@
 
 ## Unreleased
 - Smarter bots: each bot plays the round out in its head against what the others are likely to bid, and every character has its own style and favourite gems, so bots no longer all play the same card. The new Hard bots beat the old ones in about 9 of 10 games.
-- Ties are always settled by a spin: the tied players' pictures spin and stop on whoever takes the whole gem (the same result on every phone online). The "Ties" option is gone. The "Fair share" achievement became "Lucky spin".
+- The "Ties" option is gone: a tied round always splits the card's points, and a tied match is settled by the tie-breaker wheel.
 - Suits: you choose only your own suit; the other players get the remaining suits at random, and the middle cards are Stars or Crowns, picked at random each match.
 - Store apps: online play, the shared leaderboard and sign-in are hidden until they work in the apps; the top-right button opens Settings (sound, vibration, stats).
 - Support and privacy policy pages (docs/), App Store listing text and screenshots (store/).

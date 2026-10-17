@@ -87,7 +87,7 @@ const POWERS = {
 
 /* ================= Setting up ================= */
 const DEFAULT_CONFIG = {
-  seatCount: 2, teams: false, tieRule: "spin", cursed: false, double: false, gamesToWin: 1, botLevel: "normal",
+  seatCount: 2, teams: false, tieRule: "split", cursed: false, double: false, gamesToWin: 1, botLevel: "normal",
   showNext: false, mystery: false, jackpot: false, powers: false,
 };
 
@@ -224,14 +224,7 @@ function resolve(s) {
   if (octopus >= 0) rivalsOf(octopus).forEach(k => { eff[k] -= 2; });
   r.reverse = used("penguin") >= 0;
   const bully = used("bear");
-  let { winners, cancelled } = pickWinners(prize, eff, c.tieRule, { reverse: r.reverse, bully });
-  // A tie for the win is settled by a spin: one of the tied players takes the whole gem. The pick comes from the
-  // round itself (not a random number), so every phone in an online game lands on the same player.
-  if (c.tieRule !== "split" && c.tieRule !== "cancel" && winners.length > 1 && new Set(winners.map(i => sideOf(c, i))).size > 1) {
-    const key = `${s.gameNumber}|${s.round}|${bids.map(b => b.card).join(",")}|${(s.prizes0 || s.prizes).join(",")}`;
-    r.spinAmong = winners.slice();
-    winners = [winners[Math.abs(seedFrom(key)) % winners.length]];
-  }
+  const { winners, cancelled } = pickWinners(prize, eff, c.tieRule, { reverse: r.reverse, bully });
   r.eff = eff;
   r.winners = winners;
   r.cancelled = cancelled;

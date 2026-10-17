@@ -308,7 +308,7 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   SU.click("home"); SU.get(`Object.assign(prefs.config, { seatCount: 4, teams: false })`); SU.click("open-setup", { kind: "bots" });
   SU.click("cfg-suit", { slot: "mine4", suit: "s" }); SU.click("start");
   ok(SU.get(`suitFor(0, 4, G.s.config) === "s" && new Set([0,1,2,3].map(i => suitFor(i, 4, G.s.config))).size === 4`), "4 players: you get spades, the others the rest");
-  ok(!SU.html().includes('data-key="tieRule"'), "the Ties option is gone");
+  ok(!SU.html().includes("tieRule"), "the Ties option is gone");
 
   // 9d) Vibration: picking and playing a card vibrate; the switch turns it off
   const V = browser("vibe"); await sleep(20); V.click("close");

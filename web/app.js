@@ -135,7 +135,7 @@ const ACHIEVEMENTS = [
   { id: "online", icon: "☁", name: "Good game", desc: "Finish {n} online games with friends.", goal: 20 },
   { id: "learner", icon: "✑", name: "Quick learner", desc: "Finish the tutorial." },
   { id: "ace", icon: "A", name: "Ace in the hole", desc: "Win {n} gems with an Ace.", goal: 10 },
-  { id: "fair_share", icon: "☸", name: "Lucky spin", desc: "Win {n} gems on the tie spin.", goal: 20 },
+  { id: "fair_share", icon: "½", name: "Fair share", desc: "Share {n} gems in ties.", goal: 20 },
   { id: "big_haul", icon: "♦", name: "Big haul", desc: "Score 60 or more points in {n} games.", goal: 10 },
   { id: "sweep", icon: "≡", name: "Clean sweep", desc: "Take 10 or more gems in one game, {n} times.", goal: 5 },
   { id: "comeback", icon: "↺", name: "Comeback kid", desc: "Win {n} games you were losing at the halfway point.", goal: 10 },
@@ -204,7 +204,6 @@ const DEAL_GAP = 75;
 const SIDE_COLOR = ["#ff7b8a", "#6ea8ff", "#5fd896", "#f5c75a"];
 const TEAM_COLOR = SIDE_COLOR.slice(0, 2);
 const REVEAL_MS = 3000;
-const TIESPIN_MS = 1600; // the reel that settles a tied round
 // Running inside the App Store / Google Play app (Capacitor) rather than on claude.ai.
 const IN_APP = !!(typeof window !== "undefined" && window.Capacitor);
 // Online and vs bots: 10 seconds to bid, then a card is played for you; 20 seconds to come back or you're out.
@@ -212,7 +211,7 @@ const TURN_MS = 10000, AWAY_MS = 20000;
 const TIMED_KINDS = ["bots", "online"];
 const SPIN_MS = 4200;
 const TUTORIAL_PRIZES = [5, 13, 2, 9, 1, 11, 7, 3, 12, 6, 10, 4, 8];
-const DAILY_CONFIG = { seatCount: 2, tieRule: "spin", cursed: true, double: true, gamesToWin: 1, botLevel: "hard", showNext: true, mystery: true, jackpot: true, powers: false };
+const DAILY_CONFIG = { seatCount: 2, tieRule: "split", cursed: true, double: true, gamesToWin: 1, botLevel: "hard", showNext: true, mystery: true, jackpot: true, powers: false };
 
 /* ================= Preferences and progress ================= */
 const store = {
@@ -221,7 +220,7 @@ const store = {
 };
 const DEFAULT_PREFS = { character: "fox", name: "", deck: "classic", table: "green", fourColor: false, sound: true, config: Object.assign({}, DEFAULT_CONFIG), localPlayers: 2, passChars: {} };
 let prefs = Object.assign({}, DEFAULT_PREFS, store.get("diamondbid.prefs", {}));
-prefs.config = Object.assign({}, DEFAULT_CONFIG, prefs.config, { tieRule: "spin" }); // ties are always spun now
+prefs.config = Object.assign({}, DEFAULT_CONFIG, prefs.config, { tieRule: "split" }); // a tied round always splits the gem
 let stats = Object.assign({ played: 0, won: 0, ach: {}, dailyDays: [], dailyBest: {}, coins: 0, owned: [], lastGift: "", giftStreak: 0, walletV: 0, tutorialPaid: false }, store.get("diamondbid.stats", {}));
 const savePrefs = () => store.set("diamondbid.prefs", prefs);
 const saveStats = () => { store.set("diamondbid.stats", stats); cloudQueue(); };
@@ -869,16 +868,14 @@ function onReveal(r) {
   else if (r.prize < 0 && w.length) banner = { text: "Cursed!", kind: "curse" };
   else if (w.length === 1 && r.prize >= 11) banner = { text: "Big win!", kind: "" };
   else if (w.length > 1) banner = { text: "Split!", kind: "" };
-  if (r.spinAmong) banner = null; // the tie spin is the show
   G.banner = banner;
   Sound.flip();
   const mine = i >= 0 ? r.awards[i] : 0;
-  if (r.spinAmong) { Sound.wheel(TIESPIN_MS); Haptics.place(); setTimeout(() => { if (G && G.s.phase === "reveal") render(); }, TIESPIN_MS + 30); }
   setTimeout(() => {
     if (mine > 0) { (r.prize >= 11 ? Sound.big : Sound.win)(); (r.prize >= 11 || r.prize === JACKPOT ? Haptics.big : Haptics.win)(); }
     else if (mine < 0) { Sound.lose(); Haptics.curse(); }
     else if (i >= 0 && w.length && !w.includes(i)) { Sound.lose(); Haptics.lose(); }
-  }, r.spinAmong ? TIESPIN_MS + 100 : 0);
+  }, 0);
   if (!G.track || i < 0) return;
   if (mine > 0) grant("first_gem");
   if (w.length === 1 && w[0] === i) {
@@ -888,7 +885,7 @@ function onReveal(r) {
   }
   if (mine >= 240) grant("double_trouble");
   if (w.length === 1 && w[0] === i && mine > 0 && r.bids[i].card === 1) grant("ace");
-  if (r.spinAmong && r.spinAmong.includes(i) && w[0] === i && mine > 0) grant("fair_share");
+  if (w.length > 1 && w.includes(i) && mine > 0) grant("fair_share");
   if (r.powers.includes(i) && w.includes(i) && mine > 0) grant("power_play");
   G.streak = w.includes(i) && mine > 0 ? G.streak + 1 : 0;
   if (G.streak === 3) grant("hat_trick");
@@ -1149,18 +1146,6 @@ function coachTip() {
   return "";
 }
 
-/** The reel for a tied round: the tied players' pictures spin past and stop on whoever takes the gem. */
-function tieSpin(s, r) {
-  const among = r.spinAmong, win = among.indexOf(r.winners[0]), loops = 5;
-  const items = Array.from({ length: loops * among.length }, (_, k) => among[k % among.length]);
-  const stop = (loops - 1) * among.length + win;
-  const since = G.revealAt ? Date.now() - G.revealAt : 0;
-  return `<div class="tiespin" style="--stop:${stop};animation-delay:${2550 - since}ms" aria-live="polite">
-    <small>${t("Tie! Spinning…")}</small>
-    <div class="reel"><div class="strip" style="animation-delay:-${since}ms">${items.map(i => avatar(s.seats[i].char, "lg")).join("")}</div></div>
-    <b style="animation-delay:${TIESPIN_MS - since}ms">${t("{name} takes it!", { name: esc(sn(s, r.winners[0])) })}</b>
-  </div>`;
-}
 function renderGame() {
   const s = G.s, c = s.config, n = s.seats.length;
   const home = homeSeat();
@@ -1168,8 +1153,6 @@ function renderGame() {
   const cols = tileSeats.length === 4 ? 2 : Math.max(tileSeats.length, 1);
   const result = s.phase === "reveal" ? s.history[s.history.length - 1] : null;
   const anim = G.revealAnim;
-  // While a tie spin is turning, keep the winner a secret: no points, highlights or message yet.
-  const spinning = !!(result && result.spinAmong && G.revealAt && Date.now() - G.revealAt < TIESPIN_MS);
   G.revealAnim = false;
   const prize = prizeNow(s);
   const hidden = s.phase === "bidding" && isMystery(s);
@@ -1188,7 +1171,7 @@ function renderGame() {
     return "";
   };
   const drops = range(n).map(dropClass);
-  const awardSpan = (i, suffix = "") => result && !spinning && result.awards[i] ? `<span class="award ${result.awards[i] < 0 ? "neg" : ""}">${awardText(result.awards[i])}${suffix}</span>` : "";
+  const awardSpan = (i, suffix = "") => result && result.awards[i] ? `<span class="award ${result.awards[i] < 0 ? "neg" : ""}">${awardText(result.awards[i])}${suffix}</span>` : "";
   const bidCard = (i, size) => {
     const suit = suitFor(i, n, c);
     if (result) {
@@ -1227,15 +1210,15 @@ function renderGame() {
   if (home !== undefined) {
     const size = tileSeats.length === 1 ? "lg" : "md";
     const label = tileSeats.length === 1 ? t("{name}'s bid", { name: esc(sn(s, tileSeats[0])) }) : t("Their bids");
-    theirs = `<div class="spot theirs"><span class="lbl">${label}</span><div class="opps">${tileSeats.map(i => `<div class="opp ${result && !spinning && result.winners.includes(i) ? "win" : ""}" data-pos="${(i - home + n) % n}">
+    theirs = `<div class="spot theirs"><span class="lbl">${label}</span><div class="opps">${tileSeats.map(i => `<div class="opp ${result && result.winners.includes(i) ? "win" : ""}" data-pos="${(i - home + n) % n}">
         ${tileSeats.length > 1 ? avatar(s.seats[i].char, "sm") : ""}
         <div class="bidwrap" style="position:relative">${bidCard(i, size)}</div>
         <span class="sub">${awardSpan(i)}</span></div>`).join("")}</div></div>`;
     const myAward = result ? result.awards[home] : 0;
-    mine = `<div class="spot minespot ${result && !spinning && result.winners.includes(home) ? "win" : ""}">
+    mine = `<div class="spot minespot ${result && result.winners.includes(home) ? "win" : ""}">
       <span class="lbl">${t("Your bid")}</span>
       <div class="bidwrap" id="mybid" style="position:relative">${result || shownSubmitted(home) ? bidCard(home, "lg") : `<div class="slot lg">${G.selected != null ? "" : t("Pick a card")}</div>`}
-        ${anim && myAward && !spinning ? `<span class="floatpts ${myAward < 0 ? "neg" : ""}">${awardText(myAward)}</span>` : ""}</div>
+        ${anim && myAward ? `<span class="floatpts ${myAward < 0 ? "neg" : ""}">${awardText(myAward)}</span>` : ""}</div>
       <span class="sub">${awardSpan(home)}</span>
     </div>`;
   }
@@ -1266,7 +1249,6 @@ function renderGame() {
         ${preview}
       </div>
       ${mine}
-      ${result && result.spinAmong ? tieSpin(s, result) : ""}
       ${anim && G.banner ? `<div class="banner ${G.banner.kind}">${esc(G.banner.power ? powerName(G.banner.power) + "!" : t(G.banner.text))}</div>` : ""}
     </div>`;
 
@@ -1283,7 +1265,7 @@ function renderGame() {
       status = waiting.length ? t("Waiting for {names}…", { names: waiting.join(t(", ")) }) : t("Revealing…");
     }
   } else if (s.phase === "reveal") {
-    status = spinning ? t("Tie at {card}! The spin picks…", { card: RANK(result.eff[result.spinAmong[0]]) }) : summaryText(s, result);
+    status = summaryText(s, result);
     if (G.kind === "tutorial") acts = `<button class="btn primary" data-act="next">${isLast(s) ? t("See results") : t("Next gem")}</button>`;
     else {
       const gone = Math.min(REVEAL_MS, Date.now() - (G.revealAt || Date.now()));
@@ -1335,12 +1317,12 @@ function renderGame() {
 
   // Scoreboard: a dark glass panel. Each side has its picture (ringed in its color), name and score;
   // a tug-of-war meter underneath shows who is ahead and by how much.
-  const sides = sideCount(c), scores = range(sides).map(side => sideScore(s, side) - (spinning ? seatsOnSide(c, side).reduce((a, i) => a + result.awards[i], 0) : 0)), top = Math.max(...scores);
+  const sides = sideCount(c), scores = range(sides).map(side => sideScore(s, side)), top = Math.max(...scores);
   const mySide = home !== undefined ? sideOf(c, home) : -1;
   const duo = sides === 2;
   const sideHTML = (side, cls = "") => {
     const pts = scores[side], seats = seatsOnSide(c, side);
-    const gain = anim && result && !spinning ? seats.reduce((a, i) => a + result.awards[i], 0) : 0;
+    const gain = anim && result ? seats.reduce((a, i) => a + result.awards[i], 0) : 0;
     const lead = pts === top && pts > 0 && scores.filter(v => v === top).length === 1;
     const tag = side === mySide ? t("You") : seats.length === 1 && s.seats[seats[0]].bot ? t("Bot") : "";
     const toks = seats.map(tokensFor).join("");
@@ -1352,7 +1334,7 @@ function renderGame() {
   };
   const sum = scores.reduce((a, v) => a + Math.max(0, v), 0);
   const meter = `<div class="bmeter" aria-hidden="true">${range(sides).map(side => `<span style="flex:${sum ? Math.max(0, scores[side]) || 0.0001 : 1};background:${SIDE_COLOR[side]}"></span>`).join("")}</div>`;
-  const gainOf = side => anim && result && !spinning ? seatsOnSide(c, side).reduce((a, i) => a + result.awards[i], 0) : 0;
+  const gainOf = side => anim && result ? seatsOnSide(c, side).reduce((a, i) => a + result.awards[i], 0) : 0;
   const duoScore = side => `<b class="bpts ${gainOf(side) ? "bump" : ""} ${scores[side] === top && top > 0 && scores[0] !== scores[1] ? "lead" : ""}" style="--sc:${SIDE_COLOR[side]}">${fmt(scores[side])}${gainOf(side) ? `<i class="plus">${awardText(gainOf(side))}</i>` : ""}</b>`;
   const teamBar = duo
     ? `<div class="board duo" role="group" aria-label="${t("Score")}">${sideHTML(0)}<div class="bscore">${duoScore(0)}<span class="bvs mid-${midSuit()}">${midIcon(midSuit())}</span>${duoScore(1)}</div>${sideHTML(1, "r")}${meter}</div>`
@@ -1961,7 +1943,6 @@ function summaryText(s, r) {
     const vals = [...new Set(r.cancelled.map(i => r.eff[i]))].sort((a, b) => a - b).map(RANK);
     parts.push(t("{cards} cancelled out.", { cards: list(vals) }));
   }
-  if (r.spinAmong) parts.push(t("Tie at {card}! The spin picks…", { card: RANK(r.eff[r.spinAmong[0]]) }));
   if (!r.winners.length) parts.push(t("Nobody takes {prize}.", { prize }));
   else if (r.winners.length === 1) {
     const w = r.winners[0], card = RANK(r.bids[w].card);
