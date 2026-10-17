@@ -14,7 +14,7 @@ Copy each field into App Store Connect. Character limits are Apple's.
 - **Privacy Policy URL**: https://nsss225-bit.github.io/diamond-bid/privacy.html
 
 ## Promotional text (170)
-Bid in secret, reveal together, take the card. New: choose your suits, play with 16 characters from around the world, and chase 31 tough achievements.
+Bid in secret, reveal together, take the card. Pick your suit, play 16 characters from around the world, and chase 31 tough achievements.
 
 ## Description (4000)
 Thirteen cards. One secret bid each round. Who wants it most?
@@ -22,10 +22,10 @@ Thirteen cards. One secret bid each round. Who wants it most?
 Diamond Bid is a quick, clever card game for 1 to 4 players. A card is turned up in the middle. Everyone picks one card from their own hand and lays it face down. All bids flip at once, and the highest card takes the middle card's points. Every card you bid is gone for good, so do you spend your King now, or save it for something bigger?
 
 PLAY YOUR WAY
-• Play against bots, from Easy to an Expert that learns your habits
+• Play against bots with their own styles, from Easy to an Expert that learns your habits
 • Pass and play with friends on one phone or iPad
 • 1 vs 1, 2 vs 2 teams, or a 4-player free-for-all
-• Choose your suit: Hearts, Spades, Diamonds or Clubs, and pick what's played for in the middle, even Stars or Crowns
+• Choose your suit: Hearts, Spades, Diamonds or Clubs, and play for Stars or Crowns in the middle
 • A new daily challenge every day
 
 16 CHARACTERS, 16 POWERS
