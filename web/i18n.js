@@ -317,7 +317,6 @@ const ROWS = [
   ["Skip", "Saltar", "Passer", "تخطٍّ", "跳过"],
   ["Your cards", "Tus cartas", "Vos cartes", "أوراقك", "你的手牌"],
   ["Use {power}", "Usar {power}", "Utiliser {power}", "استخدم {power}", "使用{power}"],
-  ["Place bid face down", "Apostar boca abajo", "Miser face cachée", "ضع رهانك مقلوبًا", "暗中出价"],
   ["The table is full, so you're watching this game.", "La mesa está llena, así que estás mirando esta partida.", "La table est pleine, vous regardez donc cette partie.", "الطاولة ممتلئة، لذا أنت تشاهد هذه اللعبة.", "牌桌已满，你正在观战。"],
   ["{n} won", "{n} ganadas", "{n} gagnées", "فاز بـ{n}", "赢 {n} 局"],
   ["{name}, your bid", "{name}, tu apuesta", "{name}, à vous de miser", "{name}، دورك في الرهان", "{name}，轮到你出价"],
@@ -326,7 +325,7 @@ const ROWS = [
   ["Show my hand", "Mostrar mi mano", "Montrer ma main", "أظهر أوراقي", "显示我的手牌"],
 
   // ---- tutorial ----
-  ["Welcome! The 5 gem is up for grabs. Tap any card in your hand, then press Place bid. Lily bids at the same time, face down.", "¡Bienvenido! Está en juego la gema de 5. Toca una carta de tu mano y pulsa Apostar. Lily apuesta a la vez, boca abajo.", "Bienvenue ! La gemme de 5 est en jeu. Touchez une carte de votre main, puis Miser. Lily mise en même temps, face cachée.", "أهلًا! جوهرة الـ5 على الطاولة. اضغط على أي ورقة في يدك ثم اضغط ضع رهانك. ليلي تراهن في الوقت نفسه، بورقة مقلوبة.", "欢迎！现在争夺 5 分宝石。点一张手牌，再点「暗中出价」。莉莉会同时暗中出价。"],
+  ["Welcome! The 5 gem is up for grabs. Double-tap a card in your hand to bid it, or drag it up to the table. Lily bids at the same time, face down.", "¡Bienvenido! Está en juego la gema de 5. Toca dos veces una carta de tu mano para apostarla, o arrástrala a la mesa. Lily apuesta a la vez, boca abajo.", "Bienvenue ! La gemme de 5 est en jeu. Touchez deux fois une carte de votre main pour la miser, ou faites-la glisser vers la table. Lily mise en même temps, face cachée.", "أهلاً! جوهرة الـ5 معروضة للفوز. انقر مرتين على ورقة من يدك للمراهنة بها، أو اسحبها إلى الطاولة. ليلي تراهن في الوقت نفسه، والورقة مقلوبة.", "欢迎！5 号宝石正在争夺中。双击手中的一张牌即可出价，或把它拖到桌上。莉莉会同时暗中出价。"],
   ["This is the 13, the biggest gem. A King is worth spending here.", "Esta es la de 13, la gema más grande. Vale la pena usar un rey aquí.", "Voici la 13, la plus grosse gemme. Un Roi vaut la peine ici.", "هذه جوهرة الـ13، أكبر جوهرة. الملك يستحق أن تلعبه هنا.", "这是 13 分宝石，最大的一颗。值得在这里出 K。"],
   ["Only a 2. Save your big cards and throw away a low one.", "Solo un 2. Guarda tus cartas altas y descarta una baja.", "Seulement un 2. Gardez vos grosses cartes et jouez une petite.", "مجرد 2. احتفظ بأوراقك الكبيرة وتخلص من ورقة صغيرة.", "只有 2 分。留着大牌，出一张小牌。"],
   ["Look under the gem: Next shows what's coming. Plan which cards you'll need.", "Mira bajo la gema: Siguiente muestra lo que viene. Planea qué cartas necesitarás.", "Regardez sous la gemme : Suivante montre ce qui arrive. Prévoyez vos cartes.", "انظر أسفل الجوهرة: التالية تُظهر ما هو قادم. خطط لأوراقك.", "看宝石下方：「下一颗」显示接下来的宝石。提前规划要用的牌。"],

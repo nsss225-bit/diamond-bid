@@ -931,7 +931,7 @@ function coachTip() {
   const s = G.s, last = s.history[s.history.length - 1];
   if (s.phase === "bidding") {
     return [
-      t("Welcome! The 5 gem is up for grabs. Tap any card in your hand, then press Place bid. Lily bids at the same time, face down."),
+      t("Welcome! The 5 gem is up for grabs. Double-tap a card in your hand to bid it, or drag it up to the table. Lily bids at the same time, face down."),
       t("This is the 13, the biggest gem. A King is worth spending here."),
       t("Only a 2. Save your big cards and throw away a low one."),
       t("Look under the gem: Next shows what's coming. Plan which cards you'll need."),
@@ -1105,13 +1105,11 @@ function renderGame() {
       const timed = TIMED_KINDS.includes(G.kind) && !G.away;
       const used = timed && G.turnKey === `${roundKey(s)}.${hs}` && G.turnAt ? Math.min(TURN_MS, Date.now() - G.turnAt) : 0;
       const secsLeft = Math.max(0, Math.ceil((TURN_MS - used) / 1000));
-      if (s.round < 2 && G.kind !== "tutorial") controls += `<p class="playhint">${t("Drag a card up to the table, or double-tap it, to play it")}</p>`;
+      if (s.round < 2 || G.selected != null) controls += `<p class="playhint">${t("Drag a card up to the table, or double-tap it, to play it")}</p>`;
       if (timed) controls += `<div class="turnclock ${secsLeft <= 3 ? "hurry" : ""}" role="timer" aria-label="${t("Time left")}"><b id="turn-left">${secsLeft}</b><span class="turnbar"><span style="animation-delay:-${used}ms"></span></span></div>`;
-      controls += `<div class="bidbar">
-        ${c.double && s.doubleAvail[hs] ? `<button class="dbl" data-act="double" aria-pressed="${G.useDouble}">×2 ${t("Double")}${G.useDouble ? " · " + t("on") : ""}</button>` : ""}
-        ${pwBtn}
-        <button class="btn primary" data-act="bid" ${G.selected == null ? "disabled" : ""}>${t("Place bid face down")}</button>
-      </div>
+      const dblBtn = c.double && s.doubleAvail[hs] ? `<button class="dbl" data-act="double" aria-pressed="${G.useDouble}">×2 ${t("Double")}${G.useDouble ? " · " + t("on") : ""}</button>` : "";
+      if (dblBtn || pwBtn) controls += `<div class="bidbar">${dblBtn}${pwBtn}</div>`;
+      controls += `
       ${pw && G.usePower ? `<p class="muted" style="margin:0;text-align:center;font-size:13px">${esc(powerName(pid))}: ${esc(powerText(pid))}</p>` : ""}`;
     }
   } else if (G.kind === "online" && !G.mySeats.length) {
@@ -1852,6 +1850,8 @@ document.addEventListener("input", e => {
 });
 document.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.id === "join-code") joinTable(e.target.value, false);
+  // Keyboard: Enter plays the picked card.
+  else if (e.key === "Enter" && G && app.screen === "game" && G.selected != null && activeSeat() !== undefined) { e.preventDefault(); placeBid(); }
   if (e.key === "Escape" && (app.modal || (app.setup && !app.setup.startsWith("online")))) { app.setup = null; app.modal = null; render(); }
 });
 
