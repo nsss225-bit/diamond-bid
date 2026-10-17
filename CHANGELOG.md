@@ -1,6 +1,7 @@
 # Diamond Bid changelog
 
 ## Unreleased
+- The Play tab fits one screen on phones and portrait tablets, no scrolling (checked from iPhone SE up to iPhone Pro Max and iPad).
 - Home screen tabs along the bottom: Play, Daily, Customize (characters, card designs, tables), Achievements and How to play. A red dot on Daily means today's challenge is still waiting; Achievements shows how many you've earned.
 - Play a card by double-tapping it or dragging it up onto the table. The "Place bid face down" button is gone; one tap just picks a card (Enter plays it on a keyboard).
 - Game setup: the 6 extras sit 3 in a row as compact tiles.
