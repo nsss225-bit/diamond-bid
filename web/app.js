@@ -91,6 +91,9 @@ const DEAL_GAP = 75;
 const SIDE_COLOR = ["#ff7b8a", "#6ea8ff", "#5fd896", "#f5c75a"];
 const TEAM_COLOR = SIDE_COLOR.slice(0, 2);
 const REVEAL_MS = 3000;
+// Online and vs bots: 10 seconds to bid, then a card is played for you; 20 seconds to come back or you're out.
+const TURN_MS = 10000, AWAY_MS = 20000;
+const TIMED_KINDS = ["bots", "online"];
 const SPIN_MS = 4200;
 const TUTORIAL_PRIZES = [5, 13, 2, 9, 1, 11, 7, 3, 12, 6, 10, 4, 8];
 const DAILY_CONFIG = { seatCount: 2, tieRule: "split", cursed: true, double: true, gamesToWin: 1, botLevel: "hard", showNext: true, mystery: true, jackpot: true, powers: false };
@@ -273,7 +276,7 @@ function gameReward(iWon) {
 /* ================= App state ================= */
 let app = { screen: "home", setup: null, modal: null, botOffset: Math.floor(Math.random() * 10), introDone: false };
 let G = null; // the current game
-let botTimer = null, revealTimer = null, tickTimer = null, spinTimer = null;
+let botTimer = null, revealTimer = null, tickTimer = null, spinTimer = null, turnTimer = null, awayTimer = null, clockTimer = null;
 
 function newG(kind, s, mySeats, extra = {}) {
   return Object.assign({
@@ -805,6 +808,66 @@ function doRematch() {
 }
 function stopTimers() {
   clearTimeout(botTimer); clearTimeout(revealTimer); clearInterval(tickTimer); clearTimeout(spinTimer);
+  clearTimeout(turnTimer); clearTimeout(awayTimer); clearInterval(clockTimer); clockTimer = null;
+}
+
+/* ================= Turn clock ================= */
+/** Called after every table render: starts the 10-second clock when it becomes your turn to bid. */
+function turnClock() {
+  if (!G || !TIMED_KINDS.includes(G.kind)) return;
+  const seat = activeSeat();
+  if (seat === undefined || needsHandoff()) { clearTimeout(turnTimer); G.turnKey = null; }
+  else {
+    const key = `${roundKey(G.s)}.${seat}`;
+    if (G.turnKey !== key) {
+      G.turnKey = key; G.turnAt = Date.now();
+      clearTimeout(turnTimer);
+      // While you're away, the game plays for you straight away.
+      turnTimer = setTimeout(() => autoPlay(key), G.away ? 900 : TURN_MS);
+    }
+  }
+  if (!clockTimer && (G.turnKey || G.away)) clockTimer = setInterval(clockTick, 200);
+}
+function clockTick() {
+  if (!G || (!G.turnKey && !G.away)) { clearInterval(clockTimer); clockTimer = null; return; }
+  const el = document.getElementById("turn-left");
+  if (el && G.turnKey && G.turnAt) {
+    const secs = Math.max(0, Math.ceil((TURN_MS - (Date.now() - G.turnAt)) / 1000));
+    if (el.textContent !== String(secs)) {
+      el.textContent = secs;
+      if (secs <= 3) { el.parentNode.classList.add("hurry"); if (secs > 0) Sound.tick(); }
+    }
+  }
+  const away = document.getElementById("away-left");
+  if (away && G.away) away.textContent = Math.max(0, Math.ceil((AWAY_MS - (Date.now() - G.away.at)) / 1000));
+}
+/** Time's up: play a sensible card for the player and start the 20-second "are you there?" clock. */
+function autoPlay(key) {
+  if (!G || G.turnKey !== key) return;
+  const seat = activeSeat();
+  if (seat === undefined || `${roundKey(G.s)}.${seat}` !== key) return;
+  if (!G.away) {
+    G.away = { at: Date.now() };
+    clearTimeout(awayTimer);
+    awayTimer = setTimeout(kickForInactivity, AWAY_MS);
+    Sound.lose(); buzz([60, 60, 60]);
+  }
+  G.selected = botChoose(G.s, seat, "normal").card;
+  G.useDouble = false; G.usePower = false;
+  placeBid();
+}
+function comeBack() {
+  if (!G) return;
+  G.away = null; G.turnKey = null;
+  clearTimeout(awayTimer); clearTimeout(turnTimer);
+  Sound.select();
+  render();
+}
+function kickForInactivity() {
+  if (!G || !G.away) return;
+  leaveGame();
+  Sound.lose();
+  toast("⏱", t("You were removed for inactivity"), t("Time's up"));
 }
 function leaveGame() {
   stopTimers();
@@ -991,6 +1054,10 @@ function renderGame() {
         const blocked = s.seats[hs].char === "cat" && isLast(s);
         pwBtn = `<button class="pwr" data-act="power" aria-pressed="${G.usePower}" ${blocked ? "disabled" : ""} title="${esc(powerText(pid))}">★ ${esc(powerName(pid))}${G.usePower ? " · " + t("on") : ""}</button>`;
       }
+      const timed = TIMED_KINDS.includes(G.kind) && !G.away;
+      const used = timed && G.turnKey === `${roundKey(s)}.${hs}` && G.turnAt ? Math.min(TURN_MS, Date.now() - G.turnAt) : 0;
+      const secsLeft = Math.max(0, Math.ceil((TURN_MS - used) / 1000));
+      if (timed) handHTML += `<div class="turnclock ${secsLeft <= 3 ? "hurry" : ""}" role="timer" aria-label="${t("Time left")}"><b id="turn-left">${secsLeft}</b><span class="turnbar"><span style="animation-delay:-${used}ms"></span></span></div>`;
       handHTML += `<div class="bidbar">
         ${c.double && s.doubleAvail[hs] ? `<button class="dbl" data-act="double" aria-pressed="${G.useDouble}">×2 ${t("Double")}${G.useDouble ? " · " + t("on") : ""}</button>` : ""}
         ${pwBtn}
@@ -1025,6 +1092,14 @@ function renderGame() {
       <button class="btn primary" data-act="unlock">${t("Show my hand")}</button></div></div>`;
   } else if (s.phase === "tiebreak") overlay = renderTiebreak();
   else if (s.phase === "gameOver" || s.phase === "matchOver") overlay = renderResults();
+  if (G.away) {
+    const left = Math.max(0, Math.ceil((AWAY_MS - (Date.now() - G.away.at)) / 1000));
+    overlay += `<div class="overlay away ${Date.now() - G.away.at > 300 ? "shown" : ""}"><div class="sheet" role="alertdialog" aria-labelledby="away-h">
+      <div class="away-ring"><svg viewBox="0 0 36 36" aria-hidden="true"><circle class="track" cx="18" cy="18" r="15.915"/><circle class="ring" cx="18" cy="18" r="15.915" style="animation-delay:-${Date.now() - G.away.at}ms"/></svg><b id="away-left">${left}</b></div>
+      <h2 id="away-h">${t("Are you still there?")}</h2>
+      <p class="muted">${t("You ran out of time, so a card was played for you. Tap Back to keep playing, or you'll be removed from the game.")}</p>
+      <button class="btn primary" data-act="come-back">${t("Back")}</button></div></div>`;
+  }
 
   const sub = G.kind === "online" ? `<span class="online-dot"></span>${t("Online · table {code}", { code: esc(Online.code.toUpperCase()) })}`
     : G.kind === "daily" ? t("Daily challenge") : G.kind === "tutorial" ? t("Tutorial")
@@ -1546,6 +1621,7 @@ function render() {
     root.innerHTML = renderGame() + (app.modal === "exit" ? renderConfirmExit() : renderModal())
       + (G.notice ? `<div class="overlay"><div class="sheet" role="alertdialog" style="max-width:420px"><p style="margin:0">${esc(G.notice)}</p><div class="sheet-foot" style="justify-content:flex-end"><button class="btn primary" data-act="notice-ok">${t("OK")}</button></div></div></div>` : "");
     flyPlayedCard();
+    turnClock();
   } else {
     const typing = document.activeElement && document.activeElement.id === "join-code" ? document.activeElement.value : null;
     root.innerHTML = renderHome() + (app.setup ? renderSetup() : "") + renderHomeModal();
@@ -1627,6 +1703,7 @@ document.addEventListener("click", e => {
     case "home": leaveGame(); break;
     case "modal": app.modal = el.dataset.m; render(); break;
     case "notice-ok": G.notice = null; render(); break;
+    case "come-back": comeBack(); break;
     case "coins": app.modal = "coins"; render(); break;
     case "lang": app.modal = "lang"; render(); break;
     case "set-lang": setLang(el.dataset.id); prefs.lang = LANG; savePrefs(); app.modal = null; Sound.select(); render(); break;

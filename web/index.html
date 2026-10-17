@@ -373,6 +373,25 @@ footer.foot { padding-block: 30px 48px; color: var(--muted); font-size: 13px; bo
 .hand button.card.sel { --lift: -22px; box-shadow: 0 0 0 3px var(--brass), 0 12px 22px rgba(0,0,0,.5); }
 .hand button.card:disabled { cursor: default; }
 .hand .pending { opacity: .25; }
+.turnclock { display: flex; align-items: center; gap: 10px; margin: 0 auto 2px; width: min(320px, 100%); }
+.turnclock b { font: 800 18px var(--display); min-width: 1.4em; text-align: center; color: var(--brass); font-variant-numeric: tabular-nums; }
+.turnclock .turnbar { flex: 1; height: 6px; border-radius: 6px; background: rgba(255,255,255,.12); overflow: hidden; }
+.turnclock .turnbar span { display: block; height: 100%; background: var(--brass); transform-origin: left; animation: drain 10s linear forwards; }
+:root[dir="rtl"] .turnclock .turnbar span { transform-origin: right; }
+.turnclock.hurry b { color: #ff7b8a; animation: tick .4s ease; }
+.turnclock.hurry .turnbar span { background: #ff7b8a; }
+.overlay.away { z-index: 40; }
+.overlay.away.shown, .overlay.away.shown .sheet { animation: none; }
+.overlay.away .sheet { max-width: 360px; text-align: center; display: grid; justify-items: center; gap: 10px; }
+.overlay.away h2 { margin: 0; }
+.overlay.away p { margin: 0; }
+.away-ring { position: relative; width: 84px; height: 84px; display: grid; place-items: center; }
+.away-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.away-ring circle { fill: none; stroke-width: 3; }
+.away-ring .track { stroke: rgba(255,255,255,.12); }
+.away-ring .ring { stroke: #ff7b8a; stroke-dasharray: 100 100; stroke-linecap: round; animation: awayring 20s linear forwards; }
+@keyframes awayring { to { stroke-dashoffset: 100; } }
+.away-ring b { font: 800 30px var(--display); }
 .bidbar { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; align-items: center; }
 .dbl { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; border: 1px solid rgba(217,171,79,.5); font-weight: 700; color: var(--brass); }
 .dbl[aria-pressed="true"] { background: var(--brass); color: #1c1608; }

@@ -1,5 +1,11 @@
 # Diamond Bid changelog
 
+## Unreleased
+- Your cards are held in an overlapping fan, dealt in one by one at the start of each game; the card you bid glides to the table.
+- Red vs blue see-through scoreboard at the top with each player's picture and name (the per-player score panels are gone). "Black team" is now "Blue team".
+- New sounds for winning and losing a hand, and for losing a game.
+- Turn clock (vs bots and online): 10 seconds to bid, then a card is played for you. Tap Back within 20 seconds or you're removed for inactivity.
+
 ## 1.2
 - **Languages:** English, العربية (Arabic, right-to-left), Español, Français and 中文. The app picks the phone's language on first visit; change it anytime from the globe button on the home screen.
 - **Coins:** 3 characters (Fennec, Prof. Hoot, Bruno) and 2 card designs (Classic, Royal) are free; everything else is bought with coins in the shop. Players already using something from 1.1 keep it.

@@ -8,6 +8,12 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["Time left", "Tiempo restante", "Temps restant", "الوقت المتبقي", "剩余时间"],
+  ["Are you still there?", "¿Sigues ahí?", "Vous êtes toujours là ?", "هل ما زلت هنا؟", "你还在吗？"],
+  ["You ran out of time, so a card was played for you. Tap Back to keep playing, or you'll be removed from the game.", "Se acabó tu tiempo, así que se jugó una carta por ti. Toca Volver para seguir jugando o saldrás de la partida.", "Votre temps est écoulé, une carte a été jouée pour vous. Touchez Retour pour continuer, sinon vous serez retiré de la partie.", "انتهى وقتك، لذلك لُعبت ورقة بدلاً منك. اضغط عودة لمواصلة اللعب، وإلا سيتم إخراجك من اللعبة.", "你超时了，系统已替你出牌。点击“返回”继续游戏，否则你将被移出游戏。"],
+  ["Back", "Volver", "Retour", "عودة", "返回"],
+  ["You were removed for inactivity", "Te sacaron por inactividad", "Vous avez été retiré pour inactivité", "تم إخراجك بسبب عدم النشاط", "你因长时间未操作被移出"],
+  ["Time's up", "Se acabó el tiempo", "Temps écoulé", "انتهى الوقت", "时间到"],
   // ---- general ----
   [" and ", " y ", " et ", " و", "和"],
   [", ", ", ", ", ", "، ", "、"],

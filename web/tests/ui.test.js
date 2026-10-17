@@ -43,7 +43,7 @@ function browser(label, bus) {
   const store = {};
   const listeners = {};
   const ctx = {
-    console, setTimeout: (f, ms) => setTimeout(f, Math.min(ms || 0, 4)), clearTimeout, setInterval, clearInterval, Date, Math, JSON, Promise, Object, Array, String, Number, Set, Map,
+    console, setTimeout: (f, ms) => setTimeout(f, ms >= 5000 ? ms : Math.min(ms || 0, 4)), clearTimeout, setInterval, clearInterval, Date, Math, JSON, Promise, Object, Array, String, Number, Set, Map,
     performance: { now: () => Date.now() }, requestAnimationFrame: f => setTimeout(() => f(Date.now()), 16), innerWidth: 400, innerHeight: 800,
     localStorage: { getItem: k => store[k] ?? null, setItem: (k, v) => { store[k] = v; } },
     navigator: {}, matchMedia: () => ({ matches: false }),
@@ -235,7 +235,22 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   c.get(`stats.lastGift = "2000-01-01"; checkDailyGift()`);
   ok(c.get("stats.giftStreak") === 1, "a missed day resets the gift streak");
 
-  // 10) Languages: picker, RTL Arabic, translated game, back to English
+  // 10) Turn clock: time runs out, a card is played for you, then Back or you're removed
+  const T = browser("clock");
+  await sleep(20); T.click("close");
+  T.get(`Object.assign(prefs.config, { seatCount: 2, botLevel: "easy", gamesToWin: 1 })`);
+  T.click("open-setup", { kind: "bots" }); T.click("start");
+  T.html();
+  ok(T.html().includes('id="turn-left"') && T.get("!!G.turnKey"), "your turn shows a 10-second clock");
+  T.get("autoPlay(G.turnKey)"); await sleep(30);
+  ok(T.get("G.s.history.length >= 1 || G.s.submitted[0]"), "time's up: a card is played for you");
+  ok(T.get("!!G.away") && T.html().includes('data-act="come-back"'), "you're asked to come back within 20 seconds");
+  T.click("come-back");
+  ok(!T.get("G.away") && T.get("app.screen") === "game", "Back keeps you in the game");
+  T.get("G.turnKey && autoPlay(G.turnKey)"); T.get("G.away = G.away || { at: Date.now() }"); T.get("kickForInactivity()");
+  ok(T.get("app.screen") === "home" && !T.get("G"), "not coming back removes you from the game");
+
+  // 10b) Languages: picker, RTL Arabic, translated game, back to English
   const L = browser("lang");
   await sleep(20); L.click("close");
   ok(L.html().includes('data-act="lang"'), "home shows the language button");
