@@ -83,6 +83,50 @@ const ACHIEVEMENTS = [
 ];
 
 const GEM_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 L36 20 L20 37 L4 20Z" style="fill:var(--gem)"/><path d="M20 3 L36 20 L20 20Z" style="fill:var(--gem-hi)"/><path d="M20 20 L4 20 L20 37Z" style="fill:var(--gem-lo)"/><path d="M20 3 L36 20 L20 37 L4 20Z" style="fill:none;stroke:var(--brass)" stroke-width="2" stroke-linejoin="round"/></svg>`;
+/* The Diamond Bid logo: a cut gem in front of a hearts card and a spades card, inside a gold ring. Each copy gets its own ids. */
+let logoCount = 0;
+function logoSVG(cls = "") {
+  const id = "lg" + (++logoCount);
+  const spark = (x, y, s, k) => `<g transform="translate(${x} ${y}) scale(${s})"><path class="lg-spark" style="animation-delay:${k * .45}s" d="M0-10L2.4-2.4L10 0L2.4 2.4L0 10L-2.4 2.4L-10 0L-2.4-2.4Z" fill="#fff4c8"/></g>`;
+  const card = (cls2, rank, color, pip) => `<g class="${cls2}"><rect x="82" y="58" width="76" height="110" rx="10" fill="#faf5e8" stroke="#d8cba9" stroke-width="1.5"/>
+    <text x="93" y="86" font-family="'Bodoni Moda', Georgia, serif" font-weight="800" font-size="24" fill="${color}">${rank}</text>
+    <path transform="translate(97 94) scale(.55)" d="${pip}" fill="${color}"/></g>`;
+  const HEART = "M0 6C-6-1-14 3-12 10C-10 15-3 19 0 24C3 19 10 15 12 10C14 3 6-1 0 6Z";
+  const SPADE = "M0-2C-4 6-13 9-12 16C-11 21-5 22-2 18L-4 26H4L2 18C5 22 11 21 12 16C13 9 4 6 0-2Z";
+  return `<svg class="logo ${cls}" viewBox="0 0 240 240" role="img" aria-label="Diamond Bid">
+  <defs>
+    <radialGradient id="${id}g" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#f3c969" stop-opacity=".45"/><stop offset="1" stop-color="#f3c969" stop-opacity="0"/></radialGradient>
+    <clipPath id="${id}c"><path d="M84 98H156L178 119L120 190L62 119Z"/></clipPath>
+  </defs>
+  <circle cx="120" cy="120" r="116" fill="url(#${id}g)"/>
+  <circle class="lg-ring" cx="120" cy="120" r="104" fill="none" stroke="#d9ab4f" stroke-width="3" stroke-linecap="round"/>
+  ${card("lg-cl", "A", "#c8283c", HEART)}
+  ${card("lg-cr", "K", "#1d1d24", SPADE)}
+  <g class="lg-gem">
+    <path d="M84 98L62 119H102Z" fill="#f08a5d"/><path d="M84 98H120L102 119Z" fill="#f8b48e"/><path d="M120 98L102 119H138Z" fill="#ec7a4f"/>
+    <path d="M120 98H156L138 119Z" fill="#f49c72"/><path d="M156 98L178 119H138Z" fill="#d4512d"/>
+    <path d="M62 119H102L120 190Z" fill="#c2441f"/><path d="M102 119H138L120 190Z" fill="#e3693d"/><path d="M138 119H178L120 190Z" fill="#a83a1c"/>
+    <g clip-path="url(#${id}c)"><rect class="lg-shine" x="70" y="80" width="22" height="130" fill="#fff" transform="rotate(20 120 130)"/></g>
+    <path d="M84 98H156L178 119L120 190L62 119Z" fill="none" stroke="#f6d88f" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+  ${spark(182, 74, 1.1, 0)}${spark(52, 150, .7, 1)}${spark(176, 176, .55, 2)}${spark(66, 64, .5, 3)}
+</svg>`;
+}
+const wordmark = () => `<div class="wordmark" dir="ltr">Diamond <em>Bid</em></div>`;
+/** "Looking for players…": the logo, gently alive, with a line of text. */
+const searching = text => `<div class="searching">${logoSVG("live")}<p>${text}</p></div>`;
+const rotateNotice = () => `<div class="rotate">${logoSVG()}<svg class="phone" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="18.5" r="1" fill="currentColor"/></svg><p>${t("Turn your phone upright to play")}</p></div>`;
+function showSplash() {
+  if (!document.body || !document.createElement) return;
+  const el = document.createElement("div");
+  el.className = "splash";
+  el.setAttribute && el.setAttribute("aria-hidden", "true");
+  el.innerHTML = `<div class="splash-in">${logoSVG("intro")}${wordmark()}<div class="splash-bar"><span></span></div></div>`;
+  document.body.appendChild(el);
+  const done = () => { if (el.classList) el.classList.add("out"); setTimeout(() => el.remove(), 450); };
+  const timer = setTimeout(done, 2300);
+  if (el.addEventListener) el.addEventListener("click", () => { clearTimeout(timer); done(); });
+}
 const JACKPOT_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2 L37 20 L20 38 L3 20Z" fill="#fff8dc"/><path d="M20 2 L37 20 L20 20Z" fill="#ffe9a0"/><path d="M20 20 L3 20 L20 38Z" fill="#c8942c"/><path d="M20 2 L37 20 L20 38 L3 20Z" fill="none" stroke="#7a4a00" stroke-width="2" stroke-linejoin="round"/></svg>`;
 const CURSE_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 C24 11 33 15 31 26 C30 33 25 37 20 37 C14 37 9 33 9 26 C9 20 13 17 14 12 C17 16 17 19 19 20 C20 14 18 9 20 3Z" fill="currentColor"/></svg>`;
 const SPEAKER_SVG = on => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>${on ? `<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>` : `<path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`}</svg>`;
@@ -91,6 +135,8 @@ const DEAL_GAP = 75;
 const SIDE_COLOR = ["#ff7b8a", "#6ea8ff", "#5fd896", "#f5c75a"];
 const TEAM_COLOR = SIDE_COLOR.slice(0, 2);
 const REVEAL_MS = 3000;
+// Running inside the App Store / Google Play app (Capacitor) rather than on claude.ai.
+const IN_APP = !!(typeof window !== "undefined" && window.Capacitor);
 // Online and vs bots: 10 seconds to bid, then a card is played for you; 20 seconds to come back or you're out.
 const TURN_MS = 10000, AWAY_MS = 20000;
 const TIMED_KINDS = ["bots", "online"];
@@ -963,12 +1009,12 @@ function renderGame() {
   if (home !== undefined) {
     const size = tileSeats.length === 1 ? "lg" : "md";
     const label = tileSeats.length === 1 ? t("{name}'s bid", { name: esc(sn(s, tileSeats[0])) }) : t("Their bids");
-    theirs = `<div class="spot"><span class="lbl">${label}</span><div class="opps">${tileSeats.map(i => `<div class="opp ${result && result.winners.includes(i) ? "win" : ""}">
+    theirs = `<div class="spot theirs"><span class="lbl">${label}</span><div class="opps">${tileSeats.map(i => `<div class="opp ${result && result.winners.includes(i) ? "win" : ""}" data-pos="${(i - home + n) % n}">
         ${tileSeats.length > 1 ? avatar(s.seats[i].char, "sm") : ""}
         <div class="bidwrap" style="position:relative">${bidCard(i, size)}</div>
         <span class="sub">${awardSpan(i)}</span></div>`).join("")}</div></div>`;
     const myAward = result ? result.awards[home] : 0;
-    mine = `<div class="spot ${result && result.winners.includes(home) ? "win" : ""}">
+    mine = `<div class="spot minespot ${result && result.winners.includes(home) ? "win" : ""}">
       <span class="lbl">${t("Your bid")}</span>
       <div class="bidwrap" id="mybid" style="position:relative">${result || shownSubmitted(home) ? bidCard(home, "lg") : `<div class="slot lg">${G.selected != null ? "" : t("Pick a card")}</div>`}
         ${anim && myAward ? `<span class="floatpts ${myAward < 0 ? "neg" : ""}">${awardText(myAward)}</span>` : ""}</div>
@@ -993,9 +1039,9 @@ function renderGame() {
     preview = `<div class="nextgem">${t("Next:")} ${prizeCard(next, "xs", isMystery(s, s.round + 1))}</div>`;
   }
   const lbl = t(hidden ? "Mystery gem" : prize === JACKPOT ? "Jackpot" : prize < 0 ? "Cursed" : "Up for grabs");
-  const center = `<div class="center ${anim && result && result.prize < 0 && result.winners.includes(home) ? "shake" : ""}">
+  const center = `<div class="center ${tileSeats.length > 1 && home !== undefined ? "around" : ""} ${anim && result && result.prize < 0 && result.winners.includes(home) ? "shake" : ""}">
       ${theirs}
-      <div class="spot">
+      <div class="spot prizespot">
         <span class="lbl ${prize < 0 && !hidden ? "cursed" : "gold"}">${lbl}</span>
         ${prizeCard(prize, "lg" + prizeAnim + (result && result.mystery && anim ? " flip" : ""), hidden)}
         ${below}
@@ -1028,7 +1074,7 @@ function renderGame() {
   }
 
   // Hand
-  let handHTML = "";
+  let handHTML = "", controls = "";
   const hs = handSeat();
   if (hs !== undefined) {
     const suit = suitFor(hs, n);
@@ -1057,8 +1103,8 @@ function renderGame() {
       const timed = TIMED_KINDS.includes(G.kind) && !G.away;
       const used = timed && G.turnKey === `${roundKey(s)}.${hs}` && G.turnAt ? Math.min(TURN_MS, Date.now() - G.turnAt) : 0;
       const secsLeft = Math.max(0, Math.ceil((TURN_MS - used) / 1000));
-      if (timed) handHTML += `<div class="turnclock ${secsLeft <= 3 ? "hurry" : ""}" role="timer" aria-label="${t("Time left")}"><b id="turn-left">${secsLeft}</b><span class="turnbar"><span style="animation-delay:-${used}ms"></span></span></div>`;
-      handHTML += `<div class="bidbar">
+      if (timed) controls += `<div class="turnclock ${secsLeft <= 3 ? "hurry" : ""}" role="timer" aria-label="${t("Time left")}"><b id="turn-left">${secsLeft}</b><span class="turnbar"><span style="animation-delay:-${used}ms"></span></span></div>`;
+      controls += `<div class="bidbar">
         ${c.double && s.doubleAvail[hs] ? `<button class="dbl" data-act="double" aria-pressed="${G.useDouble}">×2 ${t("Double")}${G.useDouble ? " · " + t("on") : ""}</button>` : ""}
         ${pwBtn}
         <button class="btn primary" data-act="bid" ${G.selected == null ? "disabled" : ""}>${t("Place bid face down")}</button>
@@ -1116,12 +1162,15 @@ function renderGame() {
         <button class="icon-btn" data-act="modal" data-m="rules" aria-label="${t("Rules")}" title="${t("Rules")}">?</button>
       </div>
     </div>
-    ${teamBar}
-    ${home !== undefined ? "" : `<div class="tiles" style="grid-template-columns:repeat(${cols}, minmax(0, 1fr))">${tileSeats.map(tile).join("")}</div>`}
     ${center}
-    ${coach}
-    ${status ? `<div class="status" aria-live="polite"><p>${status}</p><div class="acts">${acts}</div></div>` : ""}
     ${handHTML}
+    <div class="side">
+      ${teamBar}
+      ${home !== undefined ? "" : `<div class="tiles" style="grid-template-columns:repeat(${cols}, minmax(0, 1fr))">${tileSeats.map(tile).join("")}</div>`}
+      ${coach}
+      ${status ? `<div class="status" aria-live="polite"><p>${status}</p><div class="acts">${acts}</div></div>` : ""}
+      ${controls ? `<div class="controls">${controls}</div>` : ""}
+    </div>
   </div></div>${overlay}`;
 }
 
@@ -1283,7 +1332,7 @@ const Daily = { db: null, user: null, myId: null, rows: [], names: {}, status: "
 function renderLeaderboard() {
   const date = todayKey();
   if (!Daily.checked) return `<p class="muted">${t("Loading…")}</p>`;
-  if (!Daily.db) return `<p class="muted">${t("The shared leaderboard isn't available in this view. Your own best score is still saved.")}</p>`;
+  if (!Daily.db) return `<p class="muted">${IN_APP ? t("The shared leaderboard is coming soon to the app. Your own best score is saved.") : t("The shared leaderboard isn't available in this view. Your own best score is still saved.")}</p>`;
   const rows = Daily.rows.filter(r => r.date === date && typeof r.score === "number").sort((a, b) => b.score - a.score).slice(0, 10);
   if (!rows.length) return `<p class="muted">${t("No scores yet today. Play the challenge to set the first one.")}</p>`;
   return `<div class="lb">${rows.map((r, k) => `<div class="row ${r.id === Daily.myId ? "me" : ""}">
@@ -1460,14 +1509,15 @@ function renderOnlineSheet() {
   if (app.setup === "online-menu" && !Online.room) {
     return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true">
       ${head(t("Play online"))}
-      ${Online.checked ? `<p style="margin:0">${t("Online play isn't available in this view.")}</p>
+      ${IN_APP ? `<p style="margin:0">${t("Online play with friends is coming soon to the app. For now, play vs bots, pass and play, or the daily challenge.")}</p>`
+      : Online.checked ? `<p style="margin:0">${t("Online play isn't available in this view.")}</p>
       <div style="display:flex;flex-direction:column;gap:10px;color:var(--muted)">
         <p style="margin:0">${t("Online tables only admit people who are signed in to Claude and invited to this page. A public link, or a link opened inside another app such as WhatsApp, can't join a table.")}</p>
         <p style="margin:0"><b style="color:var(--ink)">${t("To fix it:")}</b></p>
         <p style="margin:0">${t("1. The page's owner invites each friend by email from the page's Share menu.")}</p>
         <p style="margin:0">${t("2. Open the link in Safari, Chrome or the Claude app, and sign in to Claude with the invited email.")}</p>
         <p style="margin:0">${t("Everything else (bots, pass and play, the daily challenge) works without that.")}</p>
-      </div>` : `<p class="muted" style="margin:0">${t("Connecting…")}</p>`}
+      </div>` : searching(t("Connecting…"))}
       <div class="sheet-foot" style="justify-content:flex-end"><button class="btn primary" data-act="online-close">${t("OK")}</button></div>
     </div></div>`;
   }
@@ -1494,10 +1544,11 @@ function renderOnlineSheet() {
     ${head(host ? t("Your table") : t("Table"))}
     <div><div class="opt-label" style="text-align:center">${t("Table code")}</div><div class="code" dir="ltr">${esc(Online.code.toUpperCase())}</div>
       <p class="muted" style="margin:4px 0 0;text-align:center">${t("Friends open this page, tap Play online, and enter this code.")}</p></div>
+    ${people.length < 2 ? searching(t("Looking for players…")) : !host && people.some(p => p.presence.host) ? searching(t("Waiting for the host to start the game…")) : ""}
     <div><div class="opt-label">${t("At the table")} (${people.length})</div><div class="peers">${roster || `<p class="muted">${t("Connecting…")}</p>`}</div></div>
     ${host ? rulesFields("online", people.length < seats)
       : people.some(p => p.presence.host)
-        ? `<p class="muted" style="margin:0">${t("Waiting for the host to start the game…")}</p>`
+        ? ""
         : `<div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start"><p style="margin:0">${t("Nobody is hosting this table yet. One person needs to host: they pick the rules and start the game.")}</p><button class="btn primary" data-act="online-host">${t("Host this table")}</button></div>`}
     ${people.length > 1 && new Set(people.map(p => p.presence.char)).size < people.length ? `<p class="muted" style="margin:0;font-size:13px">${t("Two of you picked the same character. One will be swapped when the game starts, or pick a different one on the home page first.")}</p>` : ""}
     ${err}
@@ -1620,11 +1671,12 @@ function render() {
   if (app.screen === "game" && G) {
     root.innerHTML = renderGame() + (app.modal === "exit" ? renderConfirmExit() : renderModal())
       + (G.notice ? `<div class="overlay"><div class="sheet" role="alertdialog" style="max-width:420px"><p style="margin:0">${esc(G.notice)}</p><div class="sheet-foot" style="justify-content:flex-end"><button class="btn primary" data-act="notice-ok">${t("OK")}</button></div></div></div>` : "");
+    root.insertAdjacentHTML && root.insertAdjacentHTML("beforeend", rotateNotice());
     flyPlayedCard();
     turnClock();
   } else {
     const typing = document.activeElement && document.activeElement.id === "join-code" ? document.activeElement.value : null;
-    root.innerHTML = renderHome() + (app.setup ? renderSetup() : "") + renderHomeModal();
+    root.innerHTML = renderHome() + (app.setup ? renderSetup() : "") + renderHomeModal() + rotateNotice();
     if (typing !== null) { const el = document.getElementById("join-code"); if (el) { el.value = typing; el.focus(); } }
   }
 }
@@ -1731,6 +1783,7 @@ const boot = data => {
     G = data.G || null;
     if (!G) app.screen = "home";
   }
+  if (!(data && data.app)) showSplash();
   checkDailyGift();
   render();
   if (G) { scheduleBots(); scheduleReveal(); scheduleSpin(); }

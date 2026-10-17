@@ -8,6 +8,10 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["Online play with friends is coming soon to the app. For now, play vs bots, pass and play, or the daily challenge.", "El juego en línea con amigos llegará pronto a la app. Por ahora, juega contra bots, en el mismo dispositivo o el reto diario.", "Le jeu en ligne entre amis arrive bientôt dans l'app. En attendant, jouez contre les bots, à plusieurs sur un appareil ou au défi du jour.", "اللعب عبر الإنترنت مع الأصدقاء قادم قريباً إلى التطبيق. حالياً، العب ضد الروبوتات أو على جهاز واحد أو التحدي اليومي.", "与好友在线对战即将登陆应用。目前可以与机器人对战、同屏轮流玩或参加每日挑战。"],
+  ["The shared leaderboard is coming soon to the app. Your own best score is saved.", "La clasificación compartida llegará pronto a la app. Tu mejor puntuación se guarda.", "Le classement partagé arrive bientôt dans l'app. Votre meilleur score est enregistré.", "لوحة الصدارة المشتركة قادمة قريباً إلى التطبيق. أفضل نتيجة لك محفوظة.", "共享排行榜即将登陆应用。你的最佳成绩已保存。"],
+  ["Turn your phone upright to play", "Pon el teléfono en vertical para jugar", "Tenez votre téléphone à la verticale pour jouer", "أدر هاتفك للوضع العمودي للعب", "请竖屏握持手机进行游戏"],
+  ["Looking for players…", "Buscando jugadores…", "Recherche de joueurs…", "جارٍ البحث عن لاعبين…", "正在寻找玩家…"],
   ["Time left", "Tiempo restante", "Temps restant", "الوقت المتبقي", "剩余时间"],
   ["Are you still there?", "¿Sigues ahí?", "Vous êtes toujours là ?", "هل ما زلت هنا؟", "你还在吗？"],
   ["You ran out of time, so a card was played for you. Tap Back to keep playing, or you'll be removed from the game.", "Se acabó tu tiempo, así que se jugó una carta por ti. Toca Volver para seguir jugando o saldrás de la partida.", "Votre temps est écoulé, une carte a été jouée pour vous. Touchez Retour pour continuer, sinon vous serez retiré de la partie.", "انتهى وقتك، لذلك لُعبت ورقة بدلاً منك. اضغط عودة لمواصلة اللعب، وإلا سيتم إخراجك من اللعبة.", "你超时了，系统已替你出牌。点击“返回”继续游戏，否则你将被移出游戏。"],

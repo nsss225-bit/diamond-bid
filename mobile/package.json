@@ -1,0 +1,22 @@
+{
+  "name": "diamond-bid-mobile",
+  "private": true,
+  "version": "1.4.0",
+  "description": "Diamond Bid for the App Store and Google Play: the web game (../web) wrapped with Capacitor.",
+  "scripts": {
+    "build": "node build-www.js",
+    "assets": "capacitor-assets generate --assetPath assets --iconBackgroundColor '#0b2620' --iconBackgroundColorDark '#0b2620' --splashBackgroundColor '#0b2620' --splashBackgroundColorDark '#0b2620'",
+    "add:ios": "cap add ios && node scripts/configure-native.js ios",
+    "add:android": "cap add android && node scripts/configure-native.js android",
+    "sync": "npm run build && cap sync"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.3"
+  }
+}

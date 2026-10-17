@@ -1,0 +1,8 @@
+{
+  "appId": "com.diamondbid.game",
+  "appName": "Diamond Bid",
+  "webDir": "www",
+  "backgroundColor": "#0b2620",
+  "ios": { "contentInset": "never", "backgroundColor": "#0b2620" },
+  "android": { "backgroundColor": "#0b2620" }
+}

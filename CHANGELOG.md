@@ -1,5 +1,12 @@
 # Diamond Bid changelog
 
+## Unreleased
+- Phones: the whole table fits one screen with no scrolling, clear of the notch and the home bar (checked on iPhone SE, iPhone 15 and a 360-wide Android). Pop-up messages moved to the top so they never cover your cards.
+- Phones held sideways show "Turn your phone upright to play"; the store apps lock phones to portrait.
+- Tablets and computers in landscape: scores and controls in a side panel, and in 4-player games everyone sits around the table.
+- New Diamond Bid logo, an animated opening screen, and an animated "Looking for players…" loader in online lobbies.
+- Store apps: iOS and Android projects (Capacitor) with app icon, launch screen and cloud build workflows (see mobile/README.md).
+
 ## 1.3
 - Your cards are held in an overlapping fan, dealt in one by one at the start of each game; the card you bid glides to the table.
 - Red vs blue see-through scoreboard at the top with each player's picture and name (the per-player score panels are gone). "Black team" is now "Blue team".

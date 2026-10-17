@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Diamond Bid</string>
+    <string name="title_activity_main">Diamond Bid</string>
+    <string name="package_name">com.diamondbid.game</string>
+    <string name="custom_url_scheme">com.diamondbid.game</string>
+</resources>
