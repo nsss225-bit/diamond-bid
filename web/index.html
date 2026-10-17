@@ -126,6 +126,8 @@ h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
 
 .card.prize { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4%; border: 2px solid var(--brass); color: var(--gem); box-shadow: 0 0 0 1px rgba(0,0,0,.2), 0 10px 26px rgba(0,0,0,.45); }
 .card.prize svg { width: 40%; height: auto; }
+.card.prize .pv { display: none; font: 700 calc(var(--w) * .11) var(--body); opacity: .75; margin-top: -2%; }
+.card.prize.lg .pv, .card.prize.xl .pv { display: block; }
 .card.prize b { font-size: calc(var(--w) * .34); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
 .card.prize.curse { background: var(--curse); color: var(--curse-ink); border-color: rgba(217,171,79,.45); }
 

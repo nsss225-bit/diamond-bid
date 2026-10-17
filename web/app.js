@@ -261,7 +261,7 @@ const charName = id => t(CHAR[id].name);
 /** A seat's name on screen: characters (bots, or players who kept the default) get their translated name. */
 const sn = (s, i) => { const p = s.seats[i]; return (p.bot && !p.left) || p.name === CHAR[p.char].name ? charName(p.char) : p.name; };
 const sideLabel = (s, side) => usesTeams(s.config) ? t(TEAM_NAME[side]) : sn(s, side);
-const pName = v => v === JACKPOT ? t("20 jackpot") : v < 0 ? t("{v} curse", { v: prizeLabel(v) }) : t("{v} gem", { v });
+const pName = v => v === JACKPOT ? t("20 jackpot") : v < 0 ? t("{v} curse", { v: prizeLabel(v) }) : t("{v} gem", { v: prizeLabel(v) });
 const levelName = l => t({ easy: "Easy", normal: "Normal", hard: "Hard", expert: "Expert" }[l] || l);
 const powerName = id => t(POWERS[id].name);
 const powerText = id => t(POWERS[id].text);
@@ -478,7 +478,7 @@ const cardBack = (cls = "") => `<div class="card back ${cls}" aria-label="${t("F
 function prizeCard(v, cls = "", hidden = false) {
   if (hidden) return `<div class="card prize mystery ${cls}" aria-label="${t("Mystery gem")}"><b>?</b></div>`;
   if (v === JACKPOT) return `<div class="card prize jackpot ${cls}" aria-label="${t("20 jackpot")}">${JACKPOT_SVG}<b>20</b></div>`;
-  return `<div class="card prize ${v < 0 ? "curse" : ""} ${cls}" aria-label="${pName(v)}">${v < 0 ? CURSE_SVG : GEM_SVG}<b>${prizeLabel(v)}</b></div>`;
+  return `<div class="card prize ${v < 0 ? "curse" : ""} ${cls}" aria-label="${pName(v)}">${v < 0 ? CURSE_SVG : GEM_SVG}<b>${prizeLabel(v)}</b>${v >= 11 && v <= 13 ? `<small class="pv">${t("{n} pts", { n: v })}</small>` : ""}</div>`;
 }
 const thinking = () => `<span class="thinking" aria-label="${t("choosing")}"><span></span><span></span><span></span></span>`;
 const feltPip = suit => {
