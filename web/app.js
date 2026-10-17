@@ -546,8 +546,8 @@ function renderHome() {
         <h1>Diamond <em>Bid</em></h1>
         <div class="cta">
           <button class="btn primary" data-act="open-setup" data-kind="bots">${t("Play vs bots")}</button>
-          <button class="btn ghost" data-act="open-online" ${onlineReady ? "" : `style="opacity:.6"`}>${t("Play online")}</button>
-          <button class="btn ghost" data-act="open-setup" data-kind="pass">${t("Pass and play")}</button>
+          ${IN_APP ? "" : `<button class="btn ghost" data-act="open-online" ${onlineReady ? "" : `style="opacity:.6"`}>${t("Play online")}</button>`}
+          <button class="btn ghost ${IN_APP ? "wide" : ""}" data-act="open-setup" data-kind="pass">${t("Pass and play")}</button>
         </div>
         <div class="cta2">
           ${prefs.lastKind && stats.played ? `<button class="chip" data-act="replay"><span aria-hidden="true">↻</span>${t("Play again")}</button>` : ""}
@@ -573,10 +573,10 @@ function renderHome() {
           <p class="muted" style="margin:0">${stats.dailyBest[todayKey()] != null ? t("Your best today: {score} points. Play again to beat it.", { score: `<b style="color:var(--ink)">${fmt(stats.dailyBest[todayKey()])}</b>` }) : t("You haven't played today's challenge yet.")}</p>
           <div><button class="btn primary" data-act="daily">${t("Play today's challenge")}</button></div>
         </div>
-        <div class="panel">
+        ${IN_APP ? "" : `<div class="panel">
           <h3>${t("Today's leaderboard")}</h3>
           <div id="daily-lb">${renderLeaderboard()}</div>
-        </div>
+        </div>`}
       </div>
     </section>`;
 
@@ -1591,8 +1591,10 @@ async function cloudSave() {
 }
 const saveStateText = () => Account.state === "saving" ? t("Saving…") : Account.state === "error" ? t("Couldn't save to your account. Your progress is still on this device.") : Account.savedAt ? t("Saved to your account") : "";
 const VIBE_SVG = on => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="8" y="4" width="8" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>${on ? `<path d="M4.5 9v6M2 10.5v3M19.5 9v6M22 10.5v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>` : `<path d="M3 3l18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`}</svg>`;
+const GEAR_SVG = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
 const PERSON_SVG = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="8.5" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 20.5c1.4-4 4.4-6 8-6s6.6 2 8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
 function accountButton() {
+  if (IN_APP) return `<button class="icon-btn" data-act="account" aria-label="${t("Settings")}">${GEAR_SVG}</button>`;
   const pic = Account.id && Account.avatar ? `<img src="${esc(Account.avatar)}" alt="">` : PERSON_SVG;
   return `<button class="icon-btn acctbtn ${Account.id ? "in" : ""}" data-act="account" aria-label="${Account.id ? t("Account") : t("Sign in")}">${pic}</button>`;
 }
@@ -1606,14 +1608,13 @@ function renderAccount() {
       <p class="muted" style="margin:0">${t("Your coins, characters, card designs and achievements are saved to your account. Open Diamond Bid on any phone or computer with the same account and pick up where you left off.")}</p>
       <p class="acct-state" id="save-state">${saveStateText()}</p>`;
   } else if (IN_APP) {
-    body = `<p style="margin:0">${t("Sign in with Apple or Google is coming with the App Store and Google Play release.")}</p>
-      <p class="muted" style="margin:0">${t("Until then, your progress is saved on this device.")}</p>`;
+    body = `<p class="muted" style="margin:0">${t("Your progress is saved on this device.")}</p>`;
   } else {
     body = `<p style="margin:0">${Account.checked ? t("You're not signed in, so your progress is only saved on this device.") : t("Loading…")}</p>
       <p class="muted" style="margin:0">${t("Diamond Bid uses your Claude account: sign in at claude.ai, then open the game from the link you were sent (not inside WhatsApp or another app). Your progress then follows you to every device.")}</p>`;
   }
   return `<div class="overlay" data-act="close-bg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="acct-h" style="max-width:440px">
-    <div class="sheet-head"><h2 id="acct-h">${Account.id ? t("Account") : t("Sign in")}</h2><button class="icon-btn" data-act="close" aria-label="${t("Close")}">✕</button></div>
+    <div class="sheet-head"><h2 id="acct-h">${IN_APP ? t("Settings") : Account.id ? t("Account") : t("Sign in")}</h2><button class="icon-btn" data-act="close" aria-label="${t("Close")}">✕</button></div>
     ${body}
     <div class="acct-stats"><div><b>${stats.won}</b><small>${t("Matches won")}</small></div><div><b>${achCount()}</b><small>${t("Achievements")}</small></div><div><b>${fmtCoins(stats.coins)}</b><small>${t("Coins")}</small></div></div>
     <div>${sound}</div>

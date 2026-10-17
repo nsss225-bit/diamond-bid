@@ -1,7 +1,4 @@
 .DS_Store
-ios/DiamondBid.xcodeproj/
-ios/DiamondBid/Info.plist
-ios/DiamondBid/DiamondBid.entitlements
 xcuserdata/
 DerivedData/
 *.xcuserstate

@@ -8,6 +8,8 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["Settings", "Ajustes", "Réglages", "الإعدادات", "设置"],
+  ["Your progress is saved on this device.", "Tu progreso se guarda en este dispositivo.", "Votre progression est enregistrée sur cet appareil.", "تقدّمك محفوظ على هذا الجهاز.", "你的进度保存在此设备上。"],
   ["Suits", "Palos", "Couleurs", "الأنواع", "花色"],
   ["Your suit", "Tu palo", "Votre couleur", "نوعك", "你的花色"],
   ["Middle cards", "Cartas del centro", "Cartes du milieu", "أوراق الوسط", "中间的牌"],

@@ -126,7 +126,7 @@ h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
 
 .card.prize { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4%; border: 2px solid var(--brass); color: var(--gem); box-shadow: 0 0 0 1px rgba(0,0,0,.2), 0 10px 26px rgba(0,0,0,.45); }
 .card.prize svg { width: 40%; height: auto; }
-.card.prize .pv { display: none; font: 700 calc(var(--w) * .11) var(--body); opacity: .75; margin-top: -2%; }
+.card.prize .pv { display: none; font: 700 calc(var(--w) * .11) var(--body); opacity: .75; margin-top: 6%; }
 .card.prize.lg .pv, .card.prize.xl .pv { display: block; }
 .card.prize b { font-size: calc(var(--w) * .34); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
 .card.prize.curse { background: var(--curse); color: var(--curse-ink); border-color: rgba(217,171,79,.45); }
@@ -646,6 +646,7 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
   .home.tab-play .cta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .home.tab-play .cta .btn { padding: 12px 10px; }
   .home.tab-play .cta .btn.primary { grid-column: 1 / -1; padding-block: 14px; font-size: 16px; }
+  .home.tab-play .cta .btn.wide { grid-column: 1 / -1; }
   .home.tab-play .cta2 { margin-top: 10px; }
   .home.tab-play .playing-as { margin: 12px auto 0; padding: 6px 12px 6px 6px; }
   .home.tab-play .playing-as .avatar { width: 34px; height: 34px; }
