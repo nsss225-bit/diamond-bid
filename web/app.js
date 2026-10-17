@@ -411,6 +411,7 @@ function renderHome() {
           <button class="btn ghost" data-act="open-setup" data-kind="pass">${t("Pass and play")}</button>
         </div>
         <div class="cta2">
+          ${prefs.lastKind && stats.played ? `<button class="link replay" data-act="replay">↻ ${t("Play again")}</button>` : ""}
           <button class="link" data-act="daily">${t("Today's daily challenge")} ${ARROW()}</button>
           <button class="link" data-act="tutorial">${t("New here? Play the 2-minute tutorial")} ${ARROW()}</button>
         </div>
@@ -622,6 +623,7 @@ function beginGame(g) {
   Sound.unlock();
 }
 function startLocal(kind) {
+  if (kind === "bots" || kind === "pass") { prefs.lastKind = kind; savePrefs(); }
   const seats = seatPlan(kind);
   const mySeats = range(seats.length).filter(i => !seats[i].bot);
   beginGame(newG(kind, newMatch(prefs.config, seats), mySeats));
@@ -870,6 +872,15 @@ function tieContinue() {
   if (!isAuthority() || !G.s.tie || !G.s.tie.result) return;
   finishTiebreak(G.s);
   progress();
+}
+/* Online: anyone at the table can ask for a rematch; the host sees who asked and starts it. */
+const matchKey = s => `${s.gameNumber}.${s.gameWins.join("")}.${s.scores.join(".")}`;
+function askRematch() {
+  if (!G || G.kind !== "online" || G.s.phase !== "matchOver" || !Online.named) return;
+  G.askedRematch = matchKey(G.s);
+  Online.named.presence({ r: G.askedRematch }).catch(() => {});
+  Sound.select();
+  render();
 }
 function doRematch() {
   if (!isAuthority()) return;
@@ -1249,8 +1260,11 @@ function renderResults() {
   const home = `<button class="btn ghost" data-act="home">${t("Home")}</button>`;
   if (G.kind === "tutorial") buttons = `${home}<button class="btn primary" data-act="tutorial-done">${t("Play vs bots")}</button>`;
   else if (G.kind === "daily") buttons = `${home}<button class="btn primary" data-act="daily">${t("Try again")}</button>`;
+  else if (guest && s.phase === "matchOver") buttons = `<button class="btn ghost" data-act="home">${t("Leave table")}</button>`
+    + (G.askedRematch === matchKey(s) ? `<span class="muted">${t("Rematch requested. Waiting for the host…")}</span>` : `<button class="btn primary" data-act="rematch-ask">↻ ${t("Rematch")}</button>`);
   else if (guest) buttons = `<button class="btn ghost" data-act="home">${t("Leave table")}</button><span class="muted">${t("Waiting for the host…")}</span>`;
-  else if (s.phase === "matchOver") buttons = `${home}<button class="btn primary" data-act="rematch">${t("Rematch")}</button>`;
+  else if (s.phase === "matchOver") buttons = (G.kind === "online" && G.rematchAsks && G.rematchAsks.length ? `<p class="rematch-ask">↻ ${t("Rematch requested by {names}", { names: list(G.rematchAsks.map(esc)) })}</p>` : "")
+    + `${home}<button class="btn primary ${G.rematchAsks && G.rematchAsks.length ? "pulse" : ""}" data-act="rematch">↻ ${t("Rematch")}</button>`;
   else buttons = `${home}<button class="btn primary" data-act="next">${t("Next game")}</button>`;
   return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="res-title">
     <div class="headline">
@@ -1473,6 +1487,9 @@ function hostReadPeers(ch) {
       if (submit(s, seat, { card: Number(b.c), double: !!b.d, power: !!b.p })) changed = true;
     }
   });
+  // Rematch requests from the other players.
+  const asks = s.phase === "matchOver" ? ch.peers.filter(p => !p.sameTab && p.presence && p.presence.r === matchKey(s)).map(p => cleanName(p.presence.name) || charName(p.presence.char || "fox")) : [];
+  if (asks.join() !== (G.rematchAsks || []).join()) { G.rematchAsks = asks; if (asks.length) { Sound.chime(); buzz([30, 40, 30]); } changed = true; render(); }
   if (changed) progress();
 }
 function guestReadPeers(ch) {
@@ -1830,6 +1847,8 @@ document.addEventListener("click", e => {
     }
     case "reroll": app.botOffset++; render(); break;
     case "start": startLocal(app.setup); break;
+    case "replay": startLocal(prefs.lastKind); break;
+    case "rematch-ask": askRematch(); break;
     case "daily": startDaily(); break;
     case "tutorial": startTutorial(); break;
     case "tutorial-done": stopTimers(); G = null; app.screen = "home"; app.setup = "bots"; render(); break;

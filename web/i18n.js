@@ -8,6 +8,9 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["Play again", "Jugar otra vez", "Rejouer", "العب مجدداً", "再玩一次"],
+  ["Rematch requested. Waiting for the host…", "Revancha pedida. Esperando al anfitrión…", "Revanche demandée. En attente de l'hôte…", "تم طلب مباراة جديدة. بانتظار المضيف…", "已请求再战，等待房主…"],
+  ["Rematch requested by {names}", "{names} pide la revancha", "{names} demande une revanche", "{names} يطلب مباراة جديدة", "{names} 请求再战"],
   ["Customize", "Personalizar", "Personnaliser", "تخصيص", "个性化"],
   ["Play", "Jugar", "Jouer", "العب", "开始"],
   ["Drag a card up to the table, or double-tap it, to play it", "Arrastra una carta a la mesa o tócala dos veces para jugarla", "Faites glisser une carte vers la table, ou touchez-la deux fois, pour la jouer", "اسحب الورقة إلى الطاولة أو انقر عليها مرتين للعبها", "将牌拖到桌上，或双击它来出牌"],

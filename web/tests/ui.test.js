@@ -197,6 +197,13 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   ok(["gameOver", "matchOver"].includes(host.get("G.s.phase")) && hs === gs, `online game finished with the same scores on both phones ${hs}`);
   ok(guest.html().includes("Waiting for the host") || guest.get("G.s.phase") === "matchOver", "guest waits for the host after the game");
   ok(guest.get("G.s.history.length") === 13, "guest saw all 13 rounds");
+  if (host.get("G.s.phase") === "matchOver") {
+    ok(guest.html().includes('data-act="rematch-ask"'), "a guest can ask for a rematch");
+    guest.click("rematch-ask"); await sleep(40);
+    ok(host.html().includes("Rematch requested by"), "the host sees who asked for a rematch");
+    host.click("rematch"); await sleep(60);
+    ok(host.get("G.s.phase") === "bidding" && guest.get("G.s.phase") === "bidding" && guest.get("G.s.history.length") === 0, "the host's rematch starts a new game on both phones");
+  }
   const leakCheck = host.get(`JSON.stringify(packState(G.s))`).length;
   ok(leakCheck < 4096, "host state fits in presence: " + leakCheck + " bytes");
   // host leaves → guest is told

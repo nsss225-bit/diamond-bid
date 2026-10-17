@@ -1,6 +1,7 @@
 # Diamond Bid changelog
 
 ## Unreleased
+- Rematch: online, anyone at the table can ask for a rematch (the host sees who asked and starts it for everyone). On the home screen, "↻ Play again" restarts your last game vs bots or pass and play with the same rules.
 - Game setup (vs bots and pass and play) fits one phone screen: each label sits beside its choices, the extras are compact tiles, and the seats are one row of avatars.
 - The Play tab fits one screen on phones and portrait tablets, no scrolling (checked from iPhone SE up to iPhone Pro Max and iPad).
 - Home screen tabs along the bottom: Play, Daily, Customize (characters, card designs, tables), Achievements and How to play. A red dot on Daily means today's challenge is still waiting; Achievements shows how many you've earned.
