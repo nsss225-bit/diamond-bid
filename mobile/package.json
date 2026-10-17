@@ -1,7 +1,7 @@
 {
   "name": "diamond-bid-mobile",
   "private": true,
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Diamond Bid for the App Store and Google Play: the web game (../web) wrapped with Capacitor.",
   "scripts": {
     "build": "node build-www.js",

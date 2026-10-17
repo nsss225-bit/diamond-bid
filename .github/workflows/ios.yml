@@ -31,7 +31,7 @@ jobs:
           xcodebuild -project App.xcodeproj -scheme App -configuration Release \
             -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/App.xcarchive" \
             DEVELOPMENT_TEAM=${{ secrets.APPLE_TEAM_ID }} CODE_SIGN_STYLE=Automatic \
-            CURRENT_PROJECT_VERSION=${{ github.run_number }} MARKETING_VERSION=${{ vars.VERSION_NAME || '1.5' }} \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} MARKETING_VERSION=${{ vars.VERSION_NAME || '1.6' }} \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" \
             -authenticationKeyID ${{ secrets.ASC_KEY_ID }} \

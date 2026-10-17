@@ -1,6 +1,6 @@
 # Diamond Bid changelog
 
-## Unreleased
+## 1.6
 - Smarter bots: each bot plays the round out in its head against what the others are likely to bid, and every character has its own style and favourite gems, so bots no longer all play the same card. The new Hard bots beat the old ones in about 9 of 10 games.
 - The "Ties" option is gone: a tied round always splits the card's points, and a tied match is settled by the tie-breaker wheel.
 - Suits: you choose only your own suit; the other players get the remaining suits at random, and the middle cards are Stars or Crowns, picked at random each match.
