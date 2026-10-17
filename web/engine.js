@@ -15,16 +15,15 @@ const usesTeams = c => !!c.teams && c.seatCount === 4;
 const sideCount = c => usesTeams(c) ? 2 : c.seatCount;
 const sideOf = (c, seat) => usesTeams(c) ? seat % 2 : seat;
 const seatsOnSide = (c, side) => range(c.seatCount).filter(i => sideOf(c, i) === side);
-const TEAM_NAME = ["Red team", "Black team"];
+const TEAM_NAME = ["Red team", "Blue team"];
 
 /** Points are kept in twelfths so splits between 2, 3 or 4 players stay exact. */
 function fmt(t) {
   const sign = t < 0 ? "−" : "";
   const a = Math.abs(t), whole = Math.floor(a / 12), rem = a % 12;
-  const fr = { 3: "¼", 4: "⅓", 6: "½", 8: "⅔", 9: "¾" };
+  const fr = { 1: "¹⁄₁₂", 2: "⅙", 3: "¼", 4: "⅓", 5: "⁵⁄₁₂", 6: "½", 7: "⁷⁄₁₂", 8: "⅔", 9: "¾", 10: "⅚", 11: "¹¹⁄₁₂" };
   if (rem === 0) return sign + whole;
-  if (fr[rem]) return sign + (whole ? whole : "") + fr[rem];
-  return sign + (a / 12).toFixed(1);
+  return sign + (whole ? whole : "") + fr[rem];
 }
 
 /* Randomness. A state with `rngState` (the daily challenge) is fully repeatable. */

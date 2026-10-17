@@ -86,7 +86,9 @@ const GEM_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 L36 
 const JACKPOT_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2 L37 20 L20 38 L3 20Z" fill="#fff8dc"/><path d="M20 2 L37 20 L20 20Z" fill="#ffe9a0"/><path d="M20 20 L3 20 L20 38Z" fill="#c8942c"/><path d="M20 2 L37 20 L20 38 L3 20Z" fill="none" stroke="#7a4a00" stroke-width="2" stroke-linejoin="round"/></svg>`;
 const CURSE_SVG = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 C24 11 33 15 31 26 C30 33 25 37 20 37 C14 37 9 33 9 26 C9 20 13 17 14 12 C17 16 17 19 19 20 C20 14 18 9 20 3Z" fill="currentColor"/></svg>`;
 const SPEAKER_SVG = on => `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>${on ? `<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>` : `<path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`}</svg>`;
-const TEAM_COLOR = ["#e0485a", "#e9e3d3"];
+// Score colors for each side: red and blue like a scoreboard, then green and gold for 3–4 players.
+const SIDE_COLOR = ["#e0485a", "#3d7bf0", "#2fb46c", "#e0a92a"];
+const TEAM_COLOR = SIDE_COLOR.slice(0, 2);
 const REVEAL_MS = 3000;
 const SPIN_MS = 4200;
 const TUTORIAL_PRIZES = [5, 13, 2, 9, 1, 11, 7, 3, 12, 6, 10, 4, 8];
@@ -996,9 +998,15 @@ function renderGame() {
     handHTML = `<p class="muted" style="text-align:center">${t("The table is full, so you're watching this game.")}</p>`;
   }
 
-  const teamBar = usesTeams(c) ? `<div class="teambar">
-      ${[0, 1].map(side => `<span class="t"><span class="team-dot" style="background:${TEAM_COLOR[side]}"></span>${t(TEAM_NAME[side])} <b>${fmt(sideScore(s, side))}</b>${c.gamesToWin > 1 ? `<small style="color:var(--muted)">· ${t("{n} won", { n: s.gameWins[side] })}</small>` : ""}</span>`).join(`<span style="color:var(--muted)">${t("vs")}</span>`)}
-    </div>` : "";
+  // Scoreboard across the top: red vs blue, the two scores meeting in the middle.
+  const sides = sideCount(c), top = Math.max(...range(sides).map(side => sideScore(s, side)));
+  const mySide = home !== undefined ? sideOf(c, home) : -1;
+  const teamBar = `<div class="scorebar ${sides === 2 ? "duo" : ""}">${range(sides).map(side => {
+    const pts = sideScore(s, side);
+    return `<div class="sb ${pts === top && pts > 0 ? "lead" : ""}" style="--sc:${SIDE_COLOR[side]}">
+      <span class="nm">${esc(sideLabel(s, side))}${side === mySide ? ` <small>${t("(you)")}</small>` : ""}${c.gamesToWin > 1 ? `<small>${t("{n} won", { n: s.gameWins[side] })}</small>` : ""}</span>
+      <b>${fmt(pts)}</b></div>`;
+  }).join("")}</div>`;
 
   let overlay = "";
   if (needsHandoff()) {

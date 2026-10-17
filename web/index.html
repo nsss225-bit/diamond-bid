@@ -269,6 +269,17 @@ footer.foot { padding-block: 30px 48px; color: var(--muted); font-size: 13px; bo
 .tbar .mid b { display: block; font: 700 20px var(--display); }
 .tbar .mid small { color: var(--muted); font-size: 12px; }
 .tbar .right { display: flex; gap: 8px; }
+.scorebar { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 3px; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+.scorebar .sb { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 12px; color: #fff; background: linear-gradient(180deg, color-mix(in srgb, var(--sc) 92%, #fff), color-mix(in srgb, var(--sc) 70%, #000)); }
+.scorebar.duo .sb:last-child { flex-direction: row-reverse; text-align: end; }
+.scorebar .nm { display: flex; flex-direction: column; min-width: 0; font-weight: 700; font-size: 13px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scorebar .nm small { font-weight: 500; font-size: 11px; opacity: .85; }
+.scorebar b { font: 800 26px var(--display); font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+.scorebar .sb.lead b { color: #ffe7a3; }
+.scorebar:not(.duo) .sb { flex-direction: column; justify-content: center; gap: 0; padding: 5px 4px; text-align: center; }
+.scorebar:not(.duo) .nm { align-items: center; max-width: 100%; font-size: 12px; }
+.scorebar:not(.duo) .nm, .scorebar:not(.duo) .nm small { display: block; overflow: hidden; text-overflow: ellipsis; }
+.scorebar:not(.duo) b { font-size: 21px; line-height: 1.1; }
 .teambar { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--panel); padding: 8px 14px; border-radius: 14px; font-variant-numeric: tabular-nums; }
 .teambar .t { display: flex; align-items: center; gap: 8px; font-weight: 600; }
 .teambar .t b { font: 800 22px var(--display); }

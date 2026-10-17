@@ -66,7 +66,7 @@ const ROWS = [
   ["Diamonds", "Diamantes", "Carreau", "الديناري", "方块"],
   ["Spades", "Picas", "Pique", "البستوني", "黑桃"],
   ["Red team", "Equipo rojo", "Équipe rouge", "الفريق الأحمر", "红队"],
-  ["Black team", "Equipo negro", "Équipe noire", "الفريق الأسود", "黑队"],
+  ["Blue team", "Equipo azul", "Équipe bleue", "الفريق الأزرق", "蓝队"],
   ["vs", "contra", "contre", "ضد", "对"],
   ["Bot", "Bot", "Bot", "روبوت", "机器人"],
   ["You", "Tú", "Vous", "أنت", "你"],
