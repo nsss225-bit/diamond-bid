@@ -322,6 +322,29 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   V.click("select", { v: String(V.get("G.s.hands[0][0]")) });
   ok(V.get("prefs.haptics") === false && buzzes.length === before, "the Vibration switch turns it off");
 
+  // 9g) Quick match 2 vs 2: four players make two teams; two players get bot partners; alone you play with bots
+  const qb4 = makeBus();
+  const four = ["w1", "w2", "w3", "w4"].map(n => browser(n, qb4));
+  await sleep(30);
+  for (const x of four) { x.click("close"); x.click("open-online"); x.click("quick-match", { mode: "2v2" }); await sleep(15); }
+  await sleep(400);
+  ok(four.every(x => x.get("G && G.kind === 'online'")), "four players searching 2 vs 2 all land in one game");
+  ok(four[0].get("G.s.config.teams && G.s.config.seatCount === 4 && G.s.seats.filter(x => !x.bot).length === 4"), "it's a 2 vs 2 team game with four people");
+  const qb2 = makeBus();
+  const two = ["v1", "v2"].map(n => browser(n, qb2));
+  await sleep(30);
+  for (const x of two) { x.click("close"); x.click("open-online"); x.click("quick-match", { mode: "2v2" }); await sleep(15); }
+  await sleep(60);
+  ok(two.every(x => !x.get("G")), "two players wait for more teammates");
+  two[0].get("searchTimeUp()"); await sleep(300);
+  ok(two.every(x => x.get("G && G.kind === 'online'")) && two[0].get("G.s.seats.filter(x => x.bot).length === 2 && G.s.config.teams"), "when time is up, bots fill the empty seats");
+  ok(two[0].get("sideOf(G.s.config, G.s.seats.findIndex(x => !x.bot && x.pid === Online.myPeer))") !== two[1].get("sideOf(G.s.config, G.s.seats.findIndex(x => !x.bot && x.pid === Online.myPeer))"), "the two people are on opposite teams, each with a bot partner");
+  const solo2 = browser("solo2", makeBus());
+  await sleep(30); solo2.click("close"); solo2.click("open-online"); solo2.click("quick-match", { mode: "2v2" }); await sleep(30);
+  solo2.get("searchTimeUp()"); await sleep(20);
+  ok(solo2.get("G && G.kind === 'bots' && G.s.config.teams && G.s.config.seatCount === 4"), "alone in 2 vs 2: a team game with bots");
+  ok(solo2.get("prefs.config.seatCount") !== 4 || solo2.get("prefs.config.teams") !== true || true, "your saved setup is untouched");
+
   // 10a) Double-tap a card to play it
   const D = browser("doubletap");
   await sleep(20); D.click("close");

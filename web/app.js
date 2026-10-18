@@ -1722,7 +1722,7 @@ function onPeersChange(ch) {
 }
 function hostReadPeers(ch) {
   // Quick match: deal as soon as the other player sits down.
-  if (!G && Online.quick && tablePeople().length >= 2) { cancelQuick(); hostStart(QUICK_RULES); return; }
+  if (!G && Online.quick && tablePeople().length >= Match.expect) { const mode = Match.mode; cancelQuick(); hostStart(QUICK_RULES[mode]); return; }
   if (!G || G.kind !== "online") { if (app.setup === "online-lobby") render(); return; }
   const s = G.s;
   let changed = false;
@@ -1778,15 +1778,18 @@ function publish() {
   Online.named.presence({ g: packState(G.s) }).catch(() => {});
 }
 /* ================= Quick match ================= */
-/* Everyone searching waits in one shared lobby. The two who have waited longest pair up: the earlier one
-   opens a private table and invites the other. If nobody turns up in time, you play a bot instead. */
+/* Everyone searching waits in one shared lobby, grouped by mode (1 vs 1 or 2 vs 2). The player who has waited
+   longest opens a private table and invites the others: one for 1 vs 1, three for 2 vs 2. In 2 vs 2, if fewer
+   than four turn up in time, bots fill the empty seats. Nobody at all: you play bots instead. */
 const QM_ROOM = "quickmatch-v1", QM_WAIT_MS = 20000;
-const QUICK_RULES = { seatCount: 2, teams: false, gamesToWin: 1 };
-const Match = { lobby: null, start: 0, timer: null, tick: null, paired: null };
-async function quickMatch() {
+const QUICK_RULES = { "1v1": { seatCount: 2, teams: false, gamesToWin: 1 }, "2v2": { seatCount: 4, teams: true, gamesToWin: 1 } };
+const QM_NEED = { "1v1": 2, "2v2": 4 };
+const Match = { lobby: null, start: 0, timer: null, tick: null, paired: null, mode: "1v1", expect: 2, peers: [] };
+const qmMode = p => p.presence.qm === "2v2" ? "2v2" : "1v1";
+async function quickMatch(mode = "1v1") {
   if (!Online.room) return;
   cancelQuick();
-  Object.assign(Match, { start: Date.now(), paired: null });
+  Object.assign(Match, { start: Date.now(), paired: null, mode, expect: QM_NEED[mode], peers: [] });
   Online.error = ""; Online.quick = true;
   app.setup = "online-quick"; render();
   let lobby;
@@ -1794,34 +1797,56 @@ async function quickMatch() {
   catch (e) { Online.quick = false; Online.error = t("Couldn't open that table. Check your connection and try again."); app.setup = "online-menu"; render(); return; }
   if (app.setup !== "online-quick") { try { lobby.leave(); } catch (e) {} return; } // cancelled while connecting
   Match.lobby = lobby;
-  try { await lobby.presence({ app: "diamondbid", qm: 1, name: myName(), char: prefs.character, t: Match.start }); } catch (e) {}
+  try { await lobby.presence({ app: "diamondbid", qm: mode, name: myName(), char: prefs.character, t: Match.start }); } catch (e) {}
   lobby.onPeers(onLobby, () => {});
-  Match.timer = setTimeout(noOneFound, QM_WAIT_MS);
+  Match.timer = setTimeout(searchTimeUp, QM_WAIT_MS);
   Match.tick = setInterval(() => {
     const el = document.getElementById("qm-left");
     if (el) el.textContent = Math.max(0, Math.ceil((QM_WAIT_MS - (Date.now() - Match.start)) / 1000));
+    const found = document.getElementById("qm-found");
+    if (found) found.textContent = Math.max(1, Match.peers.length);
   }, 250);
+}
+function lobbyWaiting(peers) {
+  return peers.filter(p => p.presence && p.presence.app === "diamondbid" && p.presence.qm && !p.presence.pair && qmMode(p) === Match.mode)
+    .sort((a, b) => (a.presence.t || 0) - (b.presence.t || 0) || (a.peer < b.peer ? -1 : 1));
+}
+/** The longest-waiting player opens a table and invites `others`. */
+function openMatch(others) {
+  const code = "qm" + randomCode();
+  Match.paired = { code, host: true };
+  Match.expect = others.length + 1;
+  Haptics.alert();
+  Match.lobby.presence({ pair: code, with: others.map(p => p.peer) }).catch(() => {});
+  joinMatched();
 }
 function onLobby(ch) {
   if (Match.paired || !Match.lobby) return;
   const me = ch.peers.find(p => p.sameTab);
   if (!me) return;
   // Someone already picked me: join their table.
-  const invite = ch.peers.find(p => !p.sameTab && p.presence && p.presence.qm && p.presence.with === me.peer && p.presence.pair);
+  const invite = ch.peers.find(p => !p.sameTab && p.presence && p.presence.qm && p.presence.pair && [].concat(p.presence.with || []).includes(me.peer));
   if (invite) { Match.paired = { code: invite.presence.pair, host: false }; Haptics.alert(); joinMatched(); return; }
-  const waiting = ch.peers.filter(p => p.presence && p.presence.app === "diamondbid" && p.presence.qm && !p.presence.pair)
-    .sort((a, b) => (a.presence.t || 0) - (b.presence.t || 0) || (a.peer < b.peer ? -1 : 1));
+  const waiting = lobbyWaiting(ch.peers);
+  Match.peers = waiting;
+  const need = QM_NEED[Match.mode];
   const i = waiting.findIndex(p => p.sameTab);
-  if (i < 0 || i % 2 || !waiting[i + 1]) return; // the earlier of each pair opens the table
-  const code = "qm" + randomCode();
-  Match.paired = { code, host: true };
-  Haptics.alert();
-  Match.lobby.presence({ pair: code, with: waiting[i + 1].peer }).catch(() => {});
-  joinMatched();
+  if (i < 0 || i % need) { render(); return; } // the first of each group opens the table
+  const group = waiting.slice(i, i + need);
+  if (group.length === need) openMatch(group.slice(1));
+  else render();
+}
+/** Time's up: in 2 vs 2 start with whoever came (bots fill in); otherwise play bots. */
+function searchTimeUp() {
+  if (Match.paired || !Match.lobby) return;
+  const waiting = Match.peers;
+  if (Match.mode === "2v2" && waiting.length > 1 && waiting[0].sameTab) { openMatch(waiting.slice(1, 4)); return; }
+  if (Match.mode === "2v2" && waiting.length > 1) { Match.timer = setTimeout(noOneFound, 8000); return; } // the first one will invite us
+  noOneFound();
 }
 async function joinMatched() {
   clearTimeout(Match.timer);
-  // If the game hasn't started a little later (the other player vanished), fall back to a bot.
+  // If the game hasn't started a little later (someone vanished), fall back to bots.
   Match.timer = setTimeout(() => { if (!G && Online.quick) noOneFound(); }, 12000);
   render();
   await joinTable(Match.paired.code, Match.paired.host);
@@ -1830,13 +1855,18 @@ async function joinMatched() {
 function cancelQuick() {
   clearTimeout(Match.timer); clearInterval(Match.tick);
   if (Match.lobby) { try { Match.lobby.leave(); } catch (e) {} }
-  Object.assign(Match, { lobby: null, timer: null, tick: null, paired: null });
+  Object.assign(Match, { lobby: null, timer: null, tick: null, paired: null, peers: [] });
 }
 function noOneFound() {
+  const mode = Match.mode;
   leaveOnline();
   app.setup = null;
+  // Same mode, with bots: 1 vs 1 against a bot, or 2 vs 2 with a bot partner against two bots.
+  const keep = prefs.config;
+  prefs.config = Object.assign({}, keep, QUICK_RULES[mode]);
   startLocal("bots");
-  toast("◆", t("Nobody else was online, so you're playing a bot."), t("Quick match"));
+  prefs.config = keep;
+  toast("◆", mode === "2v2" ? t("Nobody else was online, so you're playing with bots.") : t("Nobody else was online, so you're playing a bot."), t("Quick match"));
 }
 function hostStart(over = {}) {
   const people = tablePeople();
@@ -1880,9 +1910,13 @@ function renderOnlineSheet() {
   if (app.setup === "online-quick") {
     const left = Math.max(0, Math.ceil((QM_WAIT_MS - (Date.now() - Match.start)) / 1000));
     return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true" style="max-width:420px">
-      ${head(t("Quick match"))}
-      ${Match.paired ? searching(t("Player found! Dealing the cards…"))
-        : `${searching(t("Looking for players…"))}<p class="muted" style="margin:0;text-align:center">${t("Playing a bot in {n} seconds if nobody joins.", { n: `<b id="qm-left" style="color:var(--ink)">${left}</b>` })}</p>`}
+      ${head(`${t("Quick match")} · ${Match.mode === "2v2" ? t("2 vs 2") : t("1 vs 1")}`)}
+      ${Match.paired ? searching(Match.mode === "2v2" ? t("Players found! Dealing the cards…") : t("Player found! Dealing the cards…"))
+        : `${searching(t("Looking for players…"))}
+          ${Match.mode === "2v2" ? `<p class="qm-count">${t("{n} of 4 players here", { n: `<b id="qm-found">${Math.max(1, Match.peers.length)}</b>` })}</p>` : ""}
+          <p class="muted" style="margin:0;text-align:center">${Match.mode === "2v2"
+            ? t("Starting in {n} seconds. Bots fill any empty seats.", { n: `<b id="qm-left" style="color:var(--ink)">${left}</b>` })
+            : t("Playing a bot in {n} seconds if nobody joins.", { n: `<b id="qm-left" style="color:var(--ink)">${left}</b>` })}</p>`}
       ${err}
       <div class="sheet-foot" style="justify-content:center"><button class="btn ghost" data-act="online-close">${t("Cancel")}</button></div>
     </div></div>`;
@@ -1891,8 +1925,8 @@ function renderOnlineSheet() {
     return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true">
       ${head(t("Play online"))}
       <div class="quick">
-        <div><h3>${t("Quick match")}</h3><p class="muted" style="margin:0">${t("Play someone who's online now. If nobody turns up in 20 seconds, you'll play a bot instead.")}</p></div>
-        <button class="btn primary" data-act="quick-match">${t("Find a player")}</button>
+        <div><h3>${t("Quick match")}</h3><p class="muted" style="margin:0">${t("Play people who are online now, 1 vs 1 or as teams of two. If nobody turns up in 20 seconds, bots take the empty seats.")}</p></div>
+        <div class="qm-modes"><button class="btn primary" data-act="quick-match" data-mode="1v1">${t("1 vs 1")}</button><button class="btn primary" data-act="quick-match" data-mode="2v2">${t("2 vs 2")}</button></div>
       </div>
       <div class="opt-label" style="margin:0">${t("Play with friends")}</div>
       <p class="muted friends-note" style="margin:0">${t("Play with friends on their own phones. Everyone opens this same page. Your friends need to be able to open it too: share it from the page's Share menu.")}</p>
@@ -2164,7 +2198,7 @@ document.addEventListener("click", e => {
     case "open-setup": app.setup = el.dataset.kind; render(); break;
     case "open-online": app.setup = "online-menu"; Online.error = ""; render(); break;
     case "online-create": joinTable(randomCode(), true); break;
-    case "quick-match": quickMatch(); break;
+    case "quick-match": quickMatch(el.dataset.mode === "2v2" ? "2v2" : "1v1"); break;
     case "online-join": joinTable((document.getElementById("join-code") || {}).value, false); break;
     case "online-close": leaveOnline(); app.setup = null; render(); break;
     case "online-start": hostStart(); break;

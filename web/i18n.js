@@ -8,6 +8,12 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["1 vs 1", "1 contra 1", "1 contre 1", "1 ضد 1", "1 对 1"],
+  ["Players found! Dealing the cards…", "¡Jugadores encontrados! Repartiendo las cartas…", "Joueurs trouvés ! Distribution des cartes…", "تم العثور على لاعبين! جارٍ توزيع الأوراق…", "找到玩家了！正在发牌…"],
+  ["{n} of 4 players here", "{n} de 4 jugadores aquí", "{n} joueurs sur 4 présents", "{n} من 4 لاعبين هنا", "已有 {n}/4 名玩家"],
+  ["Starting in {n} seconds. Bots fill any empty seats.", "Empieza en {n} segundos. Los bots ocupan los asientos libres.", "Début dans {n} secondes. Des bots prennent les places libres.", "تبدأ خلال {n} ثانية. الروبوتات تملأ المقاعد الفارغة.", "{n} 秒后开始，空位由机器人补上。"],
+  ["Nobody else was online, so you're playing with bots.", "No había nadie más conectado, así que juegas con bots.", "Personne d'autre n'était en ligne, vous jouez donc avec des bots.", "لم يكن أحد آخر متصلاً، لذلك ستلعب مع الروبوتات.", "目前没有其他玩家在线，你将与机器人一起玩。"],
+  ["Play people who are online now, 1 vs 1 or as teams of two. If nobody turns up in 20 seconds, bots take the empty seats.", "Juega con quien esté conectado ahora, 1 contra 1 o en equipos de dos. Si nadie aparece en 20 segundos, los bots ocupan los asientos libres.", "Jouez avec des joueurs en ligne, en 1 contre 1 ou en équipes de deux. Si personne n'arrive en 20 secondes, des bots prennent les places libres.", "العب مع المتصلين الآن، 1 ضد 1 أو في فرق من اثنين. إذا لم يظهر أحد خلال 20 ثانية، تأخذ الروبوتات المقاعد الفارغة.", "与现在在线的玩家对战，1 对 1 或两人一队。如果 20 秒内没人加入，空位由机器人补上。"],
   ["Lucky spin", "Giro afortunado", "Roue chanceuse", "الدوران المحظوظ", "幸运转盘"],
   ["Win {n} gems on the tie spin.", "Gana {n} gemas en el giro de desempate.", "Gagnez {n} gemmes à la roue d'égalité.", "اربح {n} جوهرة في دوران التعادل.", "在平局转盘中赢得 {n} 颗宝石。"],
   ["Tie! Spinning…", "¡Empate! Girando…", "Égalité ! Ça tourne…", "تعادل! جارٍ الدوران…", "平局！转盘中…"],

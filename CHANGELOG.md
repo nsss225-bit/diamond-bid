@@ -1,5 +1,8 @@
 # Diamond Bid changelog
 
+## Unreleased
+- Online quick match now has two modes: 1 vs 1, or 2 vs 2 teams. In 2 vs 2, up to four people searching at the same time are put at one table; if fewer than four turn up within about 20 seconds, bots fill the empty seats (people you're matched with sit on opposite teams). If no one is found, you play the same mode against bots. Friends' tables could already be set to 2 vs 2 by the host.
+
 ## 1.6
 - Smarter bots: each bot plays the round out in its head against what the others are likely to bid, and every character has its own style and favourite gems, so bots no longer all play the same card. The new Hard bots beat the old ones in about 9 of 10 games.
 - The "Ties" option is gone: a tied round always splits the card's points, and a tied match is settled by the tie-breaker wheel.
