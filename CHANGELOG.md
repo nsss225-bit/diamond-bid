@@ -1,6 +1,7 @@
 # Diamond Bid changelog
 
 ## Unreleased
+- Free home-screen web app: https://nsss225-bit.github.io/diamond-bid/play/ installs on iPhone (Safari → Share → Add to Home Screen) and Android, with its own icon, full screen and offline play. Like the store apps, it hides online play and sign-in for now.
 - Online quick match now has two modes: 1 vs 1, or 2 vs 2 teams. In 2 vs 2, up to four people searching at the same time are put at one table; if fewer than four turn up within about 20 seconds, bots fill the empty seats (people you're matched with sit on opposite teams). If no one is found, you play the same mode against bots. Friends' tables could already be set to 2 vs 2 by the host.
 
 ## 1.6

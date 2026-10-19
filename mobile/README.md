@@ -6,6 +6,10 @@ The store apps are the web game (`../web`) wrapped with [Capacitor](https://capa
 - **App icon and launch screen:** made from the in-game logo (`assets/`). After changing those images, run `npm run assets` again.
 - **Online play and the shared daily leaderboard:** they use claude.ai's online service, so the apps show "coming soon" for them. Everything else works offline: bots, pass and play, the daily challenge, coins and languages.
 
+## The free home-screen web app
+
+`npm run web-app` also builds `../docs/play`: the game as an installable web app on GitHub Pages (https://nsss225-bit.github.io/diamond-bid/play/), with an icon, offline play (`sw.js`) and the same layout as the store apps. On iPhone: open it in Safari → Share → Add to Home Screen. Run it again and push after changing the game.
+
 ## Layout
 
 | Path | What it is |

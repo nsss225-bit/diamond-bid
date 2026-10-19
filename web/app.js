@@ -204,8 +204,8 @@ const DEAL_GAP = 75;
 const SIDE_COLOR = ["#ff7b8a", "#6ea8ff", "#5fd896", "#f5c75a"];
 const TEAM_COLOR = SIDE_COLOR.slice(0, 2);
 const REVEAL_MS = 3000;
-// Running inside the App Store / Google Play app (Capacitor) rather than on claude.ai.
-const IN_APP = !!(typeof window !== "undefined" && window.Capacitor);
+// Running as an app (App Store / Google Play via Capacitor, or the home-screen web app in docs/play) rather than on claude.ai.
+const IN_APP = !!(typeof window !== "undefined" && (window.Capacitor || window.DIAMOND_STANDALONE));
 // Online and vs bots: 10 seconds to bid, then a card is played for you; 20 seconds to come back or you're out.
 const TURN_MS = 10000, AWAY_MS = 20000;
 const TIMED_KINDS = ["bots", "online"];
