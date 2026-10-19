@@ -4,7 +4,7 @@ The store apps are the web game (`../web`) wrapped with [Capacitor](https://capa
 
 - **Phones:** portrait only. **Tablets:** any orientation. In landscape, scores and controls sit in a side panel and 4 players sit around the table.
 - **App icon and launch screen:** made from the in-game logo (`assets/`). After changing those images, run `npm run assets` again.
-- **Online play and the shared daily leaderboard:** they use claude.ai's online service, so the apps show "coming soon" for them. Everything else works offline: bots, pass and play, the daily challenge, coins and languages.
+- **Online play and the shared daily leaderboard:** on Diamond Bid's own Firebase server (project `diamond-bid`), through `net/firebase-room.js`. It stands in for claude.ai's room and db services, so the game code is the same everywhere. Players get an anonymous ID automatically; there is no sign-up. Everything else works offline: bots, pass and play, the daily challenge, coins and languages.
 
 ## The free home-screen web app
 
@@ -15,6 +15,9 @@ The store apps are the web game (`../web`) wrapped with [Capacitor](https://capa
 | Path | What it is |
 | --- | --- |
 | `build-www.js` | Copies the web game into `www/` as a standalone page (viewport and notch settings included). |
+| `net/firebase-room.js` | Online play and the leaderboard on Firebase (bundled into `www/net.js` and `docs/play/net.js`). |
+| `net/database.rules.json` | The Realtime Database security rules. Paste them into Firebase console → Realtime Database → Rules after changing them. |
+| `net/mock-firebase.js`, `net/mock-bus.js` | An in-memory Firebase for tests: `DIAMOND_NET=firebase node ../web/tests/ui.test.js` plays the online tests through the server code. |
 | `capacitor.config.json` | App name and id (`com.diamondbid.game`). The id must match the App Store and Play listings. |
 | `ios/`, `android/` | The native projects, kept in the repo. |
 | `scripts/configure-native.js` | Locks phones to portrait and lets tablets rotate. It was already applied to `ios/` and `android/`; run it again only if those folders are regenerated. |

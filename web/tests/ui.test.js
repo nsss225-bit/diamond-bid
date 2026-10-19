@@ -9,7 +9,7 @@ const ok = (c, m) => { if (!c) { failures++; console.log("FAIL:", m); } else con
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 /* A tiny shared "room" so two simulated browsers can play each other. */
-function makeBus() {
+function makeLocalBus() {
   const rooms = {};
   let n = 0;
   return {
@@ -36,6 +36,9 @@ function makeBus() {
     },
   };
 }
+
+// DIAMOND_NET=firebase plays the online tests through the store apps' server code (mobile/net) instead.
+const makeBus = process.env.DIAMOND_NET === "firebase" ? require("../../mobile/net/mock-bus.js") : makeLocalBus;
 
 function browser(label, bus) {
   const mk = () => ({ innerHTML: "", textContent: "", classList: { add() {}, remove() {} }, appendChild() {}, remove() {}, getContext: () => ({ clearRect() {}, save() {}, restore() {}, translate() {}, rotate() {}, fillRect() {} }), focus() {}, value: "" });

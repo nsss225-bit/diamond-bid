@@ -1,7 +1,9 @@
 # Diamond Bid changelog
 
 ## Unreleased
-- Free home-screen web app: https://nsss225-bit.github.io/diamond-bid/play/ installs on iPhone (Safari → Share → Add to Home Screen) and Android, with its own icon, full screen and offline play. Like the store apps, it hides online play and sign-in for now.
+- Online play in the App Store and Google Play apps and the home-screen web app, on Diamond Bid's own Firebase server: quick match 1 vs 1 or 2 vs 2, private tables with a code, and today's leaderboard. Players get an anonymous ID automatically, with no sign-up. Players on the apps and the web app can play each other (claude.ai keeps its own tables). The privacy policy and App Store privacy answers were updated to match.
+- The leaderboard now saves the player name with each score.
+- Free home-screen web app: https://nsss225-bit.github.io/diamond-bid/play/ installs on iPhone (Safari → Share → Add to Home Screen) and Android, with its own icon, full screen and offline play.
 - Online quick match now has two modes: 1 vs 1, or 2 vs 2 teams. In 2 vs 2, up to four people searching at the same time are put at one table; if fewer than four turn up within about 20 seconds, bots fill the empty seats (people you're matched with sit on opposite teams). If no one is found, you play the same mode against bots. Friends' tables could already be set to 2 vs 2 by the host.
 
 ## 1.6

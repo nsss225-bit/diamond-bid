@@ -1,0 +1,32 @@
+{
+  "rules": {
+    "rooms": {
+      "$room": {
+        ".read": "auth != null",
+        "$peer": {
+          ".write": "auth != null && (data.exists() ? data.child('uid').val() === auth.uid : newData.child('uid').val() === auth.uid)",
+          ".validate": "$room.length <= 60 && newData.child('uid').val() === auth.uid",
+          "uid": { ".validate": "newData.isString()" },
+          "t": { ".validate": "newData.isNumber()" },
+          "p": {
+            "$key": { ".validate": "$key.length <= 16 && (newData.isNumber() || (newData.isString() && newData.val().length <= 8192))" }
+          },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "dailyscores": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['date', 'score'])",
+        "date": { ".validate": "newData.isString() && newData.val().length <= 10" },
+        "score": { ".validate": "newData.isNumber() && newData.val() >= -1000 && newData.val() <= 1000" },
+        "char": { ".validate": "newData.isString() && newData.val().length <= 20" },
+        "name": { ".validate": "newData.isString() && newData.val().length <= 32" },
+        "at": { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}

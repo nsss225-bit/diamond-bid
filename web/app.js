@@ -206,6 +206,8 @@ const TEAM_COLOR = SIDE_COLOR.slice(0, 2);
 const REVEAL_MS = 3000;
 // Running as an app (App Store / Google Play via Capacitor, or the home-screen web app in docs/play) rather than on claude.ai.
 const IN_APP = !!(typeof window !== "undefined" && (window.Capacitor || window.DIAMOND_STANDALONE));
+// The app builds bring their own online server (mobile/net); without it, online play and the leaderboard are hidden.
+const NO_ONLINE = IN_APP && !(typeof window !== "undefined" && window.claude);
 // Online and vs bots: 10 seconds to bid, then a card is played for you; 20 seconds to come back or you're out.
 const TURN_MS = 10000, AWAY_MS = 20000;
 const TIMED_KINDS = ["bots", "online"];
@@ -546,8 +548,8 @@ function renderHome() {
         <h1>Diamond <em>Bid</em></h1>
         <div class="cta">
           <button class="btn primary" data-act="open-setup" data-kind="bots">${t("Play vs bots")}</button>
-          ${IN_APP ? "" : `<button class="btn ghost" data-act="open-online" ${onlineReady ? "" : `style="opacity:.6"`}>${t("Play online")}</button>`}
-          <button class="btn ghost ${IN_APP ? "wide" : ""}" data-act="open-setup" data-kind="pass">${t("Pass and play")}</button>
+          ${NO_ONLINE ? "" : `<button class="btn ghost" data-act="open-online" ${onlineReady ? "" : `style="opacity:.6"`}>${t("Play online")}</button>`}
+          <button class="btn ghost ${NO_ONLINE ? "wide" : ""}" data-act="open-setup" data-kind="pass">${t("Pass and play")}</button>
         </div>
         <div class="cta2">
           ${prefs.lastKind && stats.played ? `<button class="chip" data-act="replay"><span aria-hidden="true">↻</span>${t("Play again")}</button>` : ""}
@@ -573,7 +575,7 @@ function renderHome() {
           <p class="muted" style="margin:0">${stats.dailyBest[todayKey()] != null ? t("Your best today: {score} points. Play again to beat it.", { score: `<b style="color:var(--ink)">${fmt(stats.dailyBest[todayKey()])}</b>` }) : t("You haven't played today's challenge yet.")}</p>
           <div><button class="btn primary" data-act="daily">${t("Play today's challenge")}</button></div>
         </div>
-        ${IN_APP ? "" : `<div class="panel">
+        ${NO_ONLINE ? "" : `<div class="panel">
           <h3>${t("Today's leaderboard")}</h3>
           <div id="daily-lb">${renderLeaderboard()}</div>
         </div>`}
@@ -1624,7 +1626,7 @@ function renderLeaderboard() {
   if (!rows.length) return `<p class="muted">${t("No scores yet today. Play the challenge to set the first one.")}</p>`;
   return `<div class="lb">${rows.map((r, k) => `<div class="row ${r.id === Daily.myId ? "me" : ""}">
       <span class="pl">${k + 1}</span>${avatar(CHAR[r.char] ? r.char : "fox", "sm")}
-      <span class="nm">${esc(Daily.names[r.id] || t("Someone"))}${r.id === Daily.myId ? " " + t("(you)") : ""}</span><span class="sc">${fmt(r.score)}</span></div>`).join("")}</div>`;
+      <span class="nm">${esc(Daily.names[r.id] || cleanName(r.name) || t("Someone"))}${r.id === Daily.myId ? " " + t("(you)") : ""}</span><span class="sc">${fmt(r.score)}</span></div>`).join("")}</div>`;
 }
 function patchLeaderboard() {
   const el = document.getElementById("daily-lb");
@@ -1657,14 +1659,15 @@ async function initDaily() {
 }
 async function postDaily(score, date) {
   Daily.status = "";
-  if (!Daily.db || !Daily.myId) { Daily.status = t("Sign in to post your score to the shared leaderboard."); return; }
+  if (Daily.db && !Daily.myId && Daily.user) { try { Daily.myId = await Daily.user.id(); } catch (e) {} }
+  if (!Daily.db || !Daily.myId) { Daily.status = IN_APP ? t("Your score couldn't be posted. Check your internet connection.") : t("Sign in to post your score to the shared leaderboard."); return; }
   const mine = Daily.rows.find(r => r.id === Daily.myId);
   if (mine && mine.date === date && mine.score >= score) return;
   try {
-    await Daily.db.collection("dailyscores").doc(Daily.myId).set({ date, score, char: prefs.character, at: Date.now() });
+    await Daily.db.collection("dailyscores").doc(Daily.myId).set({ date, score, char: prefs.character, name: myName(), at: Date.now() });
     Daily.status = t("Posted to today's leaderboard.");
   } catch (e) {
-    Daily.status = t("Your score couldn't be posted. Posting needs Contributor access to this page.");
+    Daily.status = IN_APP ? t("Your score couldn't be posted. Check your internet connection.") : t("Your score couldn't be posted. Posting needs Contributor access to this page.");
   }
   if (app.screen === "game") render();
 }
@@ -1948,7 +1951,7 @@ function renderOnlineSheet() {
   return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true">
     ${head(host ? t("Your table") : t("Table"))}
     <div><div class="opt-label" style="text-align:center">${t("Table code")}</div><div class="code" dir="ltr">${esc(Online.code.toUpperCase())}</div>
-      <p class="muted" style="margin:4px 0 0;text-align:center">${t("Friends open this page, tap Play online, and enter this code.")}</p></div>
+      <p class="muted" style="margin:4px 0 0;text-align:center">${IN_APP ? t("Friends open Diamond Bid, tap Play online, and enter this code.") : t("Friends open this page, tap Play online, and enter this code.")}</p></div>
     ${people.length < 2 ? searching(t("Looking for players…")) : !host && people.some(p => p.presence.host) ? searching(t("Waiting for the host to start the game…")) : ""}
     <div><div class="opt-label">${t("At the table")} (${people.length})</div><div class="peers">${roster || `<p class="muted">${t("Connecting…")}</p>`}</div></div>
     ${host ? rulesFields("online", people.length < seats)

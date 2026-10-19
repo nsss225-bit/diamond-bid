@@ -23,6 +23,7 @@ Diamond Bid is a quick, clever card game for 1 to 4 players. A card is turned up
 
 PLAY YOUR WAY
 • Play against bots with their own styles, from Easy to an Expert that learns your habits
+• Play online: quick match 1 vs 1 or 2 vs 2, or a private table for friends with a 4-letter code
 • Pass and play with friends on one phone or iPad
 • 1 vs 1, 2 vs 2 teams, or a 4-player free-for-all
 • Choose your suit: Hearts, Spades, Diamonds or Clubs, and play for Stars or Crowns in the middle
@@ -44,7 +45,7 @@ MADE FOR YOUR PHONE
 • Satisfying sounds and vibration
 • English, العربية, Español, Français and 中文
 
-No ads. No purchases with real money. No account needed.
+No ads. No purchases with real money. No account needed, even to play online.
 
 ## Keywords (100, comma-separated, no spaces)
 card,cards,bidding,strategy,diamonds,family,party,bots,trick,offline,friends,daily,puzzle,classic
@@ -53,11 +54,19 @@ card,cards,bidding,strategy,diamonds,family,party,bots,trick,offline,friends,dai
 The first release of Diamond Bid. Have fun, and tell us what you think!
 
 ## App Privacy (the questionnaire)
-- "Do you or your third-party partners collect data from this app?" → **No, we do not collect data from this app.**
+- "Do you or your third-party partners collect data from this app?" → **Yes, we collect data from this app.**
+- Data types to tick:
+  - **Identifiers → User ID** (the anonymous Firebase player ID)
+  - **User Content → Gameplay Content** (moves at online tables, daily scores)
+  - **Contact Info → Name** (the optional player name other players see)
+- For each of the three, answer:
+  - Used for: **App Functionality** only
+  - Linked to the user's identity: **No**
+  - Used for tracking: **No**
 
 ## App Review information
-- **Sign-in required**: No
-- **Notes for the reviewer**: Diamond Bid is a complete offline card game. Tap Play vs bots to start a game; double-tap a card (or drag it up) to bid it. The Tutorial button on the Play tab gives a two-minute guided game. Coins are earned by playing and cannot be bought.
+- **Sign-in required**: No (online play uses an automatic anonymous player ID)
+- **Notes for the reviewer**: Diamond Bid is a complete offline card game. Tap Play vs bots to start a game; double-tap a card (or drag it up) to bid it. Play online → Quick match finds another player or, after 20 seconds, starts a game against bots, so it can be tried with a single device. The Tutorial button on the Play tab gives a two-minute guided game. Coins are earned by playing and cannot be bought.
 
 ## Screenshots needed
 - iPhone 6.9" display (1320 × 2868), 3 to 10 images

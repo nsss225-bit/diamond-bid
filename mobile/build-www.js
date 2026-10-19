@@ -2,12 +2,15 @@
 //   mobile/www   for the iOS and Android apps (Capacitor)
 //   docs/play    the free home-screen web app on GitHub Pages (Safari: Share → Add to Home Screen)
 // claude.ai wraps web/index.html in a page skeleton; these need their own, with the viewport set for notches.
+// Both also get net.js: online play and the leaderboard on Diamond Bid's Firebase server (net/firebase-room.js).
 const fs = require("fs"), path = require("path"), crypto = require("crypto");
 const root = path.join(__dirname, ".."), web = path.join(root, "web");
 const GAME_FILES = ["engine.js", "i18n.js", "app.js"];
+const FILES = [...GAME_FILES, "net.js"];
 
 function page(extraHead) {
-  const body = fs.readFileSync(path.join(web, "index.html"), "utf8").replace(/<meta name="claude:[^>]*>\n?/g, "");
+  const body = fs.readFileSync(path.join(web, "index.html"), "utf8").replace(/<meta name="claude:[^>]*>\n?/g, "")
+    .replace('<script src="app.js"></script>', '<script src="net.js"></script>\n<script src="app.js"></script>');
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -27,6 +30,7 @@ function fresh(out) {
   fs.rmSync(out, { recursive: true, force: true });
   fs.mkdirSync(out, { recursive: true });
   for (const f of GAME_FILES) fs.copyFileSync(path.join(web, f), path.join(out, f));
+  require("esbuild").buildSync({ entryPoints: [path.join(__dirname, "net", "firebase-room.js")], bundle: true, minify: true, format: "iife", target: "es2019", legalComments: "none", outfile: path.join(out, "net.js") });
 }
 
 function buildApp() {
@@ -53,8 +57,8 @@ async function buildWebApp() {
 `);
   fs.writeFileSync(path.join(out, "index.html"), html);
   // The cache name changes whenever the game changes, so players get the update the next time they open it online.
-  const files = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png", ...GAME_FILES];
-  const hash = crypto.createHash("sha256").update(html + GAME_FILES.map(f => fs.readFileSync(path.join(out, f), "utf8")).join("")).digest("hex").slice(0, 12);
+  const files = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png", ...FILES];
+  const hash = crypto.createHash("sha256").update(html + FILES.map(f => fs.readFileSync(path.join(out, f), "utf8")).join("")).digest("hex").slice(0, 12);
   fs.writeFileSync(path.join(out, "sw.js"), `// Keeps Diamond Bid playable offline. Game files: network first, so updates arrive; fonts: cache first.
 const CACHE = "diamond-bid-${hash}", FILES = ${JSON.stringify(files)};
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
