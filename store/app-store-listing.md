@@ -70,5 +70,5 @@ The first release of Diamond Bid. Have fun, and tell us what you think!
 
 ## Screenshots needed
 - iPhone 6.9" display (1320 × 2868), 3 to 10 images
-- iPad 13" display (2064 × 2752), 3 to 10 images
-I'll make these from the game: Play screen, a round being played, the reveal, character picker, achievements.
+- iPad 13" display (2064 × 2752), 3 to 10 images (the iPad home screen is left out: it looks empty at that size)
+Ready in store/screenshots (remake them with `node mobile/build-www.js --web-app && node store/make-screenshots.js`): home, a round being played, the reveal, setup, character picker, achievements.
