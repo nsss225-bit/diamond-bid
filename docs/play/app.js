@@ -182,15 +182,20 @@ function logoSVG(cls = "") {
 </svg>`;
 }
 const wordmark = () => `<div class="wordmark" dir="ltr">Diamond <em>Bid</em></div>`;
-/** "Looking for players…": the logo, gently alive, with a line of text. */
-const searching = text => `<div class="searching">${logoSVG("live")}<p>${text}</p></div>`;
+/** The name fanned out on playing cards, dealt in one by one, card-room style. */
+const fanLogo = () => `<div class="fanlogo" dir="ltr" aria-label="Diamond Bid">${[..."DIAMOND"].map((ch, k) =>
+  `<span class="fl ${k % 2 ? "blk" : "red"}" style="--k:${k - 3};--d:${k}"><b>${ch}</b><i>${["♦", "♠", "♥", "♣"][k % 4]}</i></span>`).join("")}</div><div class="fanbid" dir="ltr">Bid</div>`;
+/** A deck being riffle-shuffled, over and over: shown while loading and while looking for players. */
+const shuffler = () => `<div class="shuffler" aria-hidden="true">${range(8).map(k => `<i style="--k:${k}"></i>`).join("")}</div>`;
+/** "Looking for players…": the deck shuffling, with a line of text. */
+const searching = text => `<div class="searching">${shuffler()}<p>${text}</p></div>`;
 const rotateNotice = () => `<div class="rotate">${logoSVG()}<svg class="phone" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="18.5" r="1" fill="currentColor"/></svg><p>${t("Turn your phone upright to play")}</p></div>`;
 function showSplash() {
   if (!document.body || !document.createElement) return;
   const el = document.createElement("div");
   el.className = "splash";
   el.setAttribute && el.setAttribute("aria-hidden", "true");
-  el.innerHTML = `<div class="splash-in">${logoSVG("intro")}${wordmark()}<div class="splash-bar"><span></span></div></div>`;
+  el.innerHTML = `<div class="splash-in">${fanLogo()}${shuffler()}</div>`;
   document.body.appendChild(el);
   const done = () => { if (el.classList) el.classList.add("out"); setTimeout(() => el.remove(), 450); };
   const timer = setTimeout(done, 2300);
@@ -829,6 +834,7 @@ function progress() {
     resolve(s);
     s.revealAt = Date.now();
   } else if ((s.phase === "reveal" || s.phase === "gameOver") && s.ready.every(Boolean)) {
+    if (s.phase === "reveal") snapCollect(s.history[s.history.length - 1]);
     advance(s);
     G.seen = [];
   }
@@ -846,7 +852,7 @@ function observe() {
   const s = G.s, p = G.prev || {};
   const histLen = s.history.length;
   if (s.phase === "reveal" && (p.phase !== "reveal" || p.hist !== histLen || p.gn !== s.gameNumber)) onReveal(s.history[histLen - 1]);
-  if (s.phase === "bidding" && (p.phase !== "bidding" || p.round !== s.round)) { G.banner = null; G.myBid = G.myBid && G.myBid.key === roundKey(s) ? G.myBid : null; }
+  if (s.phase === "bidding" && (p.phase !== "bidding" || p.round !== s.round)) { G.roundAt = Date.now(); G.banner = null; G.myBid = G.myBid && G.myBid.key === roundKey(s) ? G.myBid : null; }
   const ended = ph => ph === "gameOver" || ph === "matchOver";
   if (ended(s.phase) && !ended(p.phase)) onGameEnd();
   if (s.phase === "matchOver" && p.phase !== "matchOver") onMatchEnd();
@@ -953,11 +959,17 @@ function scheduleBots() {
   if (!isAuthority()) return;
   const s = G.s;
   if (s.phase !== "bidding" || !s.seats.some((x, i) => x.bot && !s.submitted[i])) return;
+  // Every bot decides at the same moment (so none can react to another), then they lay their cards down one by one.
+  const key = roundKey(s);
+  if (!G.botPlan || G.botPlan.key !== key) G.botPlan = { key, bids: null };
   botTimer = setTimeout(() => {
-    if (!G || G.s.phase !== "bidding") return;
-    G.s.seats.forEach((x, i) => { if (x.bot && !G.s.submitted[i]) submit(G.s, i, botChoose(G.s, i, x.level)); });
+    if (!G || G.s.phase !== "bidding" || roundKey(G.s) !== key) return;
+    if (!G.botPlan.bids) { G.botPlan.bids = {}; G.s.seats.forEach((x, i) => { if (x.bot && !G.s.submitted[i]) G.botPlan.bids[i] = botChoose(G.s, i, x.level); }); }
+    const waiting = G.s.seats.map((x, i) => i).filter(i => G.s.seats[i].bot && !G.s.submitted[i] && G.botPlan.bids[i]);
+    const i = waiting[Math.floor(Math.random() * waiting.length)];
+    if (i !== undefined) submit(G.s, i, G.botPlan.bids[i]);
     progress();
-  }, 650 + Math.random() * 650);
+  }, G.botPlan.bids ? 280 + Math.random() * 420 : 650 + Math.random() * 500);
 }
 
 /** After a reveal the next gem is dealt automatically (not in the tutorial, where you read the tips first). */
@@ -1148,7 +1160,14 @@ function coachTip() {
   return "";
 }
 
+/** A fresh hand is dealt in one card at a time, timed from G.dealAt so a re-render mid-deal doesn't restart it. */
+function noteDeal() {
+  const s = G.s, hs = handSeat();
+  if (hs === undefined || s.phase !== "bidding" || s.round !== 0 || s.hands[hs].length !== s.prizes.length || G.dealtFor === `${s.gameNumber}.${hs}`) return;
+  G.dealtFor = `${s.gameNumber}.${hs}`; G.dealAt = Date.now(); Sound.deal(s.hands[hs].length, DEAL_GAP / 1000); Haptics.deal(s.hands[hs].length, DEAL_GAP);
+}
 function renderGame() {
+  noteDeal();
   const s = G.s, c = s.config, n = s.seats.length;
   const home = homeSeat();
   const tileSeats = range(n).filter(i => i !== home);
@@ -1173,6 +1192,16 @@ function renderGame() {
     return "";
   };
   const drops = range(n).map(dropClass);
+  // Opponents' cards fly in from their fanned hand (see flyInBids) instead of dropping from above.
+  const fans = home !== undefined && tileSeats.length > 1;
+  if (fans) tileSeats.forEach(i => { if (drops[i]) { drops[i] = ""; (G.flyIn = G.flyIn || []).push(i); } });
+  const roundGone = G.roundAt ? Date.now() - G.roundAt : 0;
+  const seatFace = i => {
+    const left = s.hands[i].length - (s.phase === "bidding" && shownSubmitted(i) ? 1 : 0), mid = (left - 1) / 2;
+    const thinking = s.phase === "bidding" && !shownSubmitted(i);
+    return `<span class="seat"><span class="seatav ${thinking ? "thinking" : ""}">${avatar(s.seats[i].char, "sm")}${thinking ? `<svg class="tring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="16.5" pathLength="100" style="animation-delay:-${Math.min(roundGone, TURN_MS)}ms"/></svg>` : ""}</span>
+      <span class="minifan" aria-label="${t("{n} cards", { n: left })}">${range(left).map(k => `<i style="--k:${k - mid};--d:${k}"></i>`).join("")}</span></span>`;
+  };
   const awardSpan = (i, suffix = "") => result && result.awards[i] ? `<span class="award ${result.awards[i] < 0 ? "neg" : ""}">${awardText(result.awards[i])}${suffix}</span>` : "";
   const bidCard = (i, size) => {
     const suit = suitFor(i, n, c);
@@ -1215,8 +1244,8 @@ function renderGame() {
   if (home !== undefined) {
     const size = tileSeats.length === 1 ? "lg" : "md";
     const label = tileSeats.length === 1 ? t("{name}'s bid", { name: esc(sn(s, tileSeats[0])) }) : t("Their bids");
-    theirs = `<div class="spot theirs"><span class="lbl">${label}</span><div class="opps">${tileSeats.map(i => `<div class="opp ${result && result.winners.includes(i) ? "win" : ""}" data-pos="${(i - home + n) % n}"${teamVar(i)}>
-        ${tileSeats.length > 1 ? avatar(s.seats[i].char, "sm") : ""}
+    theirs = `<div class="spot theirs"><span class="lbl">${label}</span><div class="opps">${tileSeats.map(i => `<div class="opp ${result && result.winners.includes(i) ? "win" : ""}" data-pos="${(i - home + n) % n}" data-seat="${i}"${teamVar(i)}>
+        ${tileSeats.length > 1 ? seatFace(i) : ""}
         ${facing ? `<span class="tag">${esc(sn(s, i))}${sideOf(c, i) === sideOf(c, home) ? ` · ${t("partner")}` : ""}</span>` : ""}
         <div class="bidwrap" style="position:relative">${bidCard(i, size)}</div>
         <span class="sub">${awardSpan(i)}</span></div>`).join("")}</div></div>`;
@@ -1246,7 +1275,8 @@ function renderGame() {
     preview = `<div class="nextgem">${t("Next:")} ${prizeCard(next, "xs", isMystery(s, s.round + 1))}</div>`;
   }
   const lbl = t(hidden ? "Mystery gem" : prize === JACKPOT ? "Jackpot" : prize < 0 ? "Cursed" : "Up for grabs");
-  const center = `<div class="center ${tileSeats.length > 1 && home !== undefined ? "around" : ""} ${facing ? "facing" : ""} ${anim && result && result.prize < 0 && result.winners.includes(home) ? "shake" : ""}">
+  const dealtAgo = G.dealAt ? Date.now() - G.dealAt : Infinity;
+  const center = `<div class="center ${tileSeats.length > 1 && home !== undefined ? "around" : ""} ${facing ? "facing" : ""} ${dealtAgo < DEAL_GAP * 13 + 400 ? "dealing" : ""} ${anim && result && result.prize < 0 && result.winners.includes(home) ? "shake" : ""}" style="--dealt:${Math.min(dealtAgo, 99999)}ms">
       ${theirs}
       <div class="spot prizespot">
         <span class="lbl ${prize < 0 && !hidden ? "cursed" : "gold"}">${lbl}</span>
@@ -1290,10 +1320,6 @@ function renderGame() {
     const pendingCard = s.phase === "bidding" && pb ? pb.card : null;
     // Held like a real hand: overlapping cards in a gentle arc, numbers peeking out at the top left.
     const cards = s.hands[hs], mid = (cards.length - 1) / 2;
-    // A fresh hand is dealt in one card at a time. Timed from G.dealAt so a re-render mid-deal doesn't restart it.
-    if (s.phase === "bidding" && s.round === 0 && cards.length === s.prizes.length && G.dealtFor !== `${s.gameNumber}.${hs}`) {
-      G.dealtFor = `${s.gameNumber}.${hs}`; G.dealAt = Date.now(); Sound.deal(cards.length, DEAL_GAP / 1000); Haptics.deal(cards.length, DEAL_GAP);
-    }
     const dealt = G.dealAt ? Date.now() - G.dealAt : Infinity, dealing = dealt < DEAL_GAP * cards.length + 500;
     handHTML = `<div class="hand ${dealing ? "dealing" : ""}" role="group" aria-label="${t("Your cards")}" style="--m:${Math.max(cards.length, 2)}">${cards.map((v, k) =>
       cardFace(suit, v, `${G.selected === v ? "sel" : ""} ${pendingCard === v ? "pending" : ""} ${G.dragging === v ? "lifted" : ""}`, "button",
@@ -1773,6 +1799,7 @@ function guestApply(g) {
   if (!G || G.kind !== "online") {
     beginGame(newG("online", s, mySeats, { role: "guest" }));
   } else {
+    if (G.s.phase === "reveal" && s.phase !== "reveal") snapCollect(G.s.history[G.s.history.length - 1]);
     G.s = s; G.mySeats = mySeats; G.unlocked = mySeats[0] ?? null;
   }
   if (s.phase === "reveal" && G.prev.phase !== "reveal") G.revealAt = Date.now();
@@ -2089,6 +2116,8 @@ function render() {
       + (G.notice ? `<div class="overlay"><div class="sheet" role="alertdialog" style="max-width:420px"><p style="margin:0">${esc(G.notice)}</p><div class="sheet-foot" style="justify-content:flex-end"><button class="btn primary" data-act="notice-ok">${t("OK")}</button></div></div></div>` : "");
     root.insertAdjacentHTML && root.insertAdjacentHTML("beforeend", rotateNotice());
     flyPlayedCard();
+    flyInBids();
+    playCollect();
     turnClock();
   } else {
     const typing = document.activeElement && document.activeElement.id === "join-code" ? document.activeElement.value : null;
@@ -2164,6 +2193,71 @@ if (typeof document !== "undefined" && document.addEventListener) {
   document.addEventListener("pointermove", dragMove, { passive: false });
   document.addEventListener("pointerup", dragEnd);
   document.addEventListener("pointercancel", dragEnd);
+}
+
+/* ================= Table moves: cards fly between the players and the middle ================= */
+const motionOK = () => !!(document.body && document.body.animate) && !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+const rectOf = el => el && el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+const centerDelta = (a, b) => [a.left + a.width / 2 - (b.left + b.width / 2), a.top + a.height / 2 - (b.top + b.height / 2)];
+
+/* An opponent's card leaves their fanned hand, spins once and lands face down on their spot. */
+function flyInBids() {
+  const seats = G.flyIn || [];
+  G.flyIn = [];
+  if (!seats.length || !motionOK()) return;
+  seats.forEach(i => {
+    const to = document.querySelector(`.opp[data-seat="${i}"] .bidwrap .card`);
+    const fan = document.querySelector(`.opp[data-seat="${i}"] .minifan`);
+    const a = rectOf(fan), b = rectOf(to);
+    if (!a || !b || !to.animate) return;
+    const [dx, dy] = centerDelta(a, b);
+    to.animate([
+      { transform: `translate(${dx}px, ${dy}px) scale(.35) rotate(-160deg)`, opacity: .4 },
+      { transform: `translate(${dx * .3}px, ${dy * .3 - 18}px) scale(1.08) rotate(-12deg)`, opacity: 1, offset: .6 },
+      { transform: "none", opacity: 1 },
+    ], { duration: 460, easing: "cubic-bezier(.2,.8,.3,1)" });
+  });
+}
+
+/* When the next gem comes, the cards on the table slide over to whoever won the gem.
+   snapCollect copies them just before the table changes; playCollect flies the copies once the new table is drawn. */
+function snapCollect(r) {
+  G.collect = null;
+  if (!r || !motionOK() || app.screen !== "game") return;
+  const cards = [...document.querySelectorAll(".center .bidwrap .card, .center .prizespot .card")].map(el => ({ html: el.outerHTML, rect: rectOf(el) })).filter(x => x.rect && x.rect.width);
+  if (cards.length) G.collect = { cards, winners: r.winners.slice() };
+}
+function seatTarget(i) {
+  const s = G.s;
+  return document.querySelector(`.opp[data-seat="${i}"] .seatav`)
+    || document.querySelectorAll(".board .bside .bav")[sideOf(s.config, i)]
+    || document.querySelector(".hand");
+}
+function playCollect() {
+  const job = G.collect;
+  G.collect = null;
+  if (!job || !document.createElement) return;
+  const targets = (job.winners.length ? job.winners : []).map(seatTarget).filter(Boolean).map(rectOf).filter(Boolean);
+  if (!targets.length) return;
+  job.cards.forEach((c, k) => {
+    const to = targets[k % targets.length];
+    const g = document.createElement("div");
+    g.className = "ghost";
+    g.innerHTML = c.html;
+    Object.assign(g.style, { left: c.rect.left + "px", top: c.rect.top + "px", width: c.rect.width + "px", height: c.rect.height + "px", "--w": c.rect.width + "px" });
+    const card = g.firstElementChild;
+    if (card) { card.classList.remove("flip", "drop", "win"); card.style.setProperty("--w", c.rect.width + "px"); card.style.animation = "none"; }
+    document.body.appendChild(g);
+    const [dx, dy] = centerDelta(to, c.rect);
+    const anim = g.animate([
+      { transform: "none", opacity: 1 },
+      { transform: `translate(${dx * .5}px, ${dy * .5 - 24}px) scale(.8) rotate(${k % 2 ? 10 : -10}deg)`, opacity: 1, offset: .5 },
+      { transform: `translate(${dx}px, ${dy}px) scale(.25) rotate(${k % 2 ? 24 : -24}deg)`, opacity: 0 },
+    ], { duration: 520, delay: k * 45, easing: "cubic-bezier(.45,.05,.4,1)", fill: "both" });
+    anim.onfinish = () => g.remove();
+    setTimeout(() => g.remove(), 1500);
+  });
+  Sound.card();
 }
 
 /* The card you bid glides from your hand to the "Your bid" spot. */
