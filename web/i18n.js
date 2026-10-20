@@ -8,6 +8,7 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["partner", "compañero", "partenaire", "شريك", "队友"],
   ["Friends open Diamond Bid, tap Play online, and enter this code.", "Tus amigos abren Diamond Bid, tocan Jugar en línea e introducen este código.", "Tes amis ouvrent Diamond Bid, touchent Jouer en ligne et saisissent ce code.", "يفتح أصدقاؤك Diamond Bid، ويضغطون «العب عبر الإنترنت»، ثم يُدخلون هذا الرمز.", "好友打开 Diamond Bid，点击“在线对战”，然后输入此代码。"],
   ["Your score couldn't be posted. Check your internet connection.", "No se pudo publicar tu puntuación. Revisa tu conexión a internet.", "Ton score n'a pas pu être publié. Vérifie ta connexion internet.", "تعذّر نشر نتيجتك. تحقّق من اتصالك بالإنترنت.", "无法发布你的分数。请检查网络连接。"],
   ["1 vs 1", "1 contra 1", "1 contre 1", "1 ضد 1", "1 对 1"],

@@ -1,6 +1,7 @@
 # Diamond Bid changelog
 
 ## Unreleased
+- 2 vs 2 table: your partner sits across from you and the other team on your left and right, like a real card table. Everyone's picture and name are in their team's color, and your partner is marked "partner". Works on phones, tablets and computers, against bots and online.
 - Online play in the App Store and Google Play apps and the home-screen web app, on Diamond Bid's own Firebase server: quick match 1 vs 1 or 2 vs 2, private tables with a code, and today's leaderboard. Players get an anonymous ID automatically, with no sign-up. Players on the apps and the web app can play each other (claude.ai keeps its own tables). The privacy policy and App Store privacy answers were updated to match.
 - The leaderboard now saves the player name with each score.
 - Free home-screen web app: https://nsss225-bit.github.io/diamond-bid/play/ installs on iPhone (Safari → Share → Add to Home Screen) and Android, with its own icon, full screen and offline play.

@@ -1209,15 +1209,19 @@ function renderGame() {
   // Score bars (single-human games)
   // Middle of the table
   let theirs = "", mine = "";
+  // 2 vs 2: your partner sits across from you and the other team on either side, each in their team's color.
+  const facing = home !== undefined && usesTeams(c) && tileSeats.length === 3;
+  const teamVar = i => facing ? ` style="--team:${TEAM_COLOR[sideOf(c, i)]}"` : "";
   if (home !== undefined) {
     const size = tileSeats.length === 1 ? "lg" : "md";
     const label = tileSeats.length === 1 ? t("{name}'s bid", { name: esc(sn(s, tileSeats[0])) }) : t("Their bids");
-    theirs = `<div class="spot theirs"><span class="lbl">${label}</span><div class="opps">${tileSeats.map(i => `<div class="opp ${result && result.winners.includes(i) ? "win" : ""}" data-pos="${(i - home + n) % n}">
+    theirs = `<div class="spot theirs"><span class="lbl">${label}</span><div class="opps">${tileSeats.map(i => `<div class="opp ${result && result.winners.includes(i) ? "win" : ""}" data-pos="${(i - home + n) % n}"${teamVar(i)}>
         ${tileSeats.length > 1 ? avatar(s.seats[i].char, "sm") : ""}
+        ${facing ? `<span class="tag">${esc(sn(s, i))}${sideOf(c, i) === sideOf(c, home) ? ` · ${t("partner")}` : ""}</span>` : ""}
         <div class="bidwrap" style="position:relative">${bidCard(i, size)}</div>
         <span class="sub">${awardSpan(i)}</span></div>`).join("")}</div></div>`;
     const myAward = result ? result.awards[home] : 0;
-    mine = `<div class="spot minespot ${result && result.winners.includes(home) ? "win" : ""}">
+    mine = `<div class="spot minespot ${result && result.winners.includes(home) ? "win" : ""}"${teamVar(home)}>
       <span class="lbl">${t("Your bid")}</span>
       <div class="bidwrap" id="mybid" style="position:relative">${result || shownSubmitted(home) ? bidCard(home, "lg") : `<div class="slot lg">${G.selected != null ? "" : t("Pick a card")}</div>`}
         ${anim && myAward ? `<span class="floatpts ${myAward < 0 ? "neg" : ""}">${awardText(myAward)}</span>` : ""}</div>
@@ -1242,7 +1246,7 @@ function renderGame() {
     preview = `<div class="nextgem">${t("Next:")} ${prizeCard(next, "xs", isMystery(s, s.round + 1))}</div>`;
   }
   const lbl = t(hidden ? "Mystery gem" : prize === JACKPOT ? "Jackpot" : prize < 0 ? "Cursed" : "Up for grabs");
-  const center = `<div class="center ${tileSeats.length > 1 && home !== undefined ? "around" : ""} ${anim && result && result.prize < 0 && result.winners.includes(home) ? "shake" : ""}">
+  const center = `<div class="center ${tileSeats.length > 1 && home !== undefined ? "around" : ""} ${facing ? "facing" : ""} ${anim && result && result.prize < 0 && result.winners.includes(home) ? "shake" : ""}">
       ${theirs}
       <div class="spot prizespot">
         <span class="lbl ${prize < 0 && !hidden ? "cursed" : "gold"}">${lbl}</span>
