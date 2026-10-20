@@ -59,7 +59,8 @@ async function buildWebApp() {
   // The cache name changes whenever the game changes, so players get the update the next time they open it online.
   const files = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png", ...FILES];
   const hash = crypto.createHash("sha256").update(html + FILES.map(f => fs.readFileSync(path.join(out, f), "utf8")).join("")).digest("hex").slice(0, 12);
-  fs.writeFileSync(path.join(out, "sw.js"), `// Keeps Diamond Bid playable offline. Game files: network first, so updates arrive; fonts: cache first.
+  fs.writeFileSync(path.join(out, "sw.js"), `// Keeps Diamond Bid playable offline. Game files: network first, always checking with the server (GitHub Pages lets
+// browsers reuse files for 10 minutes), so updates arrive on the next open; fonts: cache first.
 const CACHE = "diamond-bid-${hash}", FILES = ${JSON.stringify(files)};
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
@@ -67,7 +68,7 @@ self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   const url = new URL(e.request.url);
   if (url.origin === location.origin) {
-    e.respondWith(fetch(e.request).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return r; })
+    e.respondWith(fetch(e.request, { cache: "no-cache" }).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return r; })
       .catch(() => caches.match(e.request, { ignoreSearch: true }).then(r => r || caches.match("index.html"))));
   } else if (/fonts\\.(googleapis|gstatic)\\.com$/.test(url.hostname)) {
     e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return res; })));
