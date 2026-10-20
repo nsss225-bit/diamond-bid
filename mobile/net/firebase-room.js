@@ -50,8 +50,9 @@ async function join(name) {
   const meRef = push(roomRef);
   const peerId = meRef.key;
   let presence = {};
-  await onDisconnect(meRef).remove();
+  // Add the entry before asking for its removal on disconnect: the security rules only let a player remove an entry they own.
   await set(meRef, { uid: me, t: serverTimestamp(), p: { _: 1 } });
+  await onDisconnect(meRef).remove();
   let left = false, peers = [], handlers = [], prev = new Map();
 
   // Each presence value is stored as JSON text: Firebase would otherwise drop empty lists and nulls inside the game state.

@@ -27,22 +27,46 @@ const related = (a, b) => { const x = parts(a).join("/"), y = parts(b).join("/")
 function changed(path) { S.listeners.filter(l => related(l.path, path)).forEach(l => setTimeout(() => l.active && l.cb({ val: () => clone(get(l.path)) }), 0)); }
 const clone = v => v === undefined ? null : JSON.parse(JSON.stringify(v));
 
+// The security rules of database.rules.json, reduced to who may write where.
+let me = null;
+const deny = () => { throw Object.assign(new Error("PERMISSION_DENIED"), { code: "PERMISSION_DENIED" }); };
+function allowed(path, after) {
+  const ks = parts(path);
+  if (!me) return false;
+  if (ks[0] === "rooms" && ks.length >= 3) {
+    const entry = ks.slice(0, 3).join("/"), before = get(entry);
+    return before ? before.uid === me : !!(after && after(entry) && after(entry).uid === me);
+  }
+  if (ks[0] === "dailyscores" && ks.length >= 2) return ks[1] === me;
+  return false;
+}
+function preview(writes) {
+  const saved = JSON.stringify(S.tree);
+  writes.forEach(([p, v]) => put(p, v));
+  const tree = S.tree; S.tree = JSON.parse(saved);
+  return entry => { let o = tree; for (const k of parts(entry)) o = o && o[k]; return o; };
+}
+
 // firebase/app
 export const initializeApp = cfg => ({ cfg });
 // firebase/auth
 export const indexedDBLocalPersistence = {}, browserLocalPersistence = {}, inMemoryPersistence = {};
 export function initializeAuth() { return { user: null, watchers: [] }; }
 export function onAuthStateChanged(auth, f) { auth.watchers.push(f); if (auth.user) setTimeout(() => f(auth.user), 0); return () => { auth.watchers = auth.watchers.filter(x => x !== f); }; }
-export async function signInAnonymously(auth) { auth.user = auth.user || { uid: "u" + (++S.uid) }; auth.watchers.forEach(f => f(auth.user)); return { user: auth.user }; }
+export async function signInAnonymously(auth) { auth.user = auth.user || { uid: "u" + (++S.uid) }; me = auth.user.uid; auth.watchers.forEach(f => f(auth.user)); return { user: auth.user }; }
 // firebase/database
 export const getDatabase = () => ({});
 export const ref = (db, path = "") => ({ path: parts(path).join("/"), key: parts(path).pop() || null });
 export const push = r => ref(null, r.path + "/k" + String(++S.n).padStart(6, "0"));
 export const serverTimestamp = () => Date.now();
 const resolveTs = v => typeof v === "function" ? v() : v && typeof v === "object" ? (Array.isArray(v) ? v.map(resolveTs) : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, resolveTs(x)]))) : v;
-export async function set(r, v) { put(r.path, resolveTs(v)); changed(r.path); }
-export async function update(r, upd) { Object.entries(upd).forEach(([k, v]) => put(r.path + "/" + k, resolveTs(v))); changed(r.path); }
-export async function remove(r) { put(r.path, null); changed(r.path); }
+export async function set(r, v) { if (!allowed(r.path, preview([[r.path, resolveTs(v)]]))) deny(); put(r.path, resolveTs(v)); changed(r.path); }
+export async function update(r, upd) {
+  const writes = Object.entries(upd).map(([k, v]) => [r.path + "/" + k, resolveTs(v)]);
+  if (!allowed(r.path, preview(writes))) deny();
+  writes.forEach(([p, v]) => put(p, v)); changed(r.path);
+}
+export async function remove(r) { if (!allowed(r.path, preview([[r.path, null]]))) deny(); put(r.path, null); changed(r.path); }
 export function onValue(r, cb) {
   if (r.path === ".info/connected") { setTimeout(() => cb({ val: () => true }), 0); return () => {}; }
   const l = { path: r.path, cb, active: true };
@@ -50,4 +74,5 @@ export function onValue(r, cb) {
   setTimeout(() => l.active && cb({ val: () => clone(get(r.path)) }), 0);
   return () => { l.active = false; S.listeners = S.listeners.filter(x => x !== l); };
 }
-export const onDisconnect = r => ({ async remove() {}, async cancel() {} });
+// The server checks an on-disconnect removal against the rules when it is set up, not when it runs.
+export const onDisconnect = r => ({ async remove() { if (!allowed(r.path, preview([[r.path, null]]))) deny(); }, async cancel() {} });
