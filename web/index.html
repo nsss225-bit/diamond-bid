@@ -938,8 +938,8 @@ button, input, a { touch-action: manipulation; }
 @keyframes mdeal { from { transform: translate(0, -46px) scale(.3) rotate(-90deg); opacity: 0; } }
 .card.flip { animation-fill-mode: backwards; }
 .opp[data-pos="1"] .card.flip { animation-delay: .12s; } .opp[data-pos="2"] .card.flip { animation-delay: .24s; } .opp[data-pos="3"] .card.flip { animation-delay: .36s; }
-.ghost { position: fixed; z-index: 60; pointer-events: none; }
-.ghost > .card { width: 100%; height: 100%; margin: 0; }
+.flyer { position: fixed; z-index: 60; pointer-events: none; }
+.flyer > .card { width: 100%; height: 100%; margin: 0; }
 .center.facing .seat { gap: 4px; }
 
 /* 2 vs 2 with you at the table: your partner across from you, the other team left and right, like a real card table. */

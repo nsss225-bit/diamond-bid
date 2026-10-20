@@ -2242,7 +2242,7 @@ function playCollect() {
   job.cards.forEach((c, k) => {
     const to = targets[k % targets.length];
     const g = document.createElement("div");
-    g.className = "ghost";
+    g.className = "flyer";
     g.innerHTML = c.html;
     Object.assign(g.style, { left: c.rect.left + "px", top: c.rect.top + "px", width: c.rect.width + "px", height: c.rect.height + "px", "--w": c.rect.width + "px" });
     const card = g.firstElementChild;
