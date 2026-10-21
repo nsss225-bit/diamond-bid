@@ -448,7 +448,8 @@ function gameReward(iWon) {
   const s = G.s;
   if (G.kind === "pass") return [10, t("Pass and play game")];
   if (G.kind === "tutorial") { if (stats.tutorialPaid) return [0, ""]; stats.tutorialPaid = true; return [100, t("Tutorial finished")]; }
-  if (G.kind === "online") return [20 + (iWon ? 40 : 0), iWon ? t("Online win") : t("Online game")];
+  // Coins are for winning: a lost game, online or against bots, earns nothing.
+  if (G.kind === "online") return iWon ? [60, t("Online win")] : [0, ""];
   if (G.kind === "daily") {
     const first = !stats.dailyPaid || stats.dailyPaid !== G.dailyDate;
     if (!first) return [10, t("Daily challenge replay")];
@@ -458,7 +459,7 @@ function gameReward(iWon) {
   const mySide = sideOf(s.config, me());
   const levels = s.seats.filter((x, k) => x.bot && sideOf(s.config, k) !== mySide).map(x => x.level);
   const base = Math.max(10, ...levels.map(l => BOT_REWARD[l] || 10));
-  return [base + (iWon ? base * 2 : 0), iWon ? t("Win vs bots") : t("Game vs bots")];
+  return iWon ? [base * 3, t("Win vs bots")] : [0, ""];
 }
 /* ================= App state ================= */
 let app = { screen: "home", setup: null, modal: null, botOffset: Math.floor(Math.random() * 10), introDone: false };
@@ -929,7 +930,7 @@ function onGameEnd() {
     postDaily(score, date);
   }
   if (G.kind === "tutorial") grant("learner");
-  if (i >= 0 || G.kind === "pass") { const [n, why] = gameReward(iWon); addCoins(n, why); }
+  if (i >= 0 || G.kind === "pass") { const [n, why] = gameReward(iWon); if (n > 0) addCoins(n, why); }
 }
 
 function onMatchEnd() {
@@ -2068,8 +2069,8 @@ function renderHomeModal() {
   if (m === "coins") {
     return wrap(`${COIN} ${t("{n} coins", { n: fmtCoins(stats.coins) })}`, `<div class="earn">
         <div><b>${t("Daily gift")}</b><span>${t("{a}–{b} a day, more for each day in a row", { a: GIFT_LADDER[0], b: GIFT_LADDER[6] })}</span></div>
-        <div><b>${t("Games vs bots")}</b><span>${t("10–30 per game, triple for a win (more for harder bots)")}</span></div>
-        <div><b>${t("Online games")}</b><span>${t("20 per game, 60 for a win")}</span></div>
+        <div><b>${t("Games vs bots")}</b><span>${t("30–90 for a win (more for harder bots), nothing for a loss")}</span></div>
+        <div><b>${t("Online games")}</b><span>${t("60 for a win, nothing for a loss")}</span></div>
         <div><b>${t("Daily challenge")}</b><span>${t("50 plus your score, once a day")}</span></div>
         <div><b>${t("Achievements")}</b><span>${t("{n} each", { n: ACH_REWARD })}</span></div>
         <div><b>${t("Tutorial")}</b><span>${t("100 the first time")}</span></div>

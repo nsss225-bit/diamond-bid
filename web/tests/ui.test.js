@@ -244,7 +244,9 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   c.get(`Object.assign(prefs.config, { seatCount: 2, botLevel: "hard", powers: false, mystery: false, jackpot: false, cursed: false, double: false, gamesToWin: 1 })`);
   c.click("open-setup", { kind: "bots" }); c.click("start");
   end = await playOut(c);
-  ok(c.get("stats.coins") >= 20 && c.html().includes("coins"), "a game vs a Hard bot pays coins: " + c.get("stats.coins"));
+  const wonHard = c.get("G.s.gameWins[0] > 0");
+  ok(wonHard ? c.get("stats.coins") === 60 && c.html().includes("coins") : c.get("stats.coins") === 0,
+    `a win vs a Hard bot pays 60 coins and a loss pays nothing: ${wonHard ? "won" : "lost"}, ${c.get("stats.coins")}`);
   c.get(`stats.lastGift = "2000-01-01"; checkDailyGift()`);
   ok(c.get("stats.giftStreak") === 1, "a missed day resets the gift streak");
 

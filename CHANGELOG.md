@@ -1,6 +1,7 @@
 # Diamond Bid changelog
 
 ## Unreleased
+- Coins are for winning only: a lost game earns nothing, online or against bots. A win pays the same as before: 60 online, 30–90 against bots (more for harder bots). The coins guide says so.
 - Card-room animations: the loading screen deals the name out on playing cards (D-I-A-M-O-N-D) above a deck that keeps shuffling, and the same shuffling deck shows while looking for players. At the table:
   - each opponent's hand is fanned face down beside their picture and is dealt in at the start;
   - a ring drains around anyone still thinking (green, then amber, then red);

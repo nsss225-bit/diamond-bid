@@ -1,6 +1,6 @@
 // Keeps Diamond Bid playable offline. Game files: network first, always checking with the server (GitHub Pages lets
 // browsers reuse files for 10 minutes), so updates arrive on the next open; fonts: cache first.
-const CACHE = "diamond-bid-b50677171362", FILES = ["./","index.html","manifest.webmanifest","icon-180.png","icon-192.png","icon-512.png","engine.js","i18n.js","app.js","net.js"];
+const CACHE = "diamond-bid-1f6bcf1b3b9b", FILES = ["./","index.html","manifest.webmanifest","icon-180.png","icon-192.png","icon-512.png","engine.js","i18n.js","app.js","net.js"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener("fetch", e => {
