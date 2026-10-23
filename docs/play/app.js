@@ -562,6 +562,7 @@ function renderHome() {
           <button class="chip" data-act="daily"><span aria-hidden="true">★</span>${t("Daily challenge")}</button>
           <button class="chip" data-act="tutorial"><span aria-hidden="true">?</span>${t("Tutorial")}</button>
         </div>
+        ${Here.count ? `<p class="here" aria-live="polite"><i aria-hidden="true"></i><span id="here-count">${hereText()}</span></p>` : ""}
         <div class="playing-as">
           ${avatar(c.id)}
           <div><small>${t("Playing as")}</small><b id="playing-name">${esc(myName())}</b></div>
@@ -1711,7 +1712,40 @@ async function initOnline() {
   try { Online.room = window.claude && window.claude.use ? await window.claude.use("room") : null; } catch (e) { Online.room = null; }
   Online.checked = true;
   if (app.screen === "home" && !app.setup) render();
+  joinHere();
 }
+/* Players online now: everyone with the game open sits in one shared room, and the home screen counts them. */
+const HERE_ROOM = "online-v1";
+const Here = { room: null, count: 0, joining: false };
+async function joinHere() {
+  if (!Online.room || Here.room || Here.joining) return;
+  Here.joining = true;
+  try {
+    const room = await Online.room.join("db-" + HERE_ROOM);
+    Here.room = room;
+    try { await room.presence({ app: "diamondbid" }); } catch (e) {}
+    room.onPeers(ch => setHere(ch.peers), () => {});
+    // The server drops a player who loses their connection; join again once it comes back.
+    if (room.onConnection) room.onConnection(up => {
+      if (!up || Here.room !== room || room.peers().some(p => p.isMe)) return;
+      Here.room = null;
+      try { room.leave(); } catch (e) {}
+      joinHere();
+    });
+  } catch (e) {}
+  Here.joining = false;
+}
+function setHere(peers) {
+  // A player with the game open in two tabs counts once.
+  const n = Math.max(1, new Set(peers.filter(p => (p.presence && p.presence.app === "diamondbid") || p.isMe).map(p => p.by || p.peer)).size);
+  if (n === Here.count) return;
+  const shown = Here.count;
+  Here.count = n;
+  const el = shown && document.getElementById("here-count");
+  if (el) el.textContent = hereText();
+  else if (app.screen === "home" && !app.setup) render();
+}
+const hereText = () => Here.count === 1 ? t("1 player online") : t("{n} players online", { n: fmtCoins(Here.count) });
 function randomCode() {
   const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
   return Array.from({ length: 4 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");

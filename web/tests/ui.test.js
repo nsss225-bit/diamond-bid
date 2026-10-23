@@ -165,6 +165,13 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   const host = browser("host", bus), guest = browser("guest", bus);
   await sleep(30);
   ok(host.html().includes("Play online") && !/data-act="open-online" disabled/.test(host.html()), "Play online is enabled when the room is available");
+  ok(host.get("Here.count") === 2 && guest.html().includes(`id="here-count"`) && guest.get("hereText()") === "2 players online", "the home screen counts the players online");
+  const third = browser("third", bus);
+  await sleep(30);
+  ok(host.get("Here.count") === 3 && guest.get("hereText()") === "3 players online", "a new player raises the count for everyone");
+  await third.get("Here.room").leave();
+  await sleep(30);
+  ok(host.get("Here.count") === 2, "a player who leaves is no longer counted");
   host.get(`prefs.name = "Hosty"; Object.assign(prefs.config, { seatCount: 4, teams: false, powers: true, showNext: true, mystery: true, jackpot: true, gamesToWin: 1, botLevel: "normal" })`);
   guest.get(`prefs.name = "Guesty"; prefs.character = "frog"`);
   host.click("open-online"); host.click("online-create");

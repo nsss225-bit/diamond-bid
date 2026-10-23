@@ -8,6 +8,8 @@ const LANGS = [
   { id: "zh", name: "中文", en: "Chinese", locale: "zh-CN" },
 ];
 const ROWS = [
+  ["1 player online", "1 jugador en línea", "1 joueur en ligne", "لاعب واحد متصل", "1 名玩家在线"],
+  ["{n} players online", "{n} jugadores en línea", "{n} joueurs en ligne", "{n} لاعبين متصلين", "{n} 名玩家在线"],
   ["30–90 for a win (more for harder bots), nothing for a loss", "30–90 por victoria (más con bots más difíciles), nada por derrota", "30 à 90 par victoire (plus contre des bots plus forts), rien en cas de défaite", "30–90 للفوز (أكثر مع الروبوتات الأصعب)، ولا شيء عند الخسارة", "获胜得 30–90（机器人越难越多），失败不得"],
   ["60 for a win, nothing for a loss", "60 por victoria, nada por derrota", "60 par victoire, rien en cas de défaite", "60 للفوز، ولا شيء عند الخسارة", "获胜得 60，失败不得"],
   ["partner", "compañero", "partenaire", "شريك", "队友"],

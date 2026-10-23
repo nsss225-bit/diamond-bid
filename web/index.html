@@ -172,6 +172,10 @@ h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
 .hero h1 em { color: var(--gem-hi); font-style: italic; }
 .lede { font-size: 18px; color: var(--muted); max-width: 30em; margin: 18px 0 26px; }
 .cta { display: flex; flex-wrap: wrap; gap: 10px; }
+.here { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; color: var(--muted); font-size: 13px; font-weight: 600; }
+.here i { width: 8px; height: 8px; border-radius: 50%; background: #5fd896; box-shadow: 0 0 0 3px rgba(95, 216, 150, .2); animation: here-pulse 2s ease-in-out infinite; }
+@keyframes here-pulse { 50% { box-shadow: 0 0 0 6px rgba(95, 216, 150, 0); } }
+@media (prefers-reduced-motion: reduce) { .here i { animation: none; } }
 .playing-as { display: flex; align-items: center; gap: 12px; margin-top: 26px; padding: 10px 14px 10px 10px; background: var(--panel); border-radius: 999px; width: fit-content; max-width: 100%; }
 .playing-as small { display: block; color: var(--muted); font-size: 12px; }
 .playing-as b { font-family: var(--display); font-size: 17px; }
