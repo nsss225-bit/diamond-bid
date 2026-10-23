@@ -554,6 +554,14 @@ table.ledger { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 .choice { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .choice > div { background: var(--panel); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 .choice h3 { font-size: 19px; }
+.qm-extras { display: flex; flex-direction: column; gap: 6px; }
+/* Quick match extras as compact chips: tap to turn on (gold) or off. */
+.qm-extras .extras .switch { padding: 7px 6px; min-height: 0; gap: 0; justify-content: center; text-align: center; font-size: 13px; line-height: 1.2; flex-direction: row; }
+.qm-extras .extras .switch .track { display: none; }
+.qm-extras .extras .switch[aria-pressed="true"] { background: var(--brass); color: #1c1608; border-color: var(--brass); }
+@media (max-height: 700px) { .quick > div:first-child > p { display: none; } }
+.qm-rules { margin: -4px 0 0; text-align: center; color: var(--brass); font-weight: 600; font-size: 13px; }
+.host-rules p { margin: 0; color: var(--ink); }
 .extras { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .extras .switch { flex-direction: column; justify-content: center; gap: 7px; padding: 10px 6px; border-radius: 14px; background: var(--panel); border: 1px solid transparent; text-align: center; font-size: 12.5px; line-height: 1.2; min-height: 72px; }
 .extras .switch[aria-pressed="true"] { border-color: rgba(217,171,79,.6); background: var(--brass-soft); }

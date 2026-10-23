@@ -1,6 +1,7 @@
 # Diamond Bid changelog
 
 ## Unreleased
+- Extras online: quick match has its own extras (character powers, show next gem, mystery gem, jackpot, cursed gems, Double token). You're only matched with players who picked the same extras, the game is played with them, and if nobody turns up the bot game uses them too. The search screen shows what you picked. At a private table the host still picks the rules, and now everyone at the table sees them, updating as the host changes them.
 - Coins are for winning only: a lost game earns nothing, online or against bots. A win pays the same as before: 60 online, 30–90 against bots (more for harder bots). The coins guide says so.
 - Card-room animations: the loading screen deals the name out on playing cards (D-I-A-M-O-N-D) above a deck that keeps shuffling, and the same shuffling deck shows while looking for players. At the table:
   - each opponent's hand is fanned face down beside their picture and is dealt in at the start;

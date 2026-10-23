@@ -225,7 +225,7 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
 };
-const DEFAULT_PREFS = { character: "fox", name: "", deck: "classic", table: "green", fourColor: false, sound: true, config: Object.assign({}, DEFAULT_CONFIG), localPlayers: 2, passChars: {} };
+const DEFAULT_PREFS = { character: "fox", name: "", deck: "classic", table: "green", fourColor: false, sound: true, config: Object.assign({}, DEFAULT_CONFIG), localPlayers: 2, passChars: {}, qmExtras: {} };
 let prefs = Object.assign({}, DEFAULT_PREFS, store.get("diamondbid.prefs", {}));
 prefs.config = Object.assign({}, DEFAULT_CONFIG, prefs.config, { tieRule: "split" }); // a tied round always splits the gem
 let stats = Object.assign({ played: 0, won: 0, ach: {}, dailyDays: [], dailyBest: {}, coins: 0, owned: [], lastGift: "", giftStreak: 0, walletV: 0, tutorialPaid: false }, store.get("diamondbid.stats", {}));
@@ -707,6 +707,16 @@ function seatPlan(kind) {
   return range(n).map(i => ({ char: chars[i], name: i === 0 ? myName() : CHAR[chars[i]].name, bot: i >= people, level: c.botLevel }));
 }
 
+/* The optional extras, in the order they're shown. Quick match keeps its own choice (prefs.qmExtras). */
+const EXTRAS = [["powers", "Character powers"], ["showNext", "Show next gem"], ["mystery", "Mystery gem"], ["jackpot", "Jackpot gem"], ["cursed", "Cursed gems"], ["double", "Double token"]];
+/** A short, stable id for a set of extras, e.g. "double,jackpot"; quick match only pairs players with the same one. */
+const extrasKey = c => EXTRAS.filter(([k]) => c && c[k]).map(([k]) => k).join(",");
+const extrasConfig = key => Object.fromEntries(EXTRAS.map(([k]) => [k, String(key || "").split(",").includes(k)]));
+const extrasText = key => { const on = EXTRAS.filter(([k]) => String(key || "").split(",").includes(k)); return on.length ? on.map(([, label]) => t(label)).join(" · ") : t("No extras"); };
+/** The host's rules, shared with everyone at a private table so guests can see what they'll play. */
+const rulesTag = () => ({ n: prefs.config.seatCount, tm: usesTeams(prefs.config) ? 1 : 0, g: prefs.config.gamesToWin, x: extrasKey(prefs.config) });
+const rulesText = r => [r.n === 4 ? (r.tm ? t("2 vs 2 teams") : t("4 players")) : t("2 players"), r.g > 1 ? t("Best of 3") : t("Single game"), extrasText(r.x)].join(" · ");
+
 function rulesFields(kind, hasBots) {
   const c = prefs.config;
   const seg = (key, options, value = c[key]) => `<div class="seg" role="group">${options.map(([val, label]) =>
@@ -725,9 +735,7 @@ function rulesFields(kind, hasBots) {
     <div>
       <div class="opt-label">${t("Extras")}</div>
       <div class="extras">
-        ${toggle("powers", "Character powers")}${toggle("showNext", "Show next gem")}
-        ${toggle("mystery", "Mystery gem")}${toggle("jackpot", "Jackpot gem")}
-        ${toggle("cursed", "Cursed gems")}${toggle("double", "Double token")}
+        ${EXTRAS.map(([k, label]) => toggle(k, label)).join("")}
       </div>
     </div>`;
 }
@@ -1728,7 +1736,7 @@ async function joinTable(code, host) {
     render(); return;
   }
   Online.code = code; Online.role = host ? "host" : "guest"; Online.error = ""; Online.lastG = null; Online.hostSince = host ? Date.now() : 0;
-  try { await Online.named.presence({ app: "diamondbid", v: 11, name: myName(), char: prefs.character, host: !!host, t: Online.hostSince || Date.now() }); } catch (e) {}
+  try { await Online.named.presence({ app: "diamondbid", v: 11, name: myName(), char: prefs.character, host: !!host, t: Online.hostSince || Date.now(), rules: host ? rulesTag() : null }); } catch (e) {}
   Online.unsub = Online.named.onPeers(onPeersChange, () => { Online.error = t("The connection to the table was lost."); render(); });
   app.setup = Online.quick ? "online-quick" : "online-lobby";
   render();
@@ -1756,7 +1764,7 @@ function onPeersChange(ch) {
 }
 function hostReadPeers(ch) {
   // Quick match: deal as soon as the other player sits down.
-  if (!G && Online.quick && tablePeople().length >= Match.expect) { const mode = Match.mode; cancelQuick(); hostStart(QUICK_RULES[mode]); return; }
+  if (!G && Online.quick && tablePeople().length >= Match.expect) { const rules = quickRules(Match.mode, Match.x); cancelQuick(); hostStart(rules); return; }
   if (!G || G.kind !== "online") { if (app.setup === "online-lobby") render(); return; }
   const s = G.s;
   let changed = false;
@@ -1819,12 +1827,14 @@ function publish() {
 const QM_ROOM = "quickmatch-v1", QM_WAIT_MS = 20000;
 const QUICK_RULES = { "1v1": { seatCount: 2, teams: false, gamesToWin: 1 }, "2v2": { seatCount: 4, teams: true, gamesToWin: 1 } };
 const QM_NEED = { "1v1": 2, "2v2": 4 };
-const Match = { lobby: null, start: 0, timer: null, tick: null, paired: null, mode: "1v1", expect: 2, peers: [] };
+const Match = { lobby: null, start: 0, timer: null, tick: null, paired: null, mode: "1v1", expect: 2, peers: [], x: "" };
+/** Quick match rules: the mode's seats and match length, plus the extras everyone at the table picked. */
+const quickRules = (mode, x) => Object.assign({}, QUICK_RULES[mode], extrasConfig(x));
 const qmMode = p => p.presence.qm === "2v2" ? "2v2" : "1v1";
 async function quickMatch(mode = "1v1") {
   if (!Online.room) return;
   cancelQuick();
-  Object.assign(Match, { start: Date.now(), paired: null, mode, expect: QM_NEED[mode], peers: [] });
+  Object.assign(Match, { start: Date.now(), paired: null, mode, expect: QM_NEED[mode], peers: [], x: extrasKey(prefs.qmExtras) });
   Online.error = ""; Online.quick = true;
   app.setup = "online-quick"; render();
   let lobby;
@@ -1832,7 +1842,7 @@ async function quickMatch(mode = "1v1") {
   catch (e) { Online.quick = false; Online.error = t("Couldn't open that table. Check your connection and try again."); app.setup = "online-menu"; render(); return; }
   if (app.setup !== "online-quick") { try { lobby.leave(); } catch (e) {} return; } // cancelled while connecting
   Match.lobby = lobby;
-  try { await lobby.presence({ app: "diamondbid", qm: mode, name: myName(), char: prefs.character, t: Match.start }); } catch (e) {}
+  try { await lobby.presence({ app: "diamondbid", qm: mode, x: Match.x, name: myName(), char: prefs.character, t: Match.start }); } catch (e) {}
   lobby.onPeers(onLobby, () => {});
   Match.timer = setTimeout(searchTimeUp, QM_WAIT_MS);
   Match.tick = setInterval(() => {
@@ -1843,7 +1853,7 @@ async function quickMatch(mode = "1v1") {
   }, 250);
 }
 function lobbyWaiting(peers) {
-  return peers.filter(p => p.presence && p.presence.app === "diamondbid" && p.presence.qm && !p.presence.pair && qmMode(p) === Match.mode)
+  return peers.filter(p => p.presence && p.presence.app === "diamondbid" && p.presence.qm && !p.presence.pair && qmMode(p) === Match.mode && (p.presence.x || "") === Match.x)
     .sort((a, b) => (a.presence.t || 0) - (b.presence.t || 0) || (a.peer < b.peer ? -1 : 1));
 }
 /** The longest-waiting player opens a table and invites `others`. */
@@ -1893,12 +1903,12 @@ function cancelQuick() {
   Object.assign(Match, { lobby: null, timer: null, tick: null, paired: null, peers: [] });
 }
 function noOneFound() {
-  const mode = Match.mode;
+  const mode = Match.mode, rules = quickRules(mode, Match.x);
   leaveOnline();
   app.setup = null;
-  // Same mode, with bots: 1 vs 1 against a bot, or 2 vs 2 with a bot partner against two bots.
+  // Same mode and extras, with bots: 1 vs 1 against a bot, or 2 vs 2 with a bot partner against two bots.
   const keep = prefs.config;
-  prefs.config = Object.assign({}, keep, QUICK_RULES[mode]);
+  prefs.config = Object.assign({}, keep, rules);
   startLocal("bots");
   prefs.config = keep;
   toast("◆", mode === "2v2" ? t("Nobody else was online, so you're playing with bots.") : t("Nobody else was online, so you're playing a bot."), t("Quick match"));
@@ -1946,6 +1956,7 @@ function renderOnlineSheet() {
     const left = Math.max(0, Math.ceil((QM_WAIT_MS - (Date.now() - Match.start)) / 1000));
     return `<div class="overlay"><div class="sheet" role="dialog" aria-modal="true" style="max-width:420px">
       ${head(`${t("Quick match")} · ${Match.mode === "2v2" ? t("2 vs 2") : t("1 vs 1")}`)}
+      <p class="qm-rules">${esc(extrasText(Match.x))}</p>
       ${Match.paired ? searching(Match.mode === "2v2" ? t("Players found! Dealing the cards…") : t("Player found! Dealing the cards…"))
         : `${searching(t("Looking for players…"))}
           ${Match.mode === "2v2" ? `<p class="qm-count">${t("{n} of 4 players here", { n: `<b id="qm-found">${Math.max(1, Match.peers.length)}</b>` })}</p>` : ""}
@@ -1961,6 +1972,9 @@ function renderOnlineSheet() {
       ${head(t("Play online"))}
       <div class="quick">
         <div><h3>${t("Quick match")}</h3><p class="muted" style="margin:0">${t("Play people who are online now, 1 vs 1 or as teams of two. If nobody turns up in 20 seconds, bots take the empty seats.")}</p></div>
+        <div class="qm-extras"><div class="opt-label" style="margin:0">${t("Extras")}</div>
+          <div class="extras">${EXTRAS.map(([k, label]) => `<button type="button" class="switch" data-act="qm-x" data-key="${k}" aria-pressed="${!!(prefs.qmExtras || {})[k]}"><span class="track"></span>${t(label)}</button>`).join("")}</div>
+          <p class="muted" style="margin:0;font-size:13px">${t("You'll play people who picked the same extras.")}</p></div>
         <div class="qm-modes"><button class="btn primary" data-act="quick-match" data-mode="1v1">${t("1 vs 1")}</button><button class="btn primary" data-act="quick-match" data-mode="2v2">${t("2 vs 2")}</button></div>
       </div>
       <div class="opt-label" style="margin:0">${t("Play with friends")}</div>
@@ -1988,7 +2002,7 @@ function renderOnlineSheet() {
     <div><div class="opt-label">${t("At the table")} (${people.length})</div><div class="peers">${roster || `<p class="muted">${t("Connecting…")}</p>`}</div></div>
     ${host ? rulesFields("online", people.length < seats)
       : people.some(p => p.presence.host)
-        ? ""
+        ? (hostRules => hostRules ? `<div class="host-rules"><div class="opt-label">${t("Rules")}</div><p>${esc(rulesText(hostRules))}</p></div>` : "")(people.find(p => p.presence.host).presence.rules)
         : `<div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start"><p style="margin:0">${t("Nobody is hosting this table yet. One person needs to host: they pick the rules and start the game.")}</p><button class="btn primary" data-act="online-host">${t("Host this table")}</button></div>`}
     ${people.length > 1 && new Set(people.map(p => p.presence.char)).size < people.length ? `<p class="muted" style="margin:0;font-size:13px">${t("Two of you picked the same character. One will be swapped when the game starts, or pick a different one on the home page first.")}</p>` : ""}
     ${err}
@@ -2306,7 +2320,7 @@ document.addEventListener("click", e => {
     case "online-start": hostStart(); break;
     case "online-host":
       Online.role = "host"; Online.hostSince = Date.now();
-      if (Online.named) Online.named.presence({ host: true, t: Online.hostSince }).catch(() => {});
+      if (Online.named) Online.named.presence({ host: true, t: Online.hostSince, rules: rulesTag() }).catch(() => {});
       render(); break;
     case "close": case "close-bg": if (app.setup && app.setup.startsWith("online")) break; app.setup = null; app.modal = null; render(); break;
     case "cfg-suit": {
@@ -2317,6 +2331,11 @@ document.addEventListener("click", e => {
       const key = el.dataset.key, val = JSON.parse(el.dataset.val);
       if (key === "localPlayers") prefs.localPlayers = val; else prefs.config[key] = val;
       if (key === "seatCount") prefs.localPlayers = Math.min(Math.max(prefs.localPlayers, 2), val);
+      if (Online.named && Online.role === "host" && !G) Online.named.presence({ rules: rulesTag() }).catch(() => {});
+      savePrefs(); render(); break;
+    }
+    case "qm-x": {
+      prefs.qmExtras = Object.assign({}, prefs.qmExtras, { [el.dataset.key]: !(prefs.qmExtras || {})[el.dataset.key] });
       savePrefs(); render(); break;
     }
     case "cycle-char": {

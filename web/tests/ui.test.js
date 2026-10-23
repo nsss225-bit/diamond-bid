@@ -350,6 +350,32 @@ async function playOut(b, { maxSteps = 4000, powers = true } = {}) {
   ok(solo2.get("G && G.kind === 'bots' && G.s.config.teams && G.s.config.seatCount === 4"), "alone in 2 vs 2: a team game with bots");
   ok(solo2.get("prefs.config.seatCount") !== 4 || solo2.get("prefs.config.teams") !== true || true, "your saved setup is untouched");
 
+  // 9h) Extras online: quick match only pairs players who picked the same extras, and plays with them; guests see the host's rules
+  const qbx = makeBus();
+  const [e1, e2, e3] = ["x1", "x2", "x3"].map(n => browser(n, qbx));
+  await sleep(30);
+  for (const x of [e1, e2, e3]) { x.click("close"); x.get(`prefs.qmExtras = {}`); x.click("open-online"); }
+  e1.click("qm-x", { key: "jackpot" }); e1.click("qm-x", { key: "double" });
+  e2.click("qm-x", { key: "jackpot" }); e2.click("qm-x", { key: "double" });
+  ok(e1.html().includes('data-key="jackpot" aria-pressed="true"'), "quick match shows the extras you picked");
+  e1.click("quick-match"); await sleep(15); e3.click("quick-match"); await sleep(250);
+  ok(!e1.get("G") && !e3.get("G"), "players who picked different extras aren't paired");
+  ok(e1.html().includes("Jackpot gem") && e3.html().includes("No extras"), "the search screen shows your extras");
+  e2.click("quick-match"); await sleep(300);
+  ok(e1.get("G && G.kind === 'online'") && e2.get("G && G.kind === 'online'") && !e3.get("G"), "players who picked the same extras are paired");
+  ok(e1.get("G.s.config.jackpot && G.s.config.double && !G.s.config.powers && !G.s.config.mystery") && e2.get("G.s.config.jackpot && G.s.config.double"), "the game is played with exactly those extras");
+  e3.get("noOneFound()"); await sleep(20);
+  ok(e3.get("G && G.kind === 'bots' && !G.s.config.jackpot && !G.s.config.double && !G.s.config.powers"), "nobody matched: the bot game uses your extras too");
+  const hb = makeBus();
+  const rh = browser("rhost", hb), rg = browser("rguest", hb);
+  await sleep(30); rh.click("close"); rg.click("close");
+  rh.get(`Object.assign(prefs.config, { seatCount: 2, teams: false, gamesToWin: 1, powers: false, showNext: false, mystery: true, jackpot: false, cursed: false, double: false })`);
+  rh.click("open-online"); rh.click("online-create"); await sleep(30);
+  rg.click("open-online"); rg.__joinCode = rh.get("Online.code"); rg.click("online-join"); await sleep(50);
+  ok(rg.html().includes("Mystery gem") && !rg.html().includes("Jackpot gem"), "a guest sees the host's extras");
+  rh.click("cfg", { key: "jackpot", val: "true" }); await sleep(50);
+  ok(rg.html().includes("Jackpot gem"), "the guest's view updates when the host changes an extra");
+
   // 10a) Double-tap a card to play it
   const D = browser("doubletap");
   await sleep(20); D.click("close");
